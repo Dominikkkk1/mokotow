@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mokotów</title>
+  <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100%;
+      min-height: 100%;
+      background: #0a0a0a;
+    }
+
+    #hero {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    #video-layer,
+    #stream-layer {
+      position: absolute;
+      inset: 0;
+    }
+
+    #video-layer {
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      background: #0a0a0a;
+      transition: opacity 0.6s ease;
+    }
+
+    #video-layer.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .player-wrapper {
+      width: 100%;
+      max-width: 1280px;
+    }
+
+    .plyr {
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
+    }
+
+    #stream-layer {
+      z-index: 1;
+    }
+
+    #stream-layer iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    #connect-btn {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+      padding: 1rem 3rem;
+      background: rgba(0, 0, 0, 0.55);
+      color: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      border-radius: 6px;
+      font-size: 1.1rem;
+      font-family: Arial, sans-serif;
+      letter-spacing: 0.1em;
+      cursor: default;
+      pointer-events: none;
+      backdrop-filter: blur(6px);
+      transition: background 0.4s ease, color 0.4s ease, border-color 0.4s ease;
+    }
+
+    #connect-btn.ready {
+      background: #fff;
+      color: #000;
+      border-color: #fff;
+      cursor: pointer;
+      pointer-events: auto;
+    }
+
+    #enter-overlay {
+      display: none;
+      position: absolute;
+      inset: 0;
+      z-index: 5;
+      cursor: pointer;
+    }
+
+    #apartments-section {
+      position: relative;
+      background: #0a0a0a;
+      color: #f5f5f5;
+      font-family: Arial, sans-serif;
+      padding: 4rem 2rem;
+    }
+
+    #apartments-section h2 {
+      font-size: 1.8rem;
+      margin-bottom: 1.5rem;
+      letter-spacing: 0.05em;
+    }
+
+    .apartments-table-wrapper {
+      overflow-x: auto;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+    }
+
+    #apartments-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 760px;
+    }
+
+    #apartments-table th,
+    #apartments-table td {
+      padding: 0.85rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 0.95rem;
+      white-space: nowrap;
+    }
+
+    #apartments-table th {
+      background: rgba(255, 255, 255, 0.05);
+      text-transform: uppercase;
+      font-size: 0.78rem;
+      letter-spacing: 0.06em;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    #apartments-table tbody tr:hover {
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .availability-badge {
+      display: inline-block;
+      padding: 0.25rem 0.65rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+
+    .availability-badge.available {
+      background: rgba(46, 204, 113, 0.15);
+      color: #2ecc71;
+    }
+
+    .availability-badge.unavailable {
+      background: rgba(231, 76, 60, 0.15);
+      color: #e74c3c;
+    }
+
+    .apartments-empty {
+      color: rgba(255, 255, 255, 0.6);
+      font-style: italic;
+    }
+
+    .apartment-select-btn {
+      padding: 0.45rem 1rem;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 6px;
+      color: #f5f5f5;
+      font-size: 0.85rem;
+      font-family: Arial, sans-serif;
+      cursor: pointer;
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .apartment-select-btn:hover {
+      background: rgba(255, 255, 255, 0.18);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .apartment-select-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="hero">
+    <div id="video-layer">
+      <div class="player-wrapper">
+        <video id="player" playsinline autoplay muted loop>
+          <source id="videoSource" type="video/mp4" />
+        </video>
+      </div>
+    </div>
+
+    <div id="stream-layer">
+      <iframe
+        id="streamIframe"
+        allow="autoplay; camera"
+        allowfullscreen
+      ></iframe>
+    </div>
+
+    <div id="enter-overlay"></div>
+
+    <button id="connect-btn">
+      <span id="loading-text">Ładowanie <span id="stream-progress">0</span>%</span>
+      <span id="queue-text" style="display:none">Kolejka: miejsce <span id="queue-position"></span></span>
+    </button>
+  </div>
+
+  <section id="apartments-section">
+    <h2>Apartamenty</h2>
+    <div class="apartments-table-wrapper">
+      <table id="apartments-table">
+        <thead>
+          <tr>
+            <th>Numer</th>
+            <th>Kierunek</th>
+            <th>Powierzchnia</th>
+            <th>Pokoje</th>
+            <th>Cena</th>
+            <th>Dostępność</th>
+            <th>Akcja</th>
+          </tr>
+        </thead>
+        <tbody id="apartments-tbody">
+          <tr><td colspan="7" class="apartments-empty">Wczytywanie danych…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <script>
+    const CONFIG = {
+      videoSrc: 'https://ue-woodshack.s3.eu-west-1.amazonaws.com/Mokotow_Outsite_Lit_opt_1080.mp4',
+      streamUrl: 'https://share.streampixel.io/69d02e1541d102927cd76c17',
+    };
+  </script>
+  <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
+  <script>
+    function isTouchDevice() {
+      return ('ontouchstart' in window) ||
+        navigator.maxTouchPoints > 0 ||
+        window.matchMedia('(pointer: coarse)').matches;
+    }
+
+    document.getElementById('videoSource').src = CONFIG.videoSrc;
+    document.getElementById('streamIframe').src = CONFIG.streamUrl;
+
+    const player = new Plyr('#player', {
+      controls: [],
+      ratio: '16:9',
+      loop: { active: true },
+      muted: true,
+      clickToPlay: false,
+    });
+
+    player.on('ready', () => {
+      player.muted = true;
+      player.play();
+    });
+
+    const connectBtn    = document.getElementById('connect-btn');
+    const streamProgress = document.getElementById('stream-progress');
+    const loadingText   = document.getElementById('loading-text');
+    const queueText     = document.getElementById('queue-text');
+    const queuePosition = document.getElementById('queue-position');
+    const videoLayer    = document.getElementById('video-layer');
+    const streamLayer   = document.getElementById('stream-layer');
+    const streamIframe  = document.getElementById('streamIframe');
+    const enterOverlay  = document.getElementById('enter-overlay');
+
+    const STATE_PROGRESS = {
+      authenticating:  10,
+      connecting:      20,
+      finalising:      80,
+      loadingComplete: 100,
+    };
+
+    let displayedProgress = 0;
+    let targetProgress    = 0;
+    let streamComplete    = false;
+    let readyTriggered    = false;
+    let inQueue           = false;
+
+    setInterval(() => {
+      if (!streamComplete && !inQueue) {
+        targetProgress = Math.min(90, targetProgress + 0.4);
+      }
+    }, 400);
+
+    function animateTick() {
+      const diff = targetProgress - displayedProgress;
+      if (Math.abs(diff) > 0.1) {
+        displayedProgress += diff * 0.08;
+        streamProgress.textContent = Math.round(displayedProgress);
+      }
+      if (streamComplete && Math.round(displayedProgress) >= 100 && !readyTriggered) {
+        readyTriggered = true;
+        onStreamReady();
+      }
+      requestAnimationFrame(animateTick);
+    }
+    requestAnimationFrame(animateTick);
+
+    function onStreamStateChange(state) {
+      if (state.startsWith('queue-')) {
+        const position = state.split('-')[1];
+        onQueueUpdate(position);
+        return;
+      }
+
+      if (queueText.style.display !== 'none') {
+        queueText.style.display = 'none';
+        loadingText.style.display = '';
+      }
+
+      const progress = STATE_PROGRESS[state];
+      if (progress !== undefined) {
+        targetProgress = Math.max(targetProgress, progress);
+      }
+      if (state === 'loadingComplete') {
+        streamComplete = true;
+        targetProgress = 100;
+      }
+    }
+
+    function onQueueUpdate(position) {
+      if (position === '0') {
+        inQueue = false;
+        displayedProgress = 20;
+        targetProgress    = 20;
+        queueText.style.display = 'none';
+        loadingText.style.display = '';
+        return;
+      }
+      inQueue = true;
+      loadingText.style.display = 'none';
+      queueText.style.display = '';
+      queuePosition.textContent = position;
+    }
+
+    function onStreamReady() {
+      connectBtn.innerHTML = 'DEMO &#9654;';
+      connectBtn.classList.add('ready');
+    }
+
+    function onConnectClick() {
+      connectBtn.style.display = 'none';
+      videoLayer.classList.add('fade-out');
+      streamLayer.style.zIndex = 3;
+      streamIframe.focus();
+      enableApartmentButtons();
+      if (isTouchDevice()){
+        sendStreamPixelMessage({ type: 'ui', mode: 'touch'});
+      } else {
+        sendStreamPixelMessage({ type: 'ui', mode: 'mouse'});
+      }
+    }
+
+    function enableApartmentButtons() {
+      document.querySelectorAll('.apartment-select-btn').forEach((btn) => {
+        btn.disabled = false;
+      });
+    }
+
+    connectBtn.addEventListener('click', () => {
+      onConnectClick();
+    });
+
+    window.addEventListener('message', (event) => {
+      if (event.origin !== 'https://share.streampixel.io') return;
+      if (event.data?.type === 'stream-state') {
+        onStreamStateChange(event.data.value);
+      }
+    });
+
+    const APARTMENTS_DATA = [
+      { "id": "apartment13", "numer": "13", "kierunek": "NE", "powierzchnia": 63.0, "pokoje": 4, "cena": 830000, "dostepnosc": true },
+      { "id": "apartment14", "numer": "14", "kierunek": "NW", "powierzchnia": 73.0, "pokoje": 5, "cena": 930000, "dostepnosc": false },
+    ];
+
+    const apartmentsTbody = document.getElementById('apartments-tbody');
+    const priceFormatter = new Intl.NumberFormat('pl-PL');
+
+    function renderApartments(apartments) {
+      if (!Array.isArray(apartments) || apartments.length === 0) {
+        apartmentsTbody.innerHTML = '<tr><td colspan="7" class="apartments-empty">Brak dostępnych apartamentów.</td></tr>';
+        return;
+      }
+
+      apartmentsTbody.innerHTML = apartments.map((apt) => `
+        <tr>
+          <td>${apt.numer}</td>
+          <td>${apt.kierunek}</td>
+          <td>${apt.powierzchnia} m&sup2;</td>
+          <td>${apt.pokoje}</td>
+          <td>${priceFormatter.format(apt.cena)} zł</td>
+          <td>
+            <span class="availability-badge ${apt.dostepnosc ? 'available' : 'unavailable'}">
+              ${apt.dostepnosc ? 'Dostępny' : 'Niedostępny'}
+            </span>
+          </td>
+          <td>
+            <button type="button" class="apartment-select-btn" data-apartment-id="${apt.id}" disabled>Wybierz</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function sendStreamPixelMessage(message, targetOrigin = 'https://share.streampixel.io') {
+      console.log('[StreamPixel] postMessage ->', message, '(targetOrigin:', targetOrigin + ')');
+      streamIframe.contentWindow.postMessage(message, targetOrigin);
+    }
+
+    function selectApartment(apartmentRowName) {
+      sendStreamPixelMessage({ type: 'apartment-selection', apartmentRowName });
+    }
+
+    apartmentsTbody.addEventListener('click', (event) => {
+      const button = event.target.closest('[data-apartment-id]');
+      if (!button) return;
+      selectApartment(button.dataset.apartmentId);
+    });
+
+    renderApartments(APARTMENTS_DATA);
+  </script>
+</body>
+</html>
