@@ -481,6 +481,15 @@
         selectApartment(pendingApartment);
         pendingApartment = null;
       }
+
+      // Re-focus iframe when clicking the stream area
+      streamLayer.addEventListener('click', () => streamIframe.focus());
+      // Forward WASD/arrow keys to iframe when it loses focus
+      document.addEventListener('keydown', (e) => {
+        if (['w','a','s','d','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) {
+          streamIframe.focus();
+        }
+      });
     }
 
     // ── Button click ──
