@@ -190,10 +190,6 @@
       border-color: rgba(255, 255, 255, 0.5);
     }
 
-    .apartment-select-btn:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-    }
   </style>
 </head>
 <body>
@@ -201,7 +197,7 @@
   <div id="hero">
     <div id="video-layer">
       <div class="player-wrapper">
-        <video id="player" playsinline autoplay muted loop>
+        <video id="player" playsinline autoplay muted loop preload="auto">
           <source id="videoSource" type="video/mp4" />
         </video>
       </div>
@@ -259,7 +255,9 @@
         window.matchMedia('(pointer: coarse)').matches;
     }
 
+    const videoEl = document.getElementById('player');
     document.getElementById('videoSource').src = CONFIG.videoSrc;
+    videoEl.load();
     document.getElementById('streamIframe').src = CONFIG.streamUrl;
 
     const player = new Plyr('#player', {
@@ -273,6 +271,10 @@
     player.on('ready', () => {
       player.muted = true;
       player.play();
+    });
+
+    videoEl.addEventListener('canplay', () => {
+      videoEl.play().catch(() => {});
     });
 
     const connectBtn    = document.getElementById('connect-btn');
@@ -361,11 +363,11 @@
     }
 
     function onConnectClick() {
+      demoStarted = true;
       connectBtn.style.display = 'none';
       videoLayer.classList.add('fade-out');
       streamLayer.style.zIndex = 3;
       streamIframe.focus();
-      enableApartmentButtons();
       if (isTouchDevice()){
         sendStreamPixelMessage({ type: 'ui', mode: 'touch'});
       } else {
@@ -373,10 +375,13 @@
       }
     }
 
-    function enableApartmentButtons() {
-      document.querySelectorAll('.apartment-select-btn').forEach((btn) => {
-        btn.disabled = false;
-      });
+    let demoStarted = false;
+
+    function ensureDemoStarted() {
+      if (!demoStarted) {
+        demoStarted = true;
+        onConnectClick();
+      }
     }
 
     connectBtn.addEventListener('click', () => {
@@ -417,7 +422,7 @@
             </span>
           </td>
           <td>
-            <button type="button" class="apartment-select-btn" data-apartment-id="${apt.id}" disabled>Wybierz</button>
+            <button type="button" class="apartment-select-btn" data-apartment-id="${apt.id}">Wybierz</button>
           </td>
         </tr>
       `).join('');
@@ -435,6 +440,7 @@
     apartmentsTbody.addEventListener('click', (event) => {
       const button = event.target.closest('[data-apartment-id]');
       if (!button) return;
+      ensureDemoStarted();
       selectApartment(button.dataset.apartmentId);
     });
 
