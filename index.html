@@ -357,13 +357,10 @@
       queuePosition.textContent = position;
     }
 
-    function onStreamReady() {
-      connectBtn.innerHTML = 'DEMO &#9654;';
-      connectBtn.classList.add('ready');
-    }
+    let demoStarted = false;
+    let pendingApartment = null;
 
-    function onConnectClick() {
-      demoStarted = true;
+    function switchToStream() {
       connectBtn.style.display = 'none';
       videoLayer.classList.add('fade-out');
       streamLayer.style.zIndex = 3;
@@ -373,14 +370,25 @@
       } else {
         sendStreamPixelMessage({ type: 'ui', mode: 'mouse'});
       }
+      if (pendingApartment) {
+        selectApartment(pendingApartment);
+        pendingApartment = null;
+      }
     }
 
-    let demoStarted = false;
+    function onStreamReady() {
+      if (demoStarted) {
+        switchToStream();
+      } else {
+        connectBtn.innerHTML = 'DEMO &#9654;';
+        connectBtn.classList.add('ready');
+      }
+    }
 
-    function ensureDemoStarted() {
-      if (!demoStarted) {
-        demoStarted = true;
-        onConnectClick();
+    function onConnectClick() {
+      demoStarted = true;
+      if (readyTriggered) {
+        switchToStream();
       }
     }
 
@@ -440,8 +448,15 @@
     apartmentsTbody.addEventListener('click', (event) => {
       const button = event.target.closest('[data-apartment-id]');
       if (!button) return;
-      ensureDemoStarted();
-      selectApartment(button.dataset.apartmentId);
+      if (demoStarted && readyTriggered) {
+        selectApartment(button.dataset.apartmentId);
+      } else {
+        pendingApartment = button.dataset.apartmentId;
+        demoStarted = true;
+        if (readyTriggered) {
+          switchToStream();
+        }
+      }
     });
 
     renderApartments(APARTMENTS_DATA);
