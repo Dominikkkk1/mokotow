@@ -812,6 +812,41 @@
     <div class="scroll-hint">Przewiń</div>
   </section>
 
+  <!-- DEMO 3D -->
+  <section id="demo-section" class="section-dark">
+    <div class="container" style="max-width:1400px">
+      <span class="section-label">Podgląd interaktywny</span>
+      <h2 class="section-title">Zwiedzaj inwestycję w 3D</h2>
+      <p class="section-subtitle">Uruchom podgląd i wybierz apartament, aby zobaczyć go w pełnym 3D opartym o Unreal Engine 5.</p>
+
+      <div id="demo-app">
+        <div id="main-view">
+          <div id="video-layer">
+            <div class="player-wrapper">
+              <video id="player" playsinline autoplay muted loop preload="auto">
+                <source id="videoSource" type="video/mp4" />
+              </video>
+            </div>
+          </div>
+          <div id="stream-layer">
+            <iframe id="streamIframe" allow="autoplay; camera" allowfullscreen></iframe>
+          </div>
+          <div id="overlay-controls">
+            <button id="connect-btn">Uruchom demo</button>
+            <span id="queue-text">Kolejka: miejsce <span id="queue-position"></span></span>
+          </div>
+        </div>
+
+        <div id="sidebar">
+          <div id="sidebar-header">
+            <h2>Wybierz apartament</h2>
+          </div>
+          <div id="apartments-list"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- O INWESTYCJI -->
   <section id="about" class="section">
     <div class="container">
@@ -912,41 +947,6 @@
         <div class="stat-card">
           <div class="stat-value">Q3 2027</div>
           <div class="stat-label">Planowane oddanie</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- DEMO 3D -->
-  <section id="demo-section" class="section-dark">
-    <div class="container" style="max-width:1400px">
-      <span class="section-label">Podgląd interaktywny</span>
-      <h2 class="section-title">Zwiedzaj inwestycję w 3D</h2>
-      <p class="section-subtitle">Uruchom podgląd i wybierz apartament, aby zobaczyć go w pełnym 3D opartym o Unreal Engine 5.</p>
-
-      <div id="demo-app">
-        <div id="main-view">
-          <div id="video-layer">
-            <div class="player-wrapper">
-              <video id="player" playsinline autoplay muted loop preload="auto">
-                <source id="videoSource" type="video/mp4" />
-              </video>
-            </div>
-          </div>
-          <div id="stream-layer">
-            <iframe id="streamIframe" allow="autoplay; camera" allowfullscreen></iframe>
-          </div>
-          <div id="overlay-controls">
-            <button id="connect-btn">Uruchom demo</button>
-            <span id="queue-text">Kolejka: miejsce <span id="queue-position"></span></span>
-          </div>
-        </div>
-
-        <div id="sidebar">
-          <div id="sidebar-header">
-            <h2>Wybierz apartament</h2>
-          </div>
-          <div id="apartments-list"></div>
         </div>
       </div>
     </div>
