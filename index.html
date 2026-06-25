@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mokotów Prestige – Podgląd Inwestycji</title>
-  <meta name="description" content="Mokotów Prestige — nowoczesna inwestycja mieszkaniowa na Mokotowie. Interaktywny podgląd 3D w technologii Unreal Engine 5." />
+  <title>Mokotów Prestige - Podgląd Inwestycji</title>
+  <meta name="description" content="Mokotów Prestige  / nowoczesna inwestycja mieszkaniowa na Mokotowie. Interaktywny podgląd 3D w technologii Unreal Engine 5." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -671,6 +671,48 @@
       flex-wrap: wrap;
     }
 
+    /* ── GALLERY ── */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+    }
+
+    .gallery-item {
+      position: relative;
+      overflow: hidden;
+      border-radius: 4px;
+      aspect-ratio: 16 / 10;
+    }
+
+    .gallery-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+
+    .gallery-item:hover img {
+      transform: scale(1.03);
+    }
+
+    .gallery-item figcaption {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 1.5rem 1.25rem 1rem;
+      background: linear-gradient(0deg, rgba(28,46,38,0.85) 0%, transparent 100%);
+      color: var(--dark-fg);
+      font-size: 0.82rem;
+      font-weight: 500;
+    }
+
+    .gallery-item.large {
+      grid-column: span 2;
+      aspect-ratio: 21 / 9;
+    }
+
     /* ── FOOTER ── */
     footer {
       padding: 2.5rem 2rem;
@@ -697,6 +739,8 @@
       .features-grid { grid-template-columns: 1fr; }
       .stats-row { grid-template-columns: repeat(2, 1fr); }
       .location-grid { grid-template-columns: 1fr; }
+      .gallery-grid { grid-template-columns: 1fr; }
+      .gallery-item.large { grid-column: span 1; aspect-ratio: 16/10; }
 
       #demo-section { padding: 3.5rem 1.25rem 4rem; }
 
@@ -822,6 +866,30 @@
     </div>
   </section>
 
+  <!-- GALERIA -->
+  <section class="section-dark section-lg">
+    <div class="container">
+      <span class="section-label">Wizualizacje</span>
+      <h2 class="section-title">Zajrzyj do srodka</h2>
+      <p class="section-subtitle">Fotorealistyczne wizualizacje stworzone w Unreal Engine 5. Tak bedzie wygladac Twoje przyszle mieszkanie.</p>
+
+      <div class="gallery-grid">
+        <figure class="gallery-item large">
+          <img src="https://archviz.codelivery.eu/assets/viz-building-BSmCZS06.png" alt="Wizualizacja budynku Mokotow Prestige z lotu ptaka" loading="lazy" />
+          <figcaption>Elewacja budynku z zielonym dachem</figcaption>
+        </figure>
+        <figure class="gallery-item">
+          <img src="https://archviz.codelivery.eu/assets/viz-livingroom-B3U_uMGr.png" alt="Wnetrze kuchni w apartamencie" loading="lazy" />
+          <figcaption>Wnetrze apartamentu / kuchnia</figcaption>
+        </figure>
+        <figure class="gallery-item">
+          <img src="https://archviz.codelivery.eu/assets/viz-balcony-BtHA3y-J.png" alt="Strefa dzienna z biblioteka" loading="lazy" />
+          <figcaption>Strefa dzienna z antresola</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
   <!-- STATS -->
   <section class="section-dark section-lg">
     <div class="container">
@@ -834,11 +902,11 @@
           <div class="stat-label">Mieszkań</div>
         </div>
         <div class="stat-card">
-          <div class="stat-value">2–5</div>
+          <div class="stat-value">2-5</div>
           <div class="stat-label">Pokoi</div>
         </div>
         <div class="stat-card">
-          <div class="stat-value">42–93</div>
+          <div class="stat-value">42-93</div>
           <div class="stat-label">m² powierzchni</div>
         </div>
         <div class="stat-card">
@@ -884,13 +952,27 @@
     </div>
   </section>
 
+  <!-- PODGLAD Z PLATFORMY -->
+  <section class="section-dark section">
+    <div class="container">
+      <span class="section-label">Rzut z gory</span>
+      <h2 class="section-title">Interaktywny wybor lokalu</h2>
+      <p class="section-subtitle">Widok z lotu ptaka na uklad mieszkania. Kliknij, aby wejsc do srodka i zobaczyc kazdy pokoj w pelnym 3D.</p>
+
+      <figure class="gallery-item large" style="border-radius:4px;max-width:960px">
+        <img src="https://archviz.codelivery.eu/assets/floorplan-topview-C3X0mgG7.png" alt="Rzut z gory na mieszkanie - widok z platformy" loading="lazy" />
+        <figcaption>Widok z platformy / intuicyjny wybor lokalu</figcaption>
+      </figure>
+    </div>
+  </section>
+
   <div class="divider divider-dark" style="background:var(--border)"></div>
 
   <!-- LOKALIZACJA -->
   <section id="location" class="section">
     <div class="container">
       <span class="section-label">Lokalizacja</span>
-      <h2 class="section-title">Mokotów — życie w dobrym adresie</h2>
+      <h2 class="section-title">Mokotów  / życie w dobrym adresie</h2>
       <p class="section-subtitle">Blisko centrum, a jednocześnie w otoczeniu zieleni. Doskonała komunikacja i pełna infrastruktura w zasięgu ręki.</p>
 
       <div class="location-grid">
@@ -1126,6 +1208,14 @@
         if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth' }); }
       });
     });
+
+    // Hero video autoplay fix
+    const heroVideo = document.querySelector('#hero-video-bg video');
+    if (heroVideo) {
+      heroVideo.load();
+      heroVideo.addEventListener('canplay', () => { heroVideo.play().catch(() => {}); });
+      heroVideo.play().catch(() => {});
+    }
 
     // Nav style on scroll (light hero -> dark sections)
     const heroEl = document.getElementById('hero');
