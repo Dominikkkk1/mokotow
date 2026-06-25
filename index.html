@@ -395,14 +395,19 @@
       padding: 5rem 1.5rem 6rem;
     }
 
-    #demo-section .container { max-width: 1400px; }
-
     #demo-app {
       display: flex;
-      height: 72vh;
-      min-height: 520px;
+      height: 80vh;
+      min-height: 560px;
       overflow: hidden;
-      border: 1px solid rgba(237,230,216,0.08);
+      border-top: 1px solid rgba(237,230,216,0.08);
+      border-bottom: 1px solid rgba(237,230,216,0.08);
+    }
+
+    /* Hide Plyr controls completely */
+    .plyr__controls,
+    .plyr__control {
+      display: none !important;
     }
 
     /* Demo main view */
@@ -818,8 +823,8 @@
       <span class="section-label">Podgląd interaktywny</span>
       <h2 class="section-title">Zwiedzaj inwestycję w 3D</h2>
       <p class="section-subtitle">Uruchom podgląd i wybierz apartament, aby zobaczyć go w pełnym 3D opartym o Unreal Engine 5.</p>
-
-      <div id="demo-app">
+    </div>
+    <div id="demo-app">
         <div id="main-view">
           <div id="video-layer">
             <div class="player-wrapper">
@@ -843,7 +848,6 @@
           </div>
           <div id="apartments-list"></div>
         </div>
-      </div>
     </div>
   </section>
 
