@@ -3,30 +3,347 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mokotów – podgląd inwestycji</title>
+  <title>Mokotów Residence – Podgląd Inwestycji</title>
   <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <style>
-    *, *::before, *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #090b0e;
+      --bg-card: #10131a;
+      --bg-card-hover: #161a24;
+      --border: rgba(255,255,255,0.07);
+      --text: #e8eaed;
+      --text-dim: rgba(255,255,255,0.5);
+      --text-muted: rgba(255,255,255,0.3);
+      --accent: #4f8cff;
+      --accent-glow: rgba(79,140,255,0.15);
+      --green: #2ecc71;
+      --red: #e74c3c;
+      --radius: 12px;
+      --font: 'Inter', system-ui, -apple-system, sans-serif;
     }
 
-    html, body {
-      width: 100%;
-      height: 100%;
-      background: #0a0a0a;
-      font-family: Arial, sans-serif;
-      color: #f5f5f5;
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
     }
 
-    #app {
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 0 2rem;
+      height: 64px;
       display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(9,11,14,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #fff;
+    }
+
+    .nav-logo span { color: var(--accent); }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: #fff; }
+
+    /* ── HERO ── */
+    #hero {
+      position: relative;
       height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       overflow: hidden;
     }
 
-    /* ── Main view (video / stream) ── */
+    #hero-video-bg {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+    }
+
+    #hero-video-bg video {
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(9,11,14,0.4) 0%, rgba(9,11,14,0.7) 60%, var(--bg) 100%);
+      z-index: 1;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      max-width: 800px;
+      padding: 0 2rem;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      padding: 0.4rem 1rem;
+      background: var(--accent-glow);
+      border: 1px solid rgba(79,140,255,0.25);
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-content h1 {
+      font-size: clamp(2.2rem, 5vw, 4rem);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      margin-bottom: 1.25rem;
+    }
+
+    .hero-content p {
+      font-size: 1.1rem;
+      color: var(--text-dim);
+      max-width: 560px;
+      margin: 0 auto 2.5rem;
+      line-height: 1.7;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.85rem 2rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      font-family: var(--font);
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: none;
+    }
+
+    .btn-primary {
+      background: #fff;
+      color: #000;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 24px rgba(255,255,255,0.2);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.25);
+    }
+
+    .btn-outline:hover {
+      border-color: rgba(255,255,255,0.5);
+      background: rgba(255,255,255,0.05);
+    }
+
+    .scroll-hint {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .scroll-hint::after {
+      content: '';
+      width: 1px;
+      height: 24px;
+      background: linear-gradient(180deg, var(--text-muted), transparent);
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
+    }
+
+    /* ── SECTIONS ── */
+    section {
+      padding: 6rem 2rem;
+    }
+
+    .section-container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--accent);
+      margin-bottom: 0.75rem;
+    }
+
+    .section-title {
+      font-size: clamp(1.6rem, 3vw, 2.4rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 1rem;
+      line-height: 1.2;
+    }
+
+    .section-subtitle {
+      font-size: 1rem;
+      color: var(--text-dim);
+      max-width: 600px;
+      line-height: 1.7;
+      margin-bottom: 3rem;
+    }
+
+    /* ── FEATURES (O Inwestycji) ── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+    }
+
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem 1.5rem;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .feature-card:hover {
+      background: var(--bg-card-hover);
+      border-color: rgba(255,255,255,0.12);
+    }
+
+    .feature-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: var(--accent-glow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .feature-card h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .feature-card p {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+
+    /* ── STATS ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.25rem;
+      margin-top: 3rem;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1;
+      margin-bottom: 0.35rem;
+    }
+
+    .stat-label {
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+
+    /* ── DEMO SECTION ── */
+    #demo-section {
+      padding: 4rem 2rem 6rem;
+      background: linear-gradient(180deg, var(--bg) 0%, #0d1017 50%, var(--bg) 100%);
+    }
+
+    #demo-section .section-container {
+      max-width: 1300px;
+    }
+
+    #demo-app {
+      display: flex;
+      height: 70vh;
+      min-height: 500px;
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: #000;
+    }
+
+    /* ── Demo main view ── */
     #main-view {
       position: relative;
       flex: 1;
@@ -44,7 +361,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #0a0a0a;
+      background: #000;
       transition: opacity 0.6s ease;
     }
 
@@ -54,32 +371,13 @@
       visibility: hidden;
     }
 
-    .player-wrapper {
-      width: 100%;
-      height: 100%;
-    }
+    .player-wrapper { width: 100%; height: 100%; }
+    .plyr, .plyr__video-wrapper { height: 100%; }
+    .plyr video { object-fit: cover; width: 100%; height: 100%; }
 
-    .plyr, .plyr__video-wrapper {
-      height: 100%;
-    }
+    #stream-layer { z-index: 1; }
+    #stream-layer iframe { width: 100%; height: 100%; border: none; }
 
-    .plyr video {
-      object-fit: cover;
-      width: 100%;
-      height: 100%;
-    }
-
-    #stream-layer {
-      z-index: 1;
-    }
-
-    #stream-layer iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
-
-    /* ── Overlay controls on video ── */
     #overlay-controls {
       position: absolute;
       inset: 0;
@@ -98,10 +396,10 @@
       color: #000;
       border: none;
       border-radius: 8px;
-      font-size: 1.1rem;
-      font-family: Arial, sans-serif;
+      font-size: 1rem;
+      font-family: var(--font);
       font-weight: 600;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.02em;
       cursor: pointer;
       pointer-events: auto;
       transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -109,13 +407,13 @@
 
     #connect-btn:hover {
       transform: scale(1.03);
-      box-shadow: 0 4px 20px rgba(255, 255, 255, 0.25);
+      box-shadow: 0 4px 20px rgba(255,255,255,0.25);
     }
 
     #connect-btn.loading {
-      background: rgba(0, 0, 0, 0.6);
-      color: rgba(255, 255, 255, 0.9);
-      border: 1px solid rgba(255, 255, 255, 0.4);
+      background: rgba(0,0,0,0.6);
+      color: rgba(255,255,255,0.9);
+      border: 1px solid rgba(255,255,255,0.4);
       backdrop-filter: blur(6px);
       cursor: default;
       pointer-events: none;
@@ -131,27 +429,25 @@
       border: none;
     }
 
-    #connect-btn.hidden {
-      display: none;
-    }
+    #connect-btn.hidden { display: none; }
 
     #queue-text {
       display: none;
       padding: 0.6rem 1.5rem;
-      background: rgba(0, 0, 0, 0.6);
-      color: rgba(255, 255, 255, 0.9);
+      background: rgba(0,0,0,0.6);
+      color: rgba(255,255,255,0.9);
       border-radius: 6px;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       backdrop-filter: blur(6px);
       pointer-events: none;
     }
 
     /* ── Sidebar ── */
     #sidebar {
-      width: 240px;
+      width: 260px;
       flex-shrink: 0;
-      background: #111;
-      border-left: 1px solid rgba(255, 255, 255, 0.08);
+      background: var(--bg-card);
+      border-left: 1px solid var(--border);
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -159,210 +455,383 @@
 
     #sidebar-header {
       padding: 1.25rem 1.25rem 1rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      border-bottom: 1px solid var(--border);
     }
 
     #sidebar-header h2 {
-      font-size: 1rem;
+      font-size: 0.78rem;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: rgba(255, 255, 255, 0.7);
+      letter-spacing: 0.1em;
+      color: var(--text-dim);
       font-weight: 600;
     }
 
     #apartments-list {
       flex: 1;
       overflow-y: auto;
-      padding: 0.5rem 0;
+      padding: 0.25rem 0;
     }
 
     .apt-card {
       padding: 1rem 1.25rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      border-bottom: 1px solid var(--border);
       transition: background 0.15s ease;
+      cursor: default;
     }
 
-    .apt-card:hover {
-      background: rgba(255, 255, 255, 0.04);
-    }
+    .apt-card:hover { background: var(--bg-card-hover); }
 
     .apt-card-top {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.4rem;
     }
 
-    .apt-name {
-      font-size: 1rem;
-      font-weight: 600;
-    }
+    .apt-name { font-size: 0.9rem; font-weight: 600; }
 
     .availability-badge {
       display: inline-block;
-      padding: 0.2rem 0.55rem;
+      padding: 0.15rem 0.5rem;
       border-radius: 999px;
-      font-size: 0.7rem;
+      font-size: 0.65rem;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.03em;
     }
 
-    .availability-badge.available {
-      background: rgba(46, 204, 113, 0.15);
-      color: #2ecc71;
-    }
-
-    .availability-badge.unavailable {
-      background: rgba(231, 76, 60, 0.15);
-      color: #e74c3c;
-    }
+    .availability-badge.available { background: rgba(46,204,113,0.12); color: var(--green); }
+    .availability-badge.unavailable { background: rgba(231,76,60,0.12); color: var(--red); }
 
     .apt-details {
       display: flex;
-      gap: 1rem;
-      font-size: 0.78rem;
-      color: rgba(255, 255, 255, 0.5);
-      margin-bottom: 0.75rem;
+      gap: 0.75rem;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
     }
 
     .apt-price {
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       font-weight: 600;
-      color: rgba(255, 255, 255, 0.85);
-      margin-bottom: 0.75rem;
+      color: rgba(255,255,255,0.8);
+      margin-bottom: 0.6rem;
     }
 
     .apartment-select-btn {
       width: 100%;
-      padding: 0.5rem;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 0.45rem;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.15);
       border-radius: 6px;
-      color: #f5f5f5;
-      font-size: 0.82rem;
-      font-family: Arial, sans-serif;
+      color: var(--text);
+      font-size: 0.78rem;
+      font-family: var(--font);
+      font-weight: 500;
       cursor: pointer;
-      transition: background 0.15s ease, border-color 0.15s ease;
+      transition: all 0.15s ease;
     }
 
     .apartment-select-btn:hover {
-      background: rgba(255, 255, 255, 0.15);
-      border-color: rgba(255, 255, 255, 0.4);
+      background: rgba(255,255,255,0.12);
+      border-color: rgba(255,255,255,0.3);
     }
 
     .apt-card.active .apartment-select-btn {
-      background: rgba(255, 255, 255, 0.15);
-      border-color: #fff;
+      background: var(--accent-glow);
+      border-color: var(--accent);
+      color: var(--accent);
     }
 
-    #sidebar-footer {
-      padding: 1rem 1.25rem;
-      border-top: 1px solid rgba(255, 255, 255, 0.08);
-      font-size: 0.72rem;
-      color: rgba(255, 255, 255, 0.3);
-      line-height: 1.4;
+    /* ── LOCATION ── */
+    .location-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
     }
 
-    /* ── Mobile ── */
+    .location-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+    }
+
+    .location-card h3 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+    }
+
+    .location-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.4rem 0;
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .location-item:last-child { border-bottom: none; }
+    .location-item span:last-child { color: var(--text); font-weight: 500; }
+
+    /* ── CTA ── */
+    #cta {
+      text-align: center;
+      background: linear-gradient(180deg, var(--bg) 0%, #0d1017 100%);
+    }
+
+    #cta .section-title {
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 2rem;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    /* ── MOBILE ── */
     @media (max-width: 768px) {
-      #app {
+      nav { padding: 0 1rem; }
+      .nav-links { display: none; }
+
+      .hero-content h1 { font-size: 2rem; }
+      .hero-content p { font-size: 0.95rem; }
+
+      section { padding: 3.5rem 1.25rem; }
+
+      .features-grid { grid-template-columns: 1fr; }
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .location-grid { grid-template-columns: 1fr; }
+
+      #demo-app {
         flex-direction: column;
-        height: 100vh;
-        overflow: hidden;
+        height: auto;
+        min-height: auto;
       }
 
       #main-view {
-        height: 45vh;
+        height: 50vh;
         flex: none;
         transition: height 0.4s ease;
       }
 
-      #main-view.stream-active {
-        height: 65vh;
-      }
+      #main-view.stream-active { height: 65vh; }
 
       #sidebar {
         width: 100%;
-        flex: 1;
-        min-height: 0;
         border-left: none;
-        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        border-top: 1px solid var(--border);
+        max-height: 40vh;
         overflow-y: auto;
-      }
-
-      #sidebar-header {
-        padding: 0.75rem 1rem;
-      }
-
-      #sidebar-header h2 {
-        font-size: 0.85rem;
-      }
-
-      .apt-card {
-        padding: 0.75rem 1rem;
-      }
-
-      .apt-name {
-        font-size: 0.88rem;
-      }
-
-      .apt-details {
-        font-size: 0.72rem;
-        margin-bottom: 0.4rem;
-      }
-
-      .apt-price {
-        font-size: 0.82rem;
-        margin-bottom: 0.5rem;
-      }
-
-      .apartment-select-btn {
-        padding: 0.4rem;
-        font-size: 0.78rem;
       }
 
       #connect-btn {
         padding: 0.75rem 2rem;
-        font-size: 0.95rem;
+        font-size: 0.9rem;
       }
+
+      .apt-card { padding: 0.75rem 1rem; }
+      .apt-name { font-size: 0.82rem; }
+      .apt-details { font-size: 0.7rem; }
+      .apt-price { font-size: 0.8rem; }
     }
   </style>
 </head>
 <body>
 
-  <div id="app">
-    <div id="main-view">
-      <div id="video-layer">
-        <div class="player-wrapper">
-          <video id="player" playsinline autoplay muted loop preload="auto">
-            <source id="videoSource" type="video/mp4" />
-          </video>
+  <!-- ── NAV ── -->
+  <nav>
+    <div class="nav-logo">Mokotów <span>Residence</span></div>
+    <ul class="nav-links">
+      <li><a href="#about">O inwestycji</a></li>
+      <li><a href="#demo-section">Demo 3D</a></li>
+      <li><a href="#location">Lokalizacja</a></li>
+      <li><a href="#cta">Kontakt</a></li>
+    </ul>
+  </nav>
+
+  <!-- ── HERO ── -->
+  <section id="hero">
+    <div id="hero-video-bg">
+      <video playsinline autoplay muted loop preload="auto">
+        <source src="https://ue-woodshack.s3.eu-west-1.amazonaws.com/Mokotow_Outsite_Lit_opt_1080.mp4" type="video/mp4" />
+      </video>
+    </div>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <div class="hero-badge">Nowa inwestycja na Mokotowie</div>
+      <h1>Nowoczesne mieszkania w sercu Warszawy</h1>
+      <p>Poznaj inwestycję w interaktywnym podglądzie 3D. Wybierz mieszkanie, przejdź wirtualny spacer i poczuj przestrzeń zanim zostanie wybudowana.</p>
+      <div class="hero-actions">
+        <a href="#demo-section" class="btn btn-primary">Uruchom podgląd 3D</a>
+        <a href="#about" class="btn btn-outline">Dowiedz się więcej</a>
+      </div>
+    </div>
+    <div class="scroll-hint">Przewiń</div>
+  </section>
+
+  <!-- ── O INWESTYCJI ── -->
+  <section id="about">
+    <div class="section-container">
+      <div class="section-label">O inwestycji</div>
+      <h2 class="section-title">Zaprojektowane z myślą o komforcie</h2>
+      <p class="section-subtitle">Mokotów Residence to kameralny projekt w jednej z najbardziej pożądanych dzielnic Warszawy. Nowoczesna architektura, przemyślane układy i najwyższa jakość wykończenia.</p>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">&#9634;</div>
+          <h3>Przemyślane układy</h3>
+          <p>Funkcjonalne rozkłady mieszkań od 2 do 5 pokoi, zaprojektowane z dbałością o każdy metr kwadratowy.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">&#9728;</div>
+          <h3>Naturalne światło</h3>
+          <p>Duże przeszklenia i przemyślana orientacja budynku zapewniają optymalne doświetlenie wnętrz.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">&#9881;</div>
+          <h3>Smart Home</h3>
+          <p>Każde mieszkanie wyposażone w system inteligentnego zarządzania oświetleniem, ogrzewaniem i bezpieczeństwem.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">&#127795;</div>
+          <h3>Zieleń i rekreacja</h3>
+          <p>Wewnętrzny dziedziniec z ogrodem, plac zabaw dla dzieci i strefa relaksu dla mieszkańców.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">&#128663;</div>
+          <h3>Parking podziemny</h3>
+          <p>Hala garażowa z miejscami postojowymi i stacjami ładowania pojazdów elektrycznych.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">&#128274;</div>
+          <h3>Bezpieczeństwo</h3>
+          <p>Monitoring, kontrola dostępu i ochrona obiektu 24/7 dla pełnego spokoju mieszkańców.</p>
         </div>
       </div>
 
-      <div id="stream-layer">
-        <iframe
-          id="streamIframe"
-          allow="autoplay; camera"
-          allowfullscreen
-        ></iframe>
-      </div>
-
-      <div id="overlay-controls">
-        <button id="connect-btn">Uruchom demo</button>
-        <span id="queue-text">Kolejka: miejsce <span id="queue-position"></span></span>
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-value">48</div>
+          <div class="stat-label">Mieszkań</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">2–5</div>
+          <div class="stat-label">Pokoi</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">42–93</div>
+          <div class="stat-label">m² powierzchni</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">Q3 2027</div>
+          <div class="stat-label">Planowane oddanie</div>
+        </div>
       </div>
     </div>
+  </section>
 
-    <div id="sidebar">
-      <div id="sidebar-header">
-        <h2>Apartamenty</h2>
+  <!-- ── DEMO 3D ── -->
+  <section id="demo-section">
+    <div class="section-container">
+      <div class="section-label">Podgląd interaktywny</div>
+      <h2 class="section-title">Zwiedzaj inwestycję w 3D</h2>
+      <p class="section-subtitle">Uruchom demo i wybierz apartament, aby zobaczyć go w pełnym podglądzie 3D opartym o Unreal Engine 5.</p>
+
+      <div id="demo-app">
+        <div id="main-view">
+          <div id="video-layer">
+            <div class="player-wrapper">
+              <video id="player" playsinline autoplay muted loop preload="auto">
+                <source id="videoSource" type="video/mp4" />
+              </video>
+            </div>
+          </div>
+          <div id="stream-layer">
+            <iframe id="streamIframe" allow="autoplay; camera" allowfullscreen></iframe>
+          </div>
+          <div id="overlay-controls">
+            <button id="connect-btn">Uruchom demo</button>
+            <span id="queue-text">Kolejka: miejsce <span id="queue-position"></span></span>
+          </div>
+        </div>
+
+        <div id="sidebar">
+          <div id="sidebar-header">
+            <h2>Apartamenty</h2>
+          </div>
+          <div id="apartments-list"></div>
+        </div>
       </div>
-      <div id="apartments-list"></div>
     </div>
-  </div>
+  </section>
 
+  <!-- ── LOKALIZACJA ── -->
+  <section id="location">
+    <div class="section-container">
+      <div class="section-label">Lokalizacja</div>
+      <h2 class="section-title">Mokotów — życie w dobrym adresie</h2>
+      <p class="section-subtitle">Blisko centrum, a jednocześnie w otoczeniu zieleni. Doskonała komunikacja i pełna infrastruktura w zasięgu ręki.</p>
+
+      <div class="location-grid">
+        <div class="location-card">
+          <h3>Komunikacja</h3>
+          <div class="location-item"><span>Metro Wilanowska</span><span>6 min</span></div>
+          <div class="location-item"><span>Centrum Warszawy</span><span>15 min</span></div>
+          <div class="location-item"><span>Lotnisko Chopina</span><span>20 min</span></div>
+          <div class="location-item"><span>Przystanek autobusowy</span><span>2 min</span></div>
+        </div>
+        <div class="location-card">
+          <h3>W okolicy</h3>
+          <div class="location-item"><span>Galeria Mokotów</span><span>8 min</span></div>
+          <div class="location-item"><span>Park Arkadia</span><span>5 min</span></div>
+          <div class="location-item"><span>Szkoła podstawowa</span><span>4 min</span></div>
+          <div class="location-item"><span>Przychodnia zdrowia</span><span>3 min</span></div>
+        </div>
+        <div class="location-card">
+          <h3>Edukacja</h3>
+          <div class="location-item"><span>Przedszkole</span><span>3 min</span></div>
+          <div class="location-item"><span>Liceum ogólnokształcące</span><span>7 min</span></div>
+          <div class="location-item"><span>Uniwersytet Warszawski</span><span>18 min</span></div>
+          <div class="location-item"><span>Szkoła językowa</span><span>5 min</span></div>
+        </div>
+        <div class="location-card">
+          <h3>Rozrywka i sport</h3>
+          <div class="location-item"><span>Siłownia / fitness</span><span>4 min</span></div>
+          <div class="location-item"><span>Basen olimpijski</span><span>10 min</span></div>
+          <div class="location-item"><span>Kino</span><span>8 min</span></div>
+          <div class="location-item"><span>Ścieżki rowerowe</span><span>1 min</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CTA ── -->
+  <section id="cta">
+    <div class="section-container" style="text-align:center">
+      <div class="section-label">Zainteresowany?</div>
+      <h2 class="section-title">Umów się na prezentację</h2>
+      <p class="section-subtitle" style="margin-left:auto;margin-right:auto">Skontaktuj się z nami, aby uzyskać szczegółową ofertę lub umówić się na indywidualną prezentację inwestycji.</p>
+      <div class="hero-actions">
+        <a href="mailto:kontakt@mokotow-residence.pl" class="btn btn-primary">Napisz do nas</a>
+        <a href="tel:+48123456789" class="btn btn-outline">+48 123 456 789</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ── -->
+  <footer>
+    Mokotów Residence &middot; Szablon podglądu inwestycji &middot; Powered by StreamPixel &amp; Unreal Engine 5
+  </footer>
+
+  <!-- ── SCRIPTS ── -->
   <script>
     const CONFIG = {
       videoSrc: 'https://ue-woodshack.s3.eu-west-1.amazonaws.com/Mokotow_Outsite_Lit_opt_1080.mp4',
@@ -431,7 +900,7 @@
       const diff = targetProgress - displayedProgress;
       if (Math.abs(diff) > 0.1) {
         displayedProgress += diff * 0.08;
-        connectBtn.textContent = 'Ładowanie ' + Math.round(displayedProgress) + '%';
+        connectBtn.textContent = '\u0141adowanie ' + Math.round(displayedProgress) + '%';
       }
       if (streamComplete && Math.round(displayedProgress) >= 100 && !readyTriggered) {
         readyTriggered = true;
@@ -450,7 +919,7 @@
 
       connectBtn.classList.add('loading');
       connectBtn.classList.remove('ready');
-      connectBtn.textContent = 'Ładowanie 0%';
+      connectBtn.textContent = '\u0141adowanie 0%';
 
       progressInterval = setInterval(() => {
         if (!streamComplete && !inQueue) {
@@ -524,9 +993,7 @@
         pendingApartment = null;
       }
 
-      // Re-focus iframe when clicking the stream area
       streamLayer.addEventListener('click', () => streamIframe.focus());
-      // Forward WASD/arrow keys to iframe when it loses focus
       document.addEventListener('keydown', (e) => {
         if (['w','a','s','d','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) {
           streamIframe.focus();
@@ -564,7 +1031,7 @@
 
     function renderApartments(apartments) {
       if (!apartments.length) {
-        apartmentsList.innerHTML = '<div style="padding:1.25rem;color:rgba(255,255,255,0.4);font-style:italic">Brak apartamentów.</div>';
+        apartmentsList.innerHTML = '<div style="padding:1.25rem;color:rgba(255,255,255,0.4);font-style:italic">Brak apartament\u00f3w.</div>';
         return;
       }
 
@@ -573,15 +1040,15 @@
           <div class="apt-card-top">
             <span class="apt-name">Apartament ${apt.numer}</span>
             <span class="availability-badge ${apt.dostepnosc ? 'available' : 'unavailable'}">
-              ${apt.dostepnosc ? 'Dostępny' : 'Niedostępny'}
+              ${apt.dostepnosc ? 'Dost\u0119pny' : 'Niedost\u0119pny'}
             </span>
           </div>
           <div class="apt-details">
-            <span>${apt.powierzchnia} m²</span>
-            <span>${apt.pokoje} ${apt.pokoje === 1 ? 'pokój' : apt.pokoje < 5 ? 'pokoje' : 'pokoi'}</span>
+            <span>${apt.powierzchnia} m\u00b2</span>
+            <span>${apt.pokoje} ${apt.pokoje === 1 ? 'pok\u00f3j' : apt.pokoje < 5 ? 'pokoje' : 'pokoi'}</span>
             <span>${apt.kierunek}</span>
           </div>
-          <div class="apt-price">${priceFormatter.format(apt.cena)} zł</div>
+          <div class="apt-price">${priceFormatter.format(apt.cena)} z\u0142</div>
           <button type="button" class="apartment-select-btn" data-apartment-id="${apt.id}">Wybierz</button>
         </div>
       `).join('');
@@ -619,6 +1086,25 @@
     });
 
     renderApartments(APARTMENTS_DATA);
+
+    // ── Smooth scroll for hero CTA ──
+    document.querySelectorAll('a[href^="#"]').forEach(link => {
+      link.addEventListener('click', (e) => {
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    });
+
+    // ── Nav background on scroll ──
+    const nav = document.querySelector('nav');
+    window.addEventListener('scroll', () => {
+      nav.style.borderBottomColor = window.scrollY > 50
+        ? 'rgba(255,255,255,0.07)'
+        : 'transparent';
+    });
   </script>
 </body>
 </html>
