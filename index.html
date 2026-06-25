@@ -96,6 +96,32 @@
     nav.dark-nav .nav-links a { color: rgba(237,230,216,0.5); }
     nav.dark-nav .nav-links a:hover { color: var(--dark-fg); }
 
+    .nav-cta {
+      height: 36px;
+      padding: 0 1.25rem;
+      background: var(--primary);
+      color: var(--primary-fg);
+      font-size: 0.7rem;
+      font-weight: 600;
+      font-family: var(--font-body);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      transition: all 0.2s ease;
+    }
+
+    .nav-cta:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(53,90,74,0.3);
+    }
+
+    nav.dark-nav .nav-cta {
+      background: var(--dark-fg);
+      color: var(--dark);
+    }
+
     /* ── HERO ── */
     #hero {
       position: relative;
@@ -859,6 +885,7 @@
       <li><a href="#location">Lokalizacja</a></li>
       <li><a href="#cta">Kontakt</a></li>
     </ul>
+    <a href="#demo-section" class="nav-cta">Podgląd 3D</a>
   </nav>
 
   <!-- HERO -->
