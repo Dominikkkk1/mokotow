@@ -517,7 +517,7 @@
 
     /* ── Sidebar ── */
     #sidebar {
-      width: 280px;
+      width: 220px;
       flex-shrink: 0;
       background: var(--dark);
       border-left: 1px solid rgba(237,230,216,0.08);
@@ -527,7 +527,7 @@
     }
 
     #sidebar-header {
-      padding: 1.5rem 1.5rem 1.25rem;
+      padding: 1.25rem 1rem 1rem;
       border-bottom: 1px solid rgba(237,230,216,0.08);
     }
 
@@ -546,7 +546,7 @@
     }
 
     .apt-card {
-      padding: 1.25rem 1.5rem;
+      padding: 1rem 1rem;
       border-bottom: 1px solid rgba(237,230,216,0.06);
       transition: background 0.15s ease;
       cursor: default;
@@ -725,6 +725,75 @@
       aspect-ratio: 21 / 9;
     }
 
+    /* ── ANIMATIONS ── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(32px);
+      transition: opacity 0.7s cubic-bezier(0.25,0.46,0.45,0.94),
+                  transform 0.7s cubic-bezier(0.25,0.46,0.45,0.94);
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+    .reveal-delay-4 { transition-delay: 0.4s; }
+    .reveal-delay-5 { transition-delay: 0.5s; }
+
+    .feature-card {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.5s cubic-bezier(0.25,0.46,0.45,0.94),
+                  transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94),
+                  background 0.2s;
+    }
+
+    .feature-card.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .stat-card {
+      opacity: 0;
+      transform: scale(0.95);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+
+    .stat-card.visible {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .gallery-item {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .gallery-item.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .gallery-item.visible img {
+      transition: transform 0.5s ease;
+    }
+
+    .location-card {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+
+    .location-card.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
     /* ── FOOTER ── */
     footer {
       padding: 2.5rem 2rem;
@@ -861,9 +930,9 @@
   <!-- O INWESTYCJI -->
   <section id="about" class="section">
     <div class="container">
-      <span class="section-label">O inwestycji</span>
-      <h2 class="section-title">Komfort w każdym detalu</h2>
-      <p class="section-subtitle">Mokotów Prestige to kameralny projekt w jednej z najbardziej pożądanych dzielnic Warszawy. Nowoczesna architektura, przemyślane układy i najwyższa jakość wykończenia.</p>
+      <span class="section-label reveal">O inwestycji</span>
+      <h2 class="section-title reveal reveal-delay-1">Komfort w każdym detalu</h2>
+      <p class="section-subtitle reveal reveal-delay-2">Mokotów Prestige to kameralny projekt w jednej z najbardziej pożądanych dzielnic Warszawy. Nowoczesna architektura, przemyślane układy i najwyższa jakość wykończenia.</p>
 
       <div class="features-grid">
         <div class="feature-card">
@@ -910,18 +979,15 @@
         </div>
       </div>
 
-      <div style="text-align:center;margin-top:3.5rem">
-        <a href="#demo-section" class="btn btn-dark">Podgląd 3D</a>
-      </div>
     </div>
   </section>
 
   <!-- GALERIA -->
   <section class="section-dark section-lg">
     <div class="container">
-      <span class="section-label">Wizualizacje</span>
-      <h2 class="section-title">Zajrzyj do srodka</h2>
-      <p class="section-subtitle">Fotorealistyczne wizualizacje stworzone w Unreal Engine 5. Tak bedzie wygladac Twoje przyszle mieszkanie.</p>
+      <span class="section-label reveal">Wizualizacje</span>
+      <h2 class="section-title reveal reveal-delay-1">Zajrzyj do srodka</h2>
+      <p class="section-subtitle reveal reveal-delay-2">Fotorealistyczne wizualizacje stworzone w Unreal Engine 5. Tak bedzie wygladac Twoje przyszle mieszkanie.</p>
 
       <div class="gallery-grid">
         <figure class="gallery-item large">
@@ -938,17 +1004,14 @@
         </figure>
       </div>
 
-      <div style="text-align:center;margin-top:3.5rem">
-        <a href="#demo-section" class="btn btn-primary">Podgląd 3D</a>
-      </div>
     </div>
   </section>
 
   <!-- STATS -->
   <section class="section-dark section-lg">
     <div class="container">
-      <span class="section-label">Inwestycja w liczbach</span>
-      <h2 class="section-title">Mokotów Prestige</h2>
+      <span class="section-label reveal">Inwestycja w liczbach</span>
+      <h2 class="section-title reveal reveal-delay-1">Mokotów Prestige</h2>
 
       <div class="stats-row">
         <div class="stat-card">
@@ -969,27 +1032,21 @@
         </div>
       </div>
 
-      <div style="text-align:center;margin-top:3.5rem">
-        <a href="#demo-section" class="btn btn-primary">Podgląd 3D</a>
-      </div>
     </div>
   </section>
 
   <!-- PODGLAD Z PLATFORMY -->
   <section class="section-dark section">
     <div class="container">
-      <span class="section-label">Rzut z gory</span>
-      <h2 class="section-title">Interaktywny wybor lokalu</h2>
-      <p class="section-subtitle">Widok z lotu ptaka na uklad mieszkania. Kliknij, aby wejsc do srodka i zobaczyc kazdy pokoj w pelnym 3D.</p>
+      <span class="section-label reveal">Rzut z gory</span>
+      <h2 class="section-title reveal reveal-delay-1">Interaktywny wybor lokalu</h2>
+      <p class="section-subtitle reveal reveal-delay-2">Widok z lotu ptaka na uklad mieszkania. Kliknij, aby wejsc do srodka i zobaczyc kazdy pokoj w pelnym 3D.</p>
 
       <figure class="gallery-item large" style="border-radius:4px;max-width:960px">
         <img src="https://archviz.codelivery.eu/assets/floorplan-topview-C3X0mgG7.png" alt="Rzut z gory na mieszkanie - widok z platformy" loading="lazy" />
         <figcaption>Widok z platformy / intuicyjny wybor lokalu</figcaption>
       </figure>
 
-      <div style="text-align:center;margin-top:3.5rem">
-        <a href="#demo-section" class="btn btn-primary">Podgląd 3D</a>
-      </div>
     </div>
   </section>
 
@@ -998,9 +1055,9 @@
   <!-- LOKALIZACJA -->
   <section id="location" class="section">
     <div class="container">
-      <span class="section-label">Lokalizacja</span>
-      <h2 class="section-title">Mokotów  / życie w dobrym adresie</h2>
-      <p class="section-subtitle">Blisko centrum, a jednocześnie w otoczeniu zieleni. Doskonała komunikacja i pełna infrastruktura w zasięgu ręki.</p>
+      <span class="section-label reveal">Lokalizacja</span>
+      <h2 class="section-title reveal reveal-delay-1">Mokotów / życie w dobrym adresie</h2>
+      <p class="section-subtitle reveal reveal-delay-2">Blisko centrum, a jednocześnie w otoczeniu zieleni. Doskonała komunikacja i pełna infrastruktura w zasięgu ręki.</p>
 
       <div class="location-grid">
         <div class="location-card">
@@ -1033,9 +1090,6 @@
         </div>
       </div>
 
-      <div style="text-align:center;margin-top:3.5rem">
-        <a href="#demo-section" class="btn btn-dark">Podgląd 3D</a>
-      </div>
     </div>
   </section>
 
@@ -1044,9 +1098,9 @@
   <!-- CTA -->
   <section id="cta" class="section-lg">
     <div class="container">
-      <span class="section-label">Zainteresowany?</span>
-      <h2 class="section-title">Umów prezentację</h2>
-      <p class="section-subtitle" style="margin-left:auto;margin-right:auto">Skontaktuj się z nami, aby poznać szczegółową ofertę lub umówić indywidualną prezentację inwestycji.</p>
+      <span class="section-label reveal">Zainteresowany?</span>
+      <h2 class="section-title reveal reveal-delay-1">Umów prezentację</h2>
+      <p class="section-subtitle reveal reveal-delay-2" style="margin-left:auto;margin-right:auto">Skontaktuj się z nami, aby poznać szczegółową ofertę lub umówić indywidualną prezentację inwestycji.</p>
       <div class="cta-actions">
         <a href="mailto:kontakt@mokotow-prestige.pl" class="btn btn-dark">Napisz do nas</a>
         <a href="tel:+48123456789" class="btn btn-outline" style="border-color:rgba(53,90,74,0.3);color:var(--primary)">+48 123 456 789</a>
@@ -1247,6 +1301,25 @@
       heroVideo.addEventListener('canplay', () => { heroVideo.play().catch(() => {}); });
       heroVideo.play().catch(() => {});
     }
+
+    // Scroll reveal animations
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.15, rootMargin: '-40px' });
+
+    document.querySelectorAll('.reveal, .feature-card, .stat-card, .gallery-item, .location-card').forEach((el, i) => {
+      if (el.classList.contains('feature-card') || el.classList.contains('stat-card') || el.classList.contains('location-card')) {
+        el.style.transitionDelay = (i % 6) * 0.08 + 's';
+      }
+      if (el.classList.contains('gallery-item')) {
+        el.style.transitionDelay = (i % 3) * 0.15 + 's';
+      }
+      revealObserver.observe(el);
+    });
 
     // Nav style on scroll (light hero -> dark sections)
     const heroEl = document.getElementById('hero');
