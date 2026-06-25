@@ -422,20 +422,19 @@
     }
 
     #demo-app {
-      display: flex;
       height: 80vh;
       min-height: 560px;
       overflow: hidden;
       border-top: 1px solid rgba(237,230,216,0.08);
       border-bottom: 1px solid rgba(237,230,216,0.08);
+      position: relative;
     }
 
 
     /* Demo main view */
     #main-view {
-      position: relative;
-      flex: 1;
-      min-width: 0;
+      position: absolute;
+      inset: 0;
     }
 
     #video-layer, #stream-layer {
@@ -529,57 +528,76 @@
       pointer-events: none;
     }
 
-    /* ── Sidebar ── */
-    #sidebar {
-      width: 220px;
-      flex-shrink: 0;
-      background: var(--dark);
-      border-left: 1px solid rgba(237,230,216,0.08);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
+    /* ── Apartment Browser ── */
+    #apartment-browser {
+      margin-top: 3rem;
+      margin-bottom: 2rem;
+      border: 1px solid rgba(237,230,216,0.1);
+      background: rgba(237,230,216,0.03);
     }
 
-    #sidebar-header {
-      padding: 1.25rem 1rem 1rem;
-      border-bottom: 1px solid rgba(237,230,216,0.08);
-    }
-
-    #sidebar-header h2 {
-      font-size: 0.68rem;
-      font-weight: 500;
-      letter-spacing: 0.25em;
-      text-transform: uppercase;
-      color: rgba(237,230,216,0.4);
-    }
-
-    #apartments-list {
-      flex: 1;
-      overflow-y: auto;
-      padding: 0.25rem 0;
-    }
-
-    .apt-card {
-      padding: 1rem 1rem;
-      border-bottom: 1px solid rgba(237,230,216,0.06);
-      transition: background 0.15s ease;
-      cursor: default;
-    }
-
-    .apt-card:hover { background: rgba(237,230,216,0.03); }
-
-    .apt-card-top {
+    #apartment-browser-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 0.5rem;
+      padding: 1.5rem 2rem;
+      border-bottom: 1px solid rgba(237,230,216,0.08);
     }
 
-    .apt-name {
+    .apartment-browser-title {
       font-family: var(--font-heading);
-      font-size: 1.1rem;
+      font-size: 1.5rem;
       font-weight: 600;
       color: var(--dark-fg);
+    }
+
+    #apartment-count {
+      font-size: 0.78rem;
+      color: rgba(237,230,216,0.4);
+    }
+
+    .apt-table-header {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr 0.8fr 0.8fr 1.2fr 1fr 120px;
+      gap: 1rem;
+      padding: 0.85rem 2rem;
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(237,230,216,0.3);
+      border-bottom: 1px solid rgba(237,230,216,0.08);
+    }
+
+    .apt-row {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr 0.8fr 0.8fr 1.2fr 1fr 120px;
+      gap: 1rem;
+      padding: 1rem 2rem;
+      align-items: center;
+      border-bottom: 1px solid rgba(237,230,216,0.05);
+      transition: background 0.15s ease;
+      font-size: 0.88rem;
+      color: var(--dark-fg);
+    }
+
+    .apt-row:last-child { border-bottom: none; }
+    .apt-row:hover { background: rgba(237,230,216,0.04); }
+
+    .apt-row-name {
+      font-family: var(--font-heading);
+      font-size: 1.05rem;
+      font-weight: 600;
+    }
+
+    .apt-row-price {
+      font-family: var(--font-heading);
+      font-weight: 600;
+    }
+
+    .apt-row-dim {
+      color: rgba(237,230,216,0.5);
+      font-size: 0.82rem;
     }
 
     .availability-badge {
@@ -601,29 +619,13 @@
       color: var(--red);
     }
 
-    .apt-details {
-      display: flex;
-      gap: 1rem;
-      font-size: 0.72rem;
-      color: rgba(237,230,216,0.35);
-      margin-bottom: 0.6rem;
-    }
-
-    .apt-price {
-      font-family: var(--font-heading);
-      font-size: 1rem;
-      font-weight: 600;
-      color: rgba(237,230,216,0.75);
-      margin-bottom: 0.75rem;
-    }
-
     .apartment-select-btn {
-      width: 100%;
-      height: 38px;
+      height: 34px;
+      padding: 0 1.25rem;
       background: transparent;
       border: 1px solid rgba(237,230,216,0.15);
       color: var(--dark-fg);
-      font-size: 0.72rem;
+      font-size: 0.68rem;
       font-family: var(--font-body);
       font-weight: 500;
       letter-spacing: 0.1em;
@@ -635,10 +637,14 @@
     .apartment-select-btn:hover {
       border-color: var(--secondary);
       color: #fff;
-      background: rgba(87,122,101,0.1);
+      background: rgba(87,122,101,0.15);
     }
 
-    .apt-card.active .apartment-select-btn {
+    .apt-row.active {
+      background: rgba(53,90,74,0.1);
+    }
+
+    .apt-row.active .apartment-select-btn {
       background: var(--primary);
       border-color: var(--primary);
       color: var(--primary-fg);
@@ -840,26 +846,22 @@
       #demo-section { padding: 3.5rem 1.25rem 4rem; }
 
       #demo-app {
-        flex-direction: column;
-        height: auto;
-        min-height: auto;
+        height: 55vh;
+        min-height: 360px;
       }
 
-      #main-view {
-        height: 50vh;
-        flex: none;
-        transition: height 0.4s ease;
+      .apt-table-header { display: none; }
+
+      .apt-row {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+        padding: 1rem 1.25rem;
       }
 
-      #main-view.stream-active { height: 65vh; }
+      .apt-row-name { grid-column: 1 / -1; }
 
-      #sidebar {
-        width: 100%;
-        border-left: none;
-        border-top: 1px solid rgba(237,230,216,0.08);
-        max-height: 40vh;
-        overflow-y: auto;
-      }
+      #apartment-browser-header { padding: 1.25rem; }
+      .apartment-browser-title { font-size: 1.2rem; }
 
       #connect-btn {
         height: 48px;
@@ -933,12 +935,31 @@
           </div>
         </div>
 
-        <div id="sidebar">
-          <div id="sidebar-header">
-            <h2>Wybierz apartament</h2>
+    </div>
+
+    <!-- APARTMENT BROWSER -->
+    <div class="container" style="max-width:1200px">
+      <div id="apartment-browser">
+        <div id="apartment-browser-header">
+          <div>
+            <span class="section-label" style="margin-bottom:0.5rem">Wyszukiwarka lokali</span>
+            <h3 class="apartment-browser-title">Wybierz apartament</h3>
+          </div>
+          <div id="apartment-count"></div>
+        </div>
+        <div id="apartment-browser-table">
+          <div class="apt-table-header">
+            <span>Numer</span>
+            <span>Powierzchnia</span>
+            <span>Pokoje</span>
+            <span>Kierunek</span>
+            <span>Cena</span>
+            <span>Status</span>
+            <span></span>
           </div>
           <div id="apartments-list"></div>
         </div>
+      </div>
     </div>
   </section>
 
@@ -1243,22 +1264,17 @@
     const priceFormatter = new Intl.NumberFormat('pl-PL');
 
     function renderApartments(apartments) {
-      if (!apartments.length) { apartmentsList.innerHTML = '<div style="padding:1.5rem;color:rgba(237,230,216,0.3);font-style:italic">Brak apartament\u00f3w.</div>'; return; }
+      if (!apartments.length) { apartmentsList.innerHTML = '<div style="padding:1.5rem 2rem;color:rgba(237,230,216,0.3);font-style:italic">Brak apartament\u00f3w.</div>'; return; }
+      document.getElementById('apartment-count').textContent = apartments.length + ' ' + (apartments.length === 1 ? 'lokal' : apartments.length < 5 ? 'lokale' : 'lokali');
       apartmentsList.innerHTML = apartments.map((apt) => `
-        <div class="apt-card" data-id="${apt.id}">
-          <div class="apt-card-top">
-            <span class="apt-name">Apartament ${apt.numer}</span>
-            <span class="availability-badge ${apt.dostepnosc ? 'available' : 'unavailable'}">
-              ${apt.dostepnosc ? 'Dost\u0119pny' : 'Niedost\u0119pny'}
-            </span>
-          </div>
-          <div class="apt-details">
-            <span>${apt.powierzchnia} m\u00b2</span>
-            <span>${apt.pokoje} ${apt.pokoje === 1 ? 'pok\u00f3j' : apt.pokoje < 5 ? 'pokoje' : 'pokoi'}</span>
-            <span>${apt.kierunek}</span>
-          </div>
-          <div class="apt-price">${priceFormatter.format(apt.cena)} z\u0142</div>
-          <button type="button" class="apartment-select-btn" data-apartment-id="${apt.id}">Wybierz</button>
+        <div class="apt-row" data-id="${apt.id}">
+          <span class="apt-row-name">Apartament ${apt.numer}</span>
+          <span class="apt-row-dim">${apt.powierzchnia} m\u00b2</span>
+          <span class="apt-row-dim">${apt.pokoje} ${apt.pokoje === 1 ? 'pok\u00f3j' : apt.pokoje < 5 ? 'pokoje' : 'pokoi'}</span>
+          <span class="apt-row-dim">${apt.kierunek}</span>
+          <span class="apt-row-price">${priceFormatter.format(apt.cena)} z\u0142</span>
+          <span><span class="availability-badge ${apt.dostepnosc ? 'available' : 'unavailable'}">${apt.dostepnosc ? 'Dost\u0119pny' : 'Niedost\u0119pny'}</span></span>
+          <span><button type="button" class="apartment-select-btn" data-apartment-id="${apt.id}">Wybierz</button></span>
         </div>
       `).join('');
     }
@@ -1269,9 +1285,9 @@
     }
 
     function selectApartment(apartmentRowName) {
-      document.querySelectorAll('.apt-card').forEach(c => c.classList.remove('active'));
-      const card = document.querySelector(`.apt-card[data-id="${apartmentRowName}"]`);
-      if (card) card.classList.add('active');
+      document.querySelectorAll('.apt-row').forEach(c => c.classList.remove('active'));
+      const row = document.querySelector(`.apt-row[data-id="${apartmentRowName}"]`);
+      if (row) row.classList.add('active');
       sendStreamPixelMessage({ type: 'apartment-selection', apartmentRowName });
     }
 
