@@ -8,7 +8,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -404,17 +403,6 @@
       border-bottom: 1px solid rgba(237,230,216,0.08);
     }
 
-    /* Hide all Plyr UI */
-    .plyr__controls,
-    .plyr__control,
-    .plyr__control--overlaid,
-    .plyr__poster,
-    .plyr__cues,
-    .plyr--video .plyr__control--overlaid {
-      display: none !important;
-      opacity: 0 !important;
-      pointer-events: none !important;
-    }
 
     /* Demo main view */
     #main-view {
@@ -444,8 +432,7 @@
     }
 
     .player-wrapper { width: 100%; height: 100%; }
-    .plyr, .plyr__video-wrapper { height: 100%; }
-    .plyr video { object-fit: cover; width: 100%; height: 100%; }
+    .player-wrapper video { object-fit: cover; width: 100%; height: 100%; }
 
     #stream-layer { z-index: 1; }
     #stream-layer iframe { width: 100%; height: 100%; border: none; }
@@ -1120,7 +1107,6 @@
       streamUrl: 'https://share.streampixel.io/69d02e1541d102927cd76c17',
     };
   </script>
-  <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
   <script>
     function isTouchDevice() {
       return ('ontouchstart' in window) ||
@@ -1131,16 +1117,6 @@
     const videoEl = document.getElementById('player');
     document.getElementById('videoSource').src = CONFIG.videoSrc;
     videoEl.load();
-
-    const player = new Plyr('#player', {
-      controls: [],
-      ratio: '16:9',
-      loop: { active: true },
-      muted: true,
-      clickToPlay: false,
-    });
-
-    player.on('ready', () => { player.muted = true; player.play(); });
     videoEl.addEventListener('canplay', () => { videoEl.play().catch(() => {}); });
 
     const connectBtn    = document.getElementById('connect-btn');
