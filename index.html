@@ -1275,12 +1275,17 @@
       else { connectBtn.classList.remove('loading'); connectBtn.classList.add('ready'); connectBtn.textContent = 'DEMO \u25B6'; }
     }
 
+    function scrollToDemo() {
+      document.getElementById('demo-app').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
     function switchToStream() {
       connectBtn.classList.add('hidden');
       queueText.style.display = 'none';
       videoLayer.classList.add('fade-out');
       streamLayer.style.zIndex = 3;
       document.getElementById('main-view').classList.add('stream-active');
+      scrollToDemo();
       streamIframe.focus();
       if (isTouchDevice()) { sendStreamPixelMessage({ type: 'ui', mode: 'touch'}); }
       else { sendStreamPixelMessage({ type: 'ui', mode: 'mouse'}); }
@@ -1343,9 +1348,10 @@
 
     apartmentsList.addEventListener('click', (event) => {
       const button = event.target.closest('[data-apartment-id]');
-      if (!button) return;
+      if (!button || button.disabled) return;
       const aptId = button.dataset.apartmentId;
       const pawnType = button.dataset.pawnType || 'orbital';
+      scrollToDemo();
       if (demoStarted && readyTriggered) { selectApartment(aptId, pawnType); }
       else {
         pendingApartment = { id: aptId, pawnType };
