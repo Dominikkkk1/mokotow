@@ -930,6 +930,9 @@
         height: 30px;
       }
 
+      .pawn-btn-satellite { display: none; }
+      .apt-btn-topview { display: none; }
+
       #connect-btn {
         height: 48px;
         padding: 0 1.75rem;
@@ -1010,10 +1013,10 @@
         <div id="apartment-browser-header">
           <div>
             <span class="section-label" style="margin-bottom:0.5rem">Wyszukiwarka lokali</span>
-            <h3 class="apartment-browser-title">Wybierz apartament <span id="apartment-count"></span></h3>
+            <h3 class="apartment-browser-title">Apartamenty <span id="apartment-count"></span></h3>
             <div class="pawn-actions">
               <button type="button" class="pawn-btn active" data-pawn-select="orbital">Widok budynku</button>
-              <button type="button" class="pawn-btn" data-pawn-select="satellite">Widok z lotu ptaka</button>
+              <button type="button" class="pawn-btn pawn-btn-satellite" data-pawn-select="satellite">Widok z lotu ptaka</button>
             </div>
           </div>
         </div>
@@ -1350,8 +1353,8 @@
           <span class="apt-row-price">${priceFormatter.format(apt.cena)} z\u0142</span>
           <span><span class="availability-badge ${apt.dostepnosc ? 'available' : 'unavailable'}">${apt.dostepnosc ? 'Dost\u0119pny' : 'Niedost\u0119pny'}</span></span>
           <span class="apt-row-actions">
-            <button type="button" class="apartment-select-btn" data-apartment-id="${apt.id}" data-pawn-type="orbital">Wybierz</button>
-            <button type="button" class="apartment-select-btn" data-apartment-id="${apt.id}" data-pawn-type="top-view">Widok z gory</button>
+            <button type="button" class="apartment-select-btn" data-apartment-id="${apt.id}" data-pawn-type="orbital">Prezentacja</button>
+            <button type="button" class="apartment-select-btn apt-btn-topview" data-apartment-id="${apt.id}" data-pawn-type="top-view">Widok z gory</button>
             <button type="button" class="apartment-select-btn" data-apartment-id="${apt.id}" data-pawn-type="first-person" ${apt.dostepnosc ? '' : 'disabled'}>Spacer</button>
           </span>
         </div>
