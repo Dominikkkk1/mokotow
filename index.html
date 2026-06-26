@@ -552,8 +552,10 @@
     }
 
     #apartment-count {
+      font-family: var(--font-body);
       font-size: 0.78rem;
-      color: rgba(237,230,216,0.4);
+      font-weight: 400;
+      color: rgba(237,230,216,0.35);
     }
 
     .pawn-actions {
@@ -920,8 +922,7 @@
       }
 
       #apartment-browser-header { padding: 1.25rem; }
-      .apartment-browser-title { font-size: 1.2rem; display: inline; }
-      #apartment-count { display: inline; margin-left: 0.5rem; }
+      .apartment-browser-title { font-size: 1.2rem; }
 
       .pawn-actions .pawn-btn {
         font-size: 0.6rem;
@@ -1009,13 +1010,12 @@
         <div id="apartment-browser-header">
           <div>
             <span class="section-label" style="margin-bottom:0.5rem">Wyszukiwarka lokali</span>
-            <h3 class="apartment-browser-title">Wybierz apartament</h3>
+            <h3 class="apartment-browser-title">Wybierz apartament <span id="apartment-count"></span></h3>
             <div class="pawn-actions">
               <button type="button" class="pawn-btn active" data-pawn-select="orbital">Widok budynku</button>
               <button type="button" class="pawn-btn" data-pawn-select="satellite">Widok z lotu ptaka</button>
             </div>
           </div>
-          <div id="apartment-count"></div>
         </div>
         <div id="apartment-browser-table">
           <div class="apt-table-header">
