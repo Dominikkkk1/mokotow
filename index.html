@@ -556,9 +556,41 @@
       color: rgba(237,230,216,0.4);
     }
 
+    .pawn-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+
+    .pawn-btn {
+      height: 32px;
+      padding: 0 1rem;
+      background: transparent;
+      border: 1px solid rgba(237,230,216,0.15);
+      color: var(--dark-fg);
+      font-size: 0.65rem;
+      font-family: var(--font-body);
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .pawn-btn:hover {
+      border-color: var(--secondary);
+      background: rgba(87,122,101,0.1);
+    }
+
+    .pawn-btn.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: var(--primary-fg);
+    }
+
     .apt-table-header {
       display: grid;
-      grid-template-columns: 1fr 1.2fr 0.8fr 0.8fr 1.2fr 1fr 120px;
+      grid-template-columns: 1fr 1fr 0.7fr 0.7fr 1fr 0.9fr auto;
       gap: 1rem;
       padding: 0.85rem 2rem;
       font-size: 0.65rem;
@@ -571,7 +603,7 @@
 
     .apt-row {
       display: grid;
-      grid-template-columns: 1fr 1.2fr 0.8fr 0.8fr 1.2fr 1fr 120px;
+      grid-template-columns: 1fr 1fr 0.7fr 0.7fr 1fr 0.9fr auto;
       gap: 1rem;
       padding: 1rem 2rem;
       align-items: center;
@@ -619,9 +651,14 @@
       color: var(--red);
     }
 
+    .apt-row-actions {
+      display: flex;
+      gap: 0.4rem;
+    }
+
     .apartment-select-btn {
-      height: 34px;
-      padding: 0 1.25rem;
+      height: 30px;
+      padding: 0 0.75rem;
       background: transparent;
       border: 1px solid rgba(237,230,216,0.15);
       color: var(--dark-fg);
@@ -944,6 +981,10 @@
           <div>
             <span class="section-label" style="margin-bottom:0.5rem">Wyszukiwarka lokali</span>
             <h3 class="apartment-browser-title">Wybierz apartament</h3>
+            <div class="pawn-actions">
+              <button type="button" class="pawn-btn active" data-pawn-select="orbital">Prezentacja</button>
+              <button type="button" class="pawn-btn" data-pawn-select="satellite">Spacer</button>
+            </div>
           </div>
           <div id="apartment-count"></div>
         </div>
@@ -955,7 +996,7 @@
             <span>Kierunek</span>
             <span>Cena</span>
             <span>Status</span>
-            <span></span>
+            <span>Tryb</span>
           </div>
           <div id="apartments-list"></div>
         </div>
@@ -1238,7 +1279,7 @@
       streamIframe.focus();
       if (isTouchDevice()) { sendStreamPixelMessage({ type: 'ui', mode: 'touch'}); }
       else { sendStreamPixelMessage({ type: 'ui', mode: 'mouse'}); }
-      if (pendingApartment) { selectApartment(pendingApartment); pendingApartment = null; }
+      if (pendingApartment) { selectApartment(pendingApartment.id, pendingApartment.pawnType); pendingApartment = null; }
       streamLayer.addEventListener('click', () => streamIframe.focus());
       document.addEventListener('keydown', (e) => {
         if (['w','a','s','d','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) streamIframe.focus();
@@ -1274,7 +1315,11 @@
           <span class="apt-row-dim">${apt.kierunek}</span>
           <span class="apt-row-price">${priceFormatter.format(apt.cena)} z\u0142</span>
           <span><span class="availability-badge ${apt.dostepnosc ? 'available' : 'unavailable'}">${apt.dostepnosc ? 'Dost\u0119pny' : 'Niedost\u0119pny'}</span></span>
-          <span><button type="button" class="apartment-select-btn" data-apartment-id="${apt.id}">Wybierz</button></span>
+          <span class="apt-row-actions">
+            <button type="button" class="apartment-select-btn" data-apartment-id="${apt.id}" data-pawn-type="orbital">Prezentacja</button>
+            <button type="button" class="apartment-select-btn" data-apartment-id="${apt.id}" data-pawn-type="top-view">Widok z gory</button>
+            <button type="button" class="apartment-select-btn" data-apartment-id="${apt.id}" data-pawn-type="first-person">Spacer</button>
+          </span>
         </div>
       `).join('');
     }
@@ -1284,23 +1329,35 @@
       streamIframe.contentWindow.postMessage(message, targetOrigin);
     }
 
-    function selectApartment(apartmentRowName) {
+    function selectApartment(apartmentRowName, pawnType) {
       document.querySelectorAll('.apt-row').forEach(c => c.classList.remove('active'));
       const row = document.querySelector(`.apt-row[data-id="${apartmentRowName}"]`);
       if (row) row.classList.add('active');
-      sendStreamPixelMessage({ type: 'apartment-selection', apartmentRowName });
+      sendStreamPixelMessage({ type: 'apartment-selection', apartmentRowName, pawnType: pawnType || 'orbital' });
     }
 
     apartmentsList.addEventListener('click', (event) => {
       const button = event.target.closest('[data-apartment-id]');
       if (!button) return;
       const aptId = button.dataset.apartmentId;
-      if (demoStarted && readyTriggered) { selectApartment(aptId); }
+      const pawnType = button.dataset.pawnType || 'orbital';
+      if (demoStarted && readyTriggered) { selectApartment(aptId, pawnType); }
       else {
-        pendingApartment = aptId;
+        pendingApartment = { id: aptId, pawnType };
         demoStarted = true;
         if (!streamLoading) startStreamLoading();
         if (readyTriggered) switchToStream();
+      }
+    });
+
+    // Global pawn selection
+    document.querySelector('.pawn-actions').addEventListener('click', (event) => {
+      const btn = event.target.closest('[data-pawn-select]');
+      if (!btn) return;
+      document.querySelectorAll('.pawn-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      if (demoStarted && readyTriggered) {
+        sendStreamPixelMessage({ type: 'pawn-selection', pawnType: btn.dataset.pawnSelect });
       }
     });
 
