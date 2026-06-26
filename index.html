@@ -987,7 +987,7 @@
             <span class="section-label" style="margin-bottom:0.5rem">Wyszukiwarka lokali</span>
             <h3 class="apartment-browser-title">Wybierz apartament</h3>
             <div class="pawn-actions">
-              <button type="button" class="pawn-btn active" data-pawn-select="orbital">Prezentacja</button>
+              <button type="button" class="pawn-btn active" data-pawn-select="orbital">Widok budynku</button>
               <button type="button" class="pawn-btn" data-pawn-select="satellite">Widok z gory</button>
             </div>
           </div>
@@ -1363,6 +1363,10 @@
       btn.classList.add('active');
       if (demoStarted && readyTriggered) {
         sendStreamPixelMessage({ type: 'pawn-selection', pawnType: btn.dataset.pawnSelect });
+      } else {
+        demoStarted = true;
+        if (!streamLoading) startStreamLoading();
+        if (readyTriggered) switchToStream();
       }
     });
 
