@@ -671,10 +671,15 @@
       transition: all 0.2s ease;
     }
 
-    .apartment-select-btn:hover {
+    .apartment-select-btn:hover:not(:disabled) {
       border-color: var(--secondary);
       color: #fff;
       background: rgba(87,122,101,0.15);
+    }
+
+    .apartment-select-btn:disabled {
+      opacity: 0.25;
+      cursor: not-allowed;
     }
 
     .apt-row.active {
@@ -983,7 +988,7 @@
             <h3 class="apartment-browser-title">Wybierz apartament</h3>
             <div class="pawn-actions">
               <button type="button" class="pawn-btn active" data-pawn-select="orbital">Prezentacja</button>
-              <button type="button" class="pawn-btn" data-pawn-select="satellite">Spacer</button>
+              <button type="button" class="pawn-btn" data-pawn-select="satellite">Widok z gory</button>
             </div>
           </div>
           <div id="apartment-count"></div>
@@ -1318,7 +1323,7 @@
           <span class="apt-row-actions">
             <button type="button" class="apartment-select-btn" data-apartment-id="${apt.id}" data-pawn-type="orbital">Prezentacja</button>
             <button type="button" class="apartment-select-btn" data-apartment-id="${apt.id}" data-pawn-type="top-view">Widok z gory</button>
-            <button type="button" class="apartment-select-btn" data-apartment-id="${apt.id}" data-pawn-type="first-person">Spacer</button>
+            <button type="button" class="apartment-select-btn" data-apartment-id="${apt.id}" data-pawn-type="first-person" ${apt.dostepnosc ? '' : 'disabled'}>Spacer</button>
           </span>
         </div>
       `).join('');
