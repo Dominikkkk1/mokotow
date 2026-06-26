@@ -536,21 +536,6 @@
       background: rgba(237,230,216,0.03);
     }
 
-    #apartment-browser-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1.5rem 2rem;
-      border-bottom: 1px solid rgba(237,230,216,0.08);
-    }
-
-    .apartment-browser-title {
-      font-family: var(--font-heading);
-      font-size: 1.5rem;
-      font-weight: 600;
-      color: var(--dark-fg);
-    }
-
     #apartment-count {
       font-family: var(--font-body);
       font-size: 0.78rem;
@@ -921,8 +906,6 @@
         letter-spacing: 0.05em;
       }
 
-      #apartment-browser-header { padding: 1.25rem; }
-      .apartment-browser-title { font-size: 1.2rem; }
 
       .pawn-actions .pawn-btn {
         font-size: 0.6rem;
@@ -1006,20 +989,20 @@
         </div>
 
     </div>
+  </section>
 
-    <!-- APARTMENT BROWSER -->
-    <div class="container" style="max-width:1200px">
+  <!-- APARTMENT BROWSER -->
+  <section class="section-dark section">
+    <div class="container">
+      <span class="section-label reveal">Wyszukiwarka lokali</span>
+      <h2 class="section-title reveal reveal-delay-1">Wybierz apartament <span id="apartment-count"></span></h2>
+
+      <div class="pawn-actions" style="margin-bottom:2rem">
+        <button type="button" class="pawn-btn active" data-pawn-select="orbital">Widok budynku</button>
+        <button type="button" class="pawn-btn pawn-btn-satellite" data-pawn-select="satellite">Widok z lotu ptaka</button>
+      </div>
+
       <div id="apartment-browser">
-        <div id="apartment-browser-header">
-          <div>
-            <span class="section-label" style="margin-bottom:0.5rem">Wyszukiwarka lokali</span>
-            <h3 class="apartment-browser-title">Apartamenty <span id="apartment-count"></span></h3>
-            <div class="pawn-actions">
-              <button type="button" class="pawn-btn active" data-pawn-select="orbital">Widok budynku</button>
-              <button type="button" class="pawn-btn pawn-btn-satellite" data-pawn-select="satellite">Widok z lotu ptaka</button>
-            </div>
-          </div>
-        </div>
         <div id="apartment-browser-table">
           <div class="apt-table-header">
             <span>Numer</span>
