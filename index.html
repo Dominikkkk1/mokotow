@@ -1367,6 +1367,7 @@
       if (!btn) return;
       document.querySelectorAll('.pawn-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
+      scrollToDemo();
       if (demoStarted && readyTriggered) {
         sendStreamPixelMessage({ type: 'pawn-selection', pawnType: btn.dataset.pawnSelect });
       } else {
