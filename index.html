@@ -895,15 +895,38 @@
       .apt-table-header { display: none; }
 
       .apt-row {
-        grid-template-columns: 1fr 1fr;
-        gap: 0.5rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
         padding: 1rem 1.25rem;
       }
 
-      .apt-row-name { grid-column: 1 / -1; }
+      .apt-row-name { width: 100%; margin-bottom: 0.25rem; }
+
+      .apt-row-dim, .apt-row-price {
+        font-size: 0.75rem;
+      }
+
+      .apt-row-actions {
+        width: 100%;
+        margin-top: 0.5rem;
+      }
+
+      .apt-row-actions .apartment-select-btn {
+        flex: 1;
+        font-size: 0.6rem;
+        padding: 0 0.5rem;
+        letter-spacing: 0.05em;
+      }
 
       #apartment-browser-header { padding: 1.25rem; }
       .apartment-browser-title { font-size: 1.2rem; }
+
+      .pawn-actions .pawn-btn {
+        font-size: 0.6rem;
+        padding: 0 0.75rem;
+        height: 30px;
+      }
 
       #connect-btn {
         height: 48px;
