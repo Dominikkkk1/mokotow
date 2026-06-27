@@ -1353,7 +1353,12 @@
       document.querySelectorAll('.apt-row').forEach(c => c.classList.remove('active'));
       const row = document.querySelector(`.apt-row[data-id="${apartmentRowName}"]`);
       if (row) row.classList.add('active');
-      sendStreamPixelMessage({ type: 'apartment-selection', apartmentRowName, pawnType: pawnType || 'orbital' });
+      if (pawnType === 'apartment-showcase') {
+        sendStreamPixelMessage({ type: 'apartment-selection', apartmentRowName, pawnType: 'orbital' });
+        sendStreamPixelMessage({ type: 'pawn-selection', pawnType: 'apartment-showcase' });
+      } else {
+        sendStreamPixelMessage({ type: 'apartment-selection', apartmentRowName, pawnType: pawnType || 'orbital' });
+      }
     }
 
     apartmentsList.addEventListener('click', (event) => {
