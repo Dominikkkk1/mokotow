@@ -996,6 +996,7 @@
     <div class="container">
       <div class="pawn-actions" style="margin-bottom:2.5rem">
         <button type="button" class="pawn-btn active" data-pawn-select="orbital">Poznaj nasza inwestycje</button>
+        <button type="button" class="pawn-btn" data-pawn-select="apartment-showcase">Apartment Showcase</button>
         <button type="button" class="pawn-btn pawn-btn-satellite" data-pawn-select="satellite" style="display:none">Widok z lotu ptaka</button>
       </div>
 
@@ -1336,7 +1337,7 @@
           <span class="apt-row-price">${priceFormatter.format(apt.cena)} z\u0142</span>
           <span><span class="availability-badge ${apt.dostepnosc ? 'available' : 'unavailable'}">${apt.dostepnosc ? 'Dost\u0119pny' : 'Niedost\u0119pny'}</span></span>
           <span class="apt-row-actions">
-            <button type="button" class="apartment-select-btn" data-apartment-id="${apt.id}" data-pawn-type="apartment-showcase" ${apt.dostepnosc ? '' : 'disabled'}>Apartment Showcase</button>
+            <button type="button" class="apartment-select-btn" data-apartment-id="${apt.id}" data-pawn-type="orbital">Apartment Browser</button>
             <button type="button" class="apartment-select-btn apt-btn-topview" data-apartment-id="${apt.id}" data-pawn-type="top-view">Widok z gory</button>
             <button type="button" class="apartment-select-btn" data-apartment-id="${apt.id}" data-pawn-type="first-person" ${apt.dostepnosc ? '' : 'disabled'}>Spacer</button>
           </span>
