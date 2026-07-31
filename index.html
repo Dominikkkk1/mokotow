@@ -1452,6 +1452,10 @@
 
     function onStreamStateChange(state) {
       if (state.startsWith('queue-')) { onQueueUpdate(state.split('-')[1]); return; }
+      // Zerwane polaczenie konczy ogladanie tak samo jak zamkniecie karty, tylko
+      // nie z winy odwiedzajacego - stad osobny powod. Slownika stanow StreamPixel
+      // nie znamy w calosci, wiec dopasowujemy po fragmencie nazwy.
+      if (/disconnect|closed|failed|error/i.test(state)) { endSession('stream_lost'); return; }
       if (queueText.style.display !== 'none') { queueText.style.display = 'none'; connectBtn.style.display = ''; }
       const progress = STATE_PROGRESS[state];
       if (progress !== undefined) targetProgress = Math.max(targetProgress, progress);
@@ -1483,6 +1487,7 @@
       if (isTouchDevice()) { sendStreamPixelMessage({ type: 'ui', mode: 'touch'}); }
       else { sendStreamPixelMessage({ type: 'ui', mode: 'mouse'}); }
       clTrack('demo_start');
+      startSession();
       if (pendingApartment) { selectApartment(pendingApartment.id, pendingApartment.pawnType); pendingApartment = null; }
       streamLayer.addEventListener('click', () => streamIframe.focus());
       document.addEventListener('keydown', (e) => {
@@ -1496,14 +1501,18 @@
     });
 
     /* ── ZDARZENIA ZE SCENY 3D ──
-       Scena raportuje kazde wejscie do pomieszczenia i kazda zmiane kamery, ale
-       NIE mowi, ile ktos gdzie spedzil - podaje tylko `elapsedSeconds`, czyli
-       ktora to sekunda sesji. Czas w pomieszczeniu wychodzi dopiero z roznicy
-       miedzy dwoma kolejnymi zdarzeniami, dlatego pobyt wysylamy z opoznieniem:
-       w chwili, gdy odwiedzajacy z tego pomieszczenia wychodzi.
+       Scena raportuje wejscie i wyjscie z pomieszczenia oraz zmiane kamery. Czas
+       pobytu podaje posrednio: kazde zdarzenie niesie `elapsedSeconds`, czyli
+       ktora to sekunda sesji. Pobyt wysylamy wiec dopiero w chwili wyjscia, bo
+       wtedy znamy obie granice.
 
        Bez tego przetworzenia w CRM ladowal surowy zrzut sceny, z ktorego
        handlowiec nie odczytal nic poza "cos sie stalo w 3D". */
+
+    /** Widok listy mieszkan. To nawigacja, a nie pomieszczenie do ogladania. */
+    const BROWSER_LOCATION = 'ApartmentBrowser';
+    /** Po tylu ms bez znaku zycia ze sceny uznajemy, ze odwiedzajacy odszedl. */
+    const IDLE_MS = 180000;
 
     /** Otwarty pobyt w pomieszczeniu: { apartment, room, at, wall }. */
     let sceneStay = null;
@@ -1511,10 +1520,14 @@
     let sceneApartment = null;
     let scenePawn = null;
 
+    let sessionStartedAt = null;
+    let sessionLastActivityAt = null;
+    let idleTimer = null;
+
     /**
      * Zamyka otwarty pobyt i wysyla go z czasem trwania. `elapsed` to sekunda
-     * sesji z kolejnego zdarzenia sceny; przy wyjsciu ze strony jej nie mamy,
-     * wiec liczymy z zegara przegladarki.
+     * sesji ze zdarzenia, ktore ten pobyt konczy; przy wyjsciu ze strony jej nie
+     * mamy, wiec liczymy z zegara przegladarki.
      */
     function flushRoomStay(elapsed) {
       if (!sceneStay) return;
@@ -1530,13 +1543,57 @@
       clTrack('room_view', { apartment: stay.apartment, room: stay.room, seconds });
     }
 
+    function startSession() {
+      sessionStartedAt = Date.now();
+      touchSession();
+    }
+
+    /**
+     * Kazdy dowod, ze odwiedzajacy nadal tam jest, przesuwa licznik bezczynnosci.
+     * Ruchu myszy nie da sie tu uzyc: scena siedzi w iframe i to ona zjada zdarzenia
+     * wejscia, wiec jedynym sygnalem zycia sa jej wlasne raporty.
+     */
+    function touchSession() {
+      if (!sessionStartedAt) return;
+      sessionLastActivityAt = Date.now();
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(() => endSession('idle'), IDLE_MS);
+    }
+
+    /**
+     * Koniec ogladania. `seconds` to caly czas w scenie, `active_seconds` - czas do
+     * ostatniego znaku zycia. Roznica miedzy nimi mowi, ile scena stala nietknieta,
+     * a to zupelnie co innego niz ogladanie.
+     */
+    function endSession(reason) {
+      if (!sessionStartedAt) return;
+      clearTimeout(idleTimer);
+      flushRoomStay(null);
+      const seconds = Math.round((Date.now() - sessionStartedAt) / 1000);
+      const active = Math.round((sessionLastActivityAt - sessionStartedAt) / 1000);
+      sessionStartedAt = null;
+      clTrack('demo_end', { seconds, active_seconds: active, reason });
+    }
+
     function onSceneAnalytics(data) {
       const elapsed = parseFloat(data.elapsedSeconds);
       // Scena mowi "13", CRM trzyma mieszkania pod "apartment13".
       const apartment = data.apartmentNumber ? 'apartment' + data.apartmentNumber : null;
 
-      // Kazde nowe zdarzenie konczy poprzedni pobyt - dopiero teraz znamy czas.
-      flushRoomStay(elapsed);
+      // Powrot po przerwie liczy sie jako nowe wejscie, nie jako ciag dalszy.
+      if (!sessionStartedAt) {
+        startSession();
+        clTrack('demo_start', { resumed: true });
+      }
+      touchSession();
+
+      if (data.actionType === 'ApartmentBrowserFocus') {
+        // Powrot do listy mieszkan. `apartmentNumber` jest tu tylko podswietleniem
+        // na liscie - potraktowanie go jak wejscia zawyzaloby zainteresowanie.
+        flushRoomStay(elapsed);
+        sceneApartment = null;
+        return;
+      }
 
       // Mieszkanie wybrane wewnatrz sceny, a nie przyciskiem na stronie. Ten sam
       // typ zdarzenia, bo dla handlowca to ta sama informacja.
@@ -1546,25 +1603,32 @@
       }
 
       if (data.actionType === 'PawnChange') {
+        // Zmiana kamery nie wyprowadza z pomieszczenia, wiec pobytu nie zamykamy.
         if (data.pawnType && data.pawnType !== scenePawn) {
           scenePawn = data.pawnType;
           clTrack('pawn_select', { apartment, pawn: data.pawnType, source: 'scene' });
         }
       } else if (data.actionType === 'LocationEnter') {
-        if (data.locationName) {
+        // Wejscie bez wczesniejszego wyjscia zamyka poprzedni pobyt - zabezpieczenie
+        // na wypadek zgubionego LocationLeave.
+        flushRoomStay(elapsed);
+        if (data.locationName && data.locationName !== BROWSER_LOCATION) {
           sceneStay = { apartment, room: data.locationName, at: elapsed, wall: Date.now() };
         }
+      } else if (data.actionType === 'LocationLeave') {
+        // Scena sama mowi, kiedy ktos wychodzi - to najdokladniejszy koniec pobytu.
+        flushRoomStay(elapsed);
       } else {
         // Typ, ktorego jeszcze nie znamy - zapisujemy surowo, zeby go nie zgubic.
         clTrack('streampixel_analytics', data);
       }
     }
 
-    // Ostatnie pomieszczenie nie ma nastepnego zdarzenia, ktore by je zamknelo -
-    // domyka je wyjscie ze strony albo przelaczenie karty.
-    window.addEventListener('pagehide', () => flushRoomStay(null));
+    // Wyjscie ze strony albo przelaczenie karty konczy sesje - inaczej ostatni
+    // pobyt i caly czas ogladania przepadlyby bez sladu.
+    window.addEventListener('pagehide', () => endSession('left_page'));
     document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'hidden') flushRoomStay(null);
+      if (document.visibilityState === 'hidden') endSession('left_page');
     });
 
     // StreamPixel raz wysyla obiekt, raz string z JSON-em - normalizujemy oba.
@@ -1624,6 +1688,7 @@
       // Scena zaraz potwierdzi ten sam wybor wlasnym zdarzeniem - zapamietujemy go,
       // zeby jedno klikniecie nie zapisalo sie w CRM jako dwie wizyty w mieszkaniu.
       sceneApartment = apartmentRowName;
+      touchSession();
       document.querySelectorAll('.apt-row').forEach(c => c.classList.remove('active'));
       const row = document.querySelector(`.apt-row[data-id="${apartmentRowName}"]`);
       if (row) row.classList.add('active');
