@@ -1413,12 +1413,22 @@
        window.clTrack(typ, dane). Musi byc PRZED reszta skryptow, bo ta juz z niego korzysta. -->
   <script>
     (function () {
+      // Kod wklejony drugi raz liczylby kazda wizyte podwojnie.
+      if (window.clTrack) return;
+
       var q = new URLSearchParams(location.search);
+      // Przy zablokowanych ciasteczkach (Safari prywatny, polityki firmowe) samo
+      // siegniecie po localStorage rzuca wyjatkiem, a nie zwraca null. Bez try/catch
+      // wyjatek przerywa cala te funkcje i clTrack w ogole nie powstaje - a wtedy
+      // milknie nie samo page_view, tylko caly spacer 3D ponizej.
+      var store = null;
+      try { store = window.localStorage; } catch (e) {}
+
       // cl_vid w adresie doklada link sledzacy z CRM - wtedy od razu wiadomo, kto to,
       // wiec ma pierwszenstwo przed losowym identyfikatorem z tej przegladarki.
-      var id = q.get('cl_vid') || localStorage.getItem('cl_vid');
+      var id = q.get('cl_vid') || (store && store.getItem('cl_vid'));
       if (!id) id = 'cv_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
-      localStorage.setItem('cl_vid', id);
+      try { if (store) store.setItem('cl_vid', id); } catch (e) {}
 
       window.clVisitorId = id;
       window.clUtm = {
@@ -1428,6 +1438,7 @@
       };
 
       window.clTrack = function (type, meta) {
+        if (!navigator.sendBeacon) return;
         var payload = Object.assign({
           key: CONFIG.crmKey, visitor_id: id, type: type,
           url: location.href, referrer: document.referrer,
