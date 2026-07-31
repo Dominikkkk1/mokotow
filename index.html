@@ -679,6 +679,55 @@
       color: var(--primary-fg);
     }
 
+    /* ── ZAPROSZENIE DO KONTAKTU ──
+       Pasek przy dolnej krawedzi, nie okno na srodku: pojawia sie po tym, jak ktos
+       cos obejrzal, wiec nie moze zaslonic tego, co wlasnie oglada. */
+    #contact-nudge {
+      position: fixed;
+      left: 50%;
+      bottom: 1.5rem;
+      z-index: 190;
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      max-width: calc(100vw - 2rem);
+      padding: 0.85rem 0.85rem 0.85rem 1.5rem;
+      transform: translateX(-50%);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.35);
+    }
+
+    #contact-nudge[hidden] { display: none; }
+
+    #contact-nudge-text {
+      font-size: 0.92rem;
+      line-height: 1.3;
+    }
+
+    #contact-nudge-close {
+      padding: 0 0.5rem;
+      font-size: 1.4rem;
+      line-height: 1;
+      color: rgba(237,230,216,0.45);
+      background: none;
+      border: 0;
+      cursor: pointer;
+    }
+
+    #contact-nudge-close:hover { color: rgba(237,230,216,0.9); }
+
+    @media (max-width: 640px) {
+      #contact-nudge {
+        left: 1rem;
+        right: 1rem;
+        max-width: none;
+        transform: none;
+        padding-left: 1rem;
+      }
+      #contact-nudge-text { font-size: 0.85rem; }
+    }
+
     /* ── FORMULARZ KONTAKTOWY ── */
     #contact-overlay {
       display: none;
@@ -1301,6 +1350,13 @@
     </div>
   </section>
 
+  <!-- ZAPROSZENIE DO KONTAKTU (pokazuje je zachowanie w scenie, nie stoper) -->
+  <div id="contact-nudge" hidden>
+    <p id="contact-nudge-text">Chcesz poznać szczegóły?</p>
+    <button type="button" class="btn btn-dark" id="contact-nudge-open">Zapytaj</button>
+    <button type="button" id="contact-nudge-close" aria-label="Zamknij">&times;</button>
+  </div>
+
   <!-- FORMULARZ KONTAKTOWY -->
   <div id="contact-overlay">
     <form id="contact-form" novalidate>
@@ -1519,6 +1575,14 @@
      */
     const IDLE_MS = 150000;
 
+    /** Ile pomieszczen trzeba obejrzec, zeby wyjscie z mieszkania liczylo sie jako zainteresowanie. */
+    const NUDGE_MIN_ROOMS = 2;
+    /** Albo tyle sekund w jednym mieszkaniu - dla kogos, kto oglada jedno pomieszczenie dlugo. */
+    const NUDGE_MIN_SECONDS = 90;
+
+    /** Ile obejrzano w kazdym mieszkaniu: apartment -> { rooms, seconds }. */
+    const apartmentEngagement = new Map();
+
     /** Otwarty pobyt w pomieszczeniu: { apartment, room, at, wall }. */
     let sceneStay = null;
     /** Ostatnie mieszkanie i kamera - zeby nie dublowac zdarzen przy kazdym raporcie. */
@@ -1546,6 +1610,14 @@
       // Ponizej sekundy to przejscie przez pomieszczenie, nie ogladanie go.
       if (seconds < 1) return;
       clTrack('room_view', { apartment: stay.apartment, room: stay.room, seconds });
+
+      if (!stay.apartment) return;
+      const seen = apartmentEngagement.get(stay.apartment) ?? { rooms: 0, seconds: 0 };
+      seen.rooms += 1;
+      seen.seconds += seconds;
+      apartmentEngagement.set(stay.apartment, seen);
+      // Dlugie ogladanie jednego mieszkania mowi to samo co obejrzenie kilku pokoi.
+      if (seen.seconds >= NUDGE_MIN_SECONDS) maybeNudge(stay.apartment, 'long_view');
     }
 
     function startSession() {
@@ -1578,6 +1650,9 @@
       const active = Math.round((sessionLastActivityAt - sessionStartedAt) / 1000);
       sessionStartedAt = null;
       clTrack('demo_end', { seconds, active_seconds: active, reason });
+      // Zerwany strumien i tak przerwal seans - to najtanszy moment na pytanie.
+      // Przy wyjsciu ze strony nie ma kogo pytac.
+      if (reason === 'stream_lost') maybeNudge(sceneApartment, 'stream_lost');
     }
 
     function onSceneAnalytics(data) {
@@ -1599,8 +1674,14 @@
         touchSession();
         // Powrot do listy mieszkan. `apartmentNumber` jest tu tylko podswietleniem
         // na liscie - potraktowanie go jak wejscia zawyzaloby zainteresowanie.
+        const left = sceneApartment;
         flushRoomStay(elapsed);
         sceneApartment = null;
+        // Wyjscie na liste to naturalna pauza: wlasnie skonczyl oglada i ma
+        // wyrobione zdanie. Zaczepka w trakcie spaceru przerwalaby to, co go
+        // przekonuje.
+        const seen = left ? apartmentEngagement.get(left) : null;
+        if (seen && seen.rooms >= NUDGE_MIN_ROOMS) maybeNudge(left, 'left_apartment');
         return;
       }
 
@@ -1801,6 +1882,40 @@
       contactForm.reset();
     }
 
+    const contactNudge     = document.getElementById('contact-nudge');
+    const contactNudgeText = document.getElementById('contact-nudge-text');
+
+    let nudgeApartment = null;
+    let nudgeShown = false;
+    let contactSent = false;
+
+    /**
+     * Zaproszenie do kontaktu. Raz na wizyte i nigdy, gdy formularz jest juz na
+     * ekranie albo wyslany - druga zaczepka po odmowie to nie zaproszenie, tylko
+     * naprzykrzanie sie.
+     */
+    function maybeNudge(apartment, reason) {
+      if (nudgeShown || contactSent) return;
+      if (contactOverlay.classList.contains('open')) return;
+      nudgeShown = true;
+      nudgeApartment = apartment;
+      const apt = APARTMENTS_DATA.find((a) => a.id === apartment);
+      contactNudgeText.textContent = apt
+        ? 'Apartament ' + apt.numer + ' \u2013 chcesz pozna\u0107 szczeg\u00f3\u0142y?'
+        : 'Chcesz pozna\u0107 szczeg\u00f3\u0142y?';
+      contactNudge.hidden = false;
+      clTrack('contact_nudge', { apartment, reason });
+    }
+
+    document.getElementById('contact-nudge-open').addEventListener('click', () => {
+      contactNudge.hidden = true;
+      openContactForm(nudgeApartment);
+    });
+
+    document.getElementById('contact-nudge-close').addEventListener('click', () => {
+      contactNudge.hidden = true;
+    });
+
     // Delegacja, nie nasluch na kazdym przycisku: te w liscie apartamentow
     // powstaja przy renderowaniu i przezywaja kazde przerysowanie listy.
     document.addEventListener('click', (event) => {
@@ -1844,6 +1959,8 @@
         });
         if (!response.ok) throw new Error(String(response.status));
 
+        contactSent = true;
+        contactNudge.hidden = true;
         clTrack('form_submit', { apartment: form.apartment || null });
         contactStatus.textContent = 'Dzi\u0119kujemy, odezwiemy si\u0119 wkr\u00f3tce.';
         setTimeout(closeContactForm, 2000);
