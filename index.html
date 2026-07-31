@@ -1994,6 +1994,13 @@
     document.addEventListener('click', (event) => {
       const btn = event.target.closest('[data-open-contact]');
       if (btn) openContactForm(btn.dataset.openContact);
+
+      // Klikniecie w numer telefonu. Najmocniejszy sygnal na calej stronie i
+      // jedyny, ktorego nie widac inaczej - polaczenie omija CRM. Na telefonie
+      // karta natychmiast oddaje sterowanie dialerowi, wiec zwykly fetch by nie
+      // zdazyl; clTrack idzie sendBeaconem, ktory przezywa opuszczenie strony.
+      const phone = event.target.closest('a[href^="tel:"]');
+      if (phone) clTrack('phone_click', { phone: phone.getAttribute('href').slice(4) });
     });
 
     document.getElementById('contact-cancel').addEventListener('click', closeContactForm);
