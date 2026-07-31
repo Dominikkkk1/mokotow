@@ -1495,6 +1495,78 @@
       else if (readyTriggered) { demoStarted = true; switchToStream(); }
     });
 
+    /* ── ZDARZENIA ZE SCENY 3D ──
+       Scena raportuje kazde wejscie do pomieszczenia i kazda zmiane kamery, ale
+       NIE mowi, ile ktos gdzie spedzil - podaje tylko `elapsedSeconds`, czyli
+       ktora to sekunda sesji. Czas w pomieszczeniu wychodzi dopiero z roznicy
+       miedzy dwoma kolejnymi zdarzeniami, dlatego pobyt wysylamy z opoznieniem:
+       w chwili, gdy odwiedzajacy z tego pomieszczenia wychodzi.
+
+       Bez tego przetworzenia w CRM ladowal surowy zrzut sceny, z ktorego
+       handlowiec nie odczytal nic poza "cos sie stalo w 3D". */
+
+    /** Otwarty pobyt w pomieszczeniu: { apartment, room, at, wall }. */
+    let sceneStay = null;
+    /** Ostatnie mieszkanie i kamera - zeby nie dublowac zdarzen przy kazdym raporcie. */
+    let sceneApartment = null;
+    let scenePawn = null;
+
+    /**
+     * Zamyka otwarty pobyt i wysyla go z czasem trwania. `elapsed` to sekunda
+     * sesji z kolejnego zdarzenia sceny; przy wyjsciu ze strony jej nie mamy,
+     * wiec liczymy z zegara przegladarki.
+     */
+    function flushRoomStay(elapsed) {
+      if (!sceneStay) return;
+      const stay = sceneStay;
+      sceneStay = null;
+      const seconds = Math.round(
+        Number.isFinite(elapsed) && Number.isFinite(stay.at)
+          ? elapsed - stay.at
+          : (Date.now() - stay.wall) / 1000
+      );
+      // Ponizej sekundy to przejscie przez pomieszczenie, nie ogladanie go.
+      if (seconds < 1) return;
+      clTrack('room_view', { apartment: stay.apartment, room: stay.room, seconds });
+    }
+
+    function onSceneAnalytics(data) {
+      const elapsed = parseFloat(data.elapsedSeconds);
+      // Scena mowi "13", CRM trzyma mieszkania pod "apartment13".
+      const apartment = data.apartmentNumber ? 'apartment' + data.apartmentNumber : null;
+
+      // Kazde nowe zdarzenie konczy poprzedni pobyt - dopiero teraz znamy czas.
+      flushRoomStay(elapsed);
+
+      // Mieszkanie wybrane wewnatrz sceny, a nie przyciskiem na stronie. Ten sam
+      // typ zdarzenia, bo dla handlowca to ta sama informacja.
+      if (apartment && apartment !== sceneApartment) {
+        sceneApartment = apartment;
+        clTrack('apartment_select', { apartment, pawn: data.pawnType || null, source: 'scene' });
+      }
+
+      if (data.actionType === 'PawnChange') {
+        if (data.pawnType && data.pawnType !== scenePawn) {
+          scenePawn = data.pawnType;
+          clTrack('pawn_select', { apartment, pawn: data.pawnType, source: 'scene' });
+        }
+      } else if (data.actionType === 'LocationEnter') {
+        if (data.locationName) {
+          sceneStay = { apartment, room: data.locationName, at: elapsed, wall: Date.now() };
+        }
+      } else {
+        // Typ, ktorego jeszcze nie znamy - zapisujemy surowo, zeby go nie zgubic.
+        clTrack('streampixel_analytics', data);
+      }
+    }
+
+    // Ostatnie pomieszczenie nie ma nastepnego zdarzenia, ktore by je zamknelo -
+    // domyka je wyjscie ze strony albo przelaczenie karty.
+    window.addEventListener('pagehide', () => flushRoomStay(null));
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') flushRoomStay(null);
+    });
+
     // StreamPixel raz wysyla obiekt, raz string z JSON-em - normalizujemy oba.
     function parseMessageData(raw) {
       if (typeof raw !== 'string') return raw;
@@ -1507,9 +1579,7 @@
       if (data?.type === 'stream-state') {
         onStreamStateChange(data.value);
       } else if (data?.type === 'analytics') {
-        // Ksztaltu tych danych nie znamy z gory, wiec zapisujemy je w calosci -
-        // lepiej miec surowy zapis niz zgadywac pola i wyrzucic te wazne.
-        clTrack('streampixel_analytics', data);
+        onSceneAnalytics(data);
       } else if (data?.type === 'contact-form') {
         openContactForm(data?.apartmentNumber);
       }
@@ -1551,6 +1621,9 @@
 
     function selectApartment(apartmentRowName, pawnType) {
       clTrack('apartment_select', { apartment: apartmentRowName, pawn: pawnType || 'orbital' });
+      // Scena zaraz potwierdzi ten sam wybor wlasnym zdarzeniem - zapamietujemy go,
+      // zeby jedno klikniecie nie zapisalo sie w CRM jako dwie wizyty w mieszkaniu.
+      sceneApartment = apartmentRowName;
       document.querySelectorAll('.apt-row').forEach(c => c.classList.remove('active'));
       const row = document.querySelector(`.apt-row[data-id="${apartmentRowName}"]`);
       if (row) row.classList.add('active');
