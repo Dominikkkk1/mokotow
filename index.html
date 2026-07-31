@@ -1511,8 +1511,13 @@
 
     /** Widok listy mieszkan. To nawigacja, a nie pomieszczenie do ogladania. */
     const BROWSER_LOCATION = 'ApartmentBrowser';
-    /** Po tylu ms bez znaku zycia ze sceny uznajemy, ze odwiedzajacy odszedl. */
-    const IDLE_MS = 180000;
+    /**
+     * Po tylu ms bez znaku zycia ze sceny uznajemy, ze odwiedzajacy odszedl.
+     * 2,5 minuty, bo tyle samo daje StreamPixel, zanim sam zerwie strumien za
+     * bezczynnosc - dluzszy prog znaczylby, ze scena juz nie zyje, a my nadal
+     * liczymy czas ogladania.
+     */
+    const IDLE_MS = 150000;
 
     /** Otwarty pobyt w pomieszczeniu: { apartment, room, at, wall }. */
     let sceneStay = null;
@@ -1585,15 +1590,33 @@
         startSession();
         clTrack('demo_start', { resumed: true });
       }
-      touchSession();
 
+      // Licznik bezczynnosci przesuwaja TYLKO znane akcje odwiedzajacego. Scena
+      // zglasza tez wlasne komunikaty - m.in. ten o zerwaniu strumienia po 2,5
+      // minuty bez ruchu - a potraktowanie takiego komunikatu jak dowodu zycia
+      // resetowaloby licznik i sesja nie skonczylaby sie nigdy.
       if (data.actionType === 'ApartmentBrowserFocus') {
+        touchSession();
         // Powrot do listy mieszkan. `apartmentNumber` jest tu tylko podswietleniem
         // na liscie - potraktowanie go jak wejscia zawyzaloby zainteresowanie.
         flushRoomStay(elapsed);
         sceneApartment = null;
         return;
       }
+
+      const known =
+        data.actionType === 'PawnChange' ||
+        data.actionType === 'LocationEnter' ||
+        data.actionType === 'LocationLeave';
+
+      if (!known) {
+        // Typ, ktorego jeszcze nie znamy - zapisujemy surowo, zeby go nie zgubic,
+        // ale bez przesuwania licznika bezczynnosci i bez wnioskow o mieszkaniu.
+        clTrack('streampixel_analytics', data);
+        return;
+      }
+
+      touchSession();
 
       // Mieszkanie wybrane wewnatrz sceny, a nie przyciskiem na stronie. Ten sam
       // typ zdarzenia, bo dla handlowca to ta sama informacja.
@@ -1615,12 +1638,10 @@
         if (data.locationName && data.locationName !== BROWSER_LOCATION) {
           sceneStay = { apartment, room: data.locationName, at: elapsed, wall: Date.now() };
         }
-      } else if (data.actionType === 'LocationLeave') {
-        // Scena sama mowi, kiedy ktos wychodzi - to najdokladniejszy koniec pobytu.
-        flushRoomStay(elapsed);
       } else {
-        // Typ, ktorego jeszcze nie znamy - zapisujemy surowo, zeby go nie zgubic.
-        clTrack('streampixel_analytics', data);
+        // LocationLeave: scena sama mowi, kiedy ktos wychodzi - to najdokladniejszy
+        // koniec pobytu, dokladniejszy niz liczenie z roznicy miedzy zdarzeniami.
+        flushRoomStay(elapsed);
       }
     }
 
