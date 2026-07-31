@@ -1379,9 +1379,16 @@
           metadata: meta || {}, occurred_at: new Date().toISOString(),
         }, window.clUtm);
         // sendBeacon przezywa zamkniecie karty - zdarzenie "wyszedl" tez dojdzie.
+        //
+        // Typ MUSI byc text/plain, mimo ze w srodku jest JSON. Przy typie
+        // application/json przegladarka wysyla beacon jako zapytanie CORS
+        // z credentials, a wtedy odrzuca odpowiedz z Access-Control-Allow-Origin: *
+        // i zdarzenie ginie po cichu (Safari mowi to wprost, Chrome milczy).
+        // text/plain jest na liscie bezpiecznych typow, wiec leci bez tego calego
+        // obrzadku - funkcja `track` i tak czyta cialo jako JSON, nie patrzac na naglowek.
         navigator.sendBeacon(
           CONFIG.crmUrl + '/track',
-          new Blob([JSON.stringify(payload)], { type: 'application/json' })
+          new Blob([JSON.stringify(payload)], { type: 'text/plain' })
         );
       };
 
