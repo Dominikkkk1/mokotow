@@ -1403,7 +1403,11 @@
       // Codelivery CRM. Klucz nie jest sekretem - pozwala wylacznie dopisac
       // zdarzenie lub leada do tej jednej organizacji, niczego nie odczyta.
       crmUrl: 'https://srkdzjxnjbgwvqeqiscy.supabase.co/functions/v1',
-      crmKey: 'ck_53a2c58727d341d79790d0e4631677a4',
+      // Klucz organizacji "Mokotow Prestige" w CRM. Nie jest sekretem: pozwala
+      // wylacznie dopisac zdarzenie i odczytac liste mieszkan, ktora i tak jest
+      // na tej stronie widoczna. Wczesniej stal tu klucz organizacji DEMO, wiec
+      // przywrocenie danych demo kasowalo prawdziwe leady.
+      crmKey: 'ck_9f4b21c7e05d4a6ab8137e2c5d9061fa',
       // Slug inwestycji w CRM - po nim lead dostaje przypisanie do Mokotowa.
       crmInvestment: 'mokotow',
     };
@@ -1762,10 +1766,19 @@
       }
     });
 
-    const APARTMENTS_DATA = [
+    /* ── LISTA MIESZKAN ──
+       Zrodlem prawdy jest CRM: ceny i dostepnosc zmienia sie w panelu, a strona
+       czyta je funkcja `catalog` przy kazdym wejsciu. Ponizsza lista to wylacznie
+       kopia awaryjna na wypadek, gdyby CRM nie odpowiedzial - lepiej pokazac
+       odwiedzajacemu stan sprzed zmiany niz pusta sekcje z samym naglowkiem.
+       Po kazdej zmianie w panelu warto ja odswiezyc, ale nic sie nie psuje,
+       gdy sie o tym zapomni. */
+    const FALLBACK_APARTMENTS = [
       { "id": "apartment13", "numer": "13", "kierunek": "NE", "powierzchnia": 63.0, "pokoje": 4, "cena": 1230000, "dostepnosc": true },
       { "id": "apartment14", "numer": "14", "kierunek": "NW", "powierzchnia": 73.0, "pokoje": 5, "cena": 1890000, "dostepnosc": false },
     ];
+
+    let apartmentsData = FALLBACK_APARTMENTS;
 
     const apartmentsList = document.getElementById('apartments-list');
     const priceFormatter = new Intl.NumberFormat('pl-PL');
@@ -1813,19 +1826,26 @@
       }
     }
 
-    apartmentsList.addEventListener('click', (event) => {
-      const button = event.target.closest('[data-apartment-id]');
-      if (!button || button.disabled) return;
-      const aptId = button.dataset.apartmentId;
-      const pawnType = button.dataset.pawnType || 'orbital';
+    /**
+     * Pokazuje mieszkanie w scenie 3D. Gdy spacer jeszcze nie wystartowal, wybor
+     * czeka w `pendingApartment` i zostanie wyslany, kiedy silnik zglosi gotowosc.
+     * Wolane z dwoch miejsc: przyciskow w liscie i linku z adresu (patrz nizej).
+     */
+    function openApartment(aptId, pawnType) {
       scrollToDemo();
       if (demoStarted && readyTriggered) { selectApartment(aptId, pawnType); }
       else {
-        pendingApartment = { id: aptId, pawnType };
+        pendingApartment = { id: aptId, pawnType: pawnType || 'orbital' };
         demoStarted = true;
         if (!streamLoading) startStreamLoading();
         if (readyTriggered) switchToStream();
       }
+    }
+
+    apartmentsList.addEventListener('click', (event) => {
+      const button = event.target.closest('[data-apartment-id]');
+      if (!button || button.disabled) return;
+      openApartment(button.dataset.apartmentId, button.dataset.pawnType || 'orbital');
     });
 
     // Global pawn selection
@@ -1845,7 +1865,49 @@
       }
     });
 
-    renderApartments(APARTMENTS_DATA);
+    /**
+     * Link z oferty PDF albo z maila: ?apartment=apartment13&pawn=apartment-showcase
+     * otwiera od razu prezentacje tego mieszkania, bez szukania go w liscie.
+     * Numer ("13") tez zadziala - apartmentIdFrom() go przetlumaczy.
+     */
+    function applyDeepLink() {
+      const params = new URLSearchParams(location.search);
+      const wanted = apartmentIdFrom(params.get('apartment'));
+      if (!wanted) return;
+      const apt = apartmentsData.find((a) => a.id === wanted);
+      // Sprzedanego mieszkania scena nie pokaze (przyciski w liscie sa wtedy
+      // wylaczone), wiec link tez ma go nie otwierac - tylko podswietlic wiersz.
+      const row = document.querySelector(`.apt-row[data-id="${wanted}"]`);
+      if (row) row.classList.add('active');
+      if (!apt || !apt.dostepnosc) return;
+      openApartment(wanted, params.get('pawn') || 'apartment-showcase');
+    }
+
+    /**
+     * Pobiera liste z CRM. Gdy sie nie uda - zostaje kopia awaryjna, bo pusta
+     * sekcja mieszkan jest gorsza niz nieaktualna cena.
+     */
+    async function loadApartments() {
+      try {
+        const url = CONFIG.crmUrl + '/catalog?key=' + encodeURIComponent(CONFIG.crmKey) +
+          '&investment=' + encodeURIComponent(CONFIG.crmInvestment);
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        const data = await response.json();
+        if (Array.isArray(data.apartments) && data.apartments.length) {
+          apartmentsData = data.apartments;
+        }
+      } catch (error) {
+        console.warn('[CRM] nie udalo sie pobrac listy mieszkan, uzywam kopii lokalnej', error);
+      }
+      renderApartments(apartmentsData);
+      applyDeepLink();
+    }
+
+    // Kopia awaryjna rysuje sie od razu, zeby lista nie migala pustka przy wolnym
+    // laczu; odpowiedz z CRM ja podmienia.
+    renderApartments(apartmentsData);
+    loadApartments();
 
     /* ── FORMULARZ KONTAKTOWY ──
        Otwiera go przycisk w sekcji kontaktu albo sama scena 3D (message
@@ -1867,7 +1929,7 @@
     function apartmentIdFrom(value) {
       if (value == null || value === '') return null;
       const text = String(value);
-      const match = APARTMENTS_DATA.find(
+      const match = apartmentsData.find(
         (apt) => apt.id === text || apt.numer === text
       );
       return match ? match.id : null;
@@ -1875,7 +1937,7 @@
 
     function openContactForm(apartmentNumber) {
       const id = apartmentIdFrom(apartmentNumber);
-      const apt = APARTMENTS_DATA.find((a) => a.id === id);
+      const apt = apartmentsData.find((a) => a.id === id);
       contactApartment.value = id || '';
       contactAptInfo.textContent = apt
         ? 'Apartament ' + apt.numer + ' \u00b7 ' + apt.powierzchnia + ' m\u00b2'
@@ -1910,7 +1972,7 @@
       if (contactOverlay.classList.contains('open')) return;
       nudgeShown = true;
       nudgeApartment = apartment;
-      const apt = APARTMENTS_DATA.find((a) => a.id === apartment);
+      const apt = apartmentsData.find((a) => a.id === apartment);
       contactNudgeText.textContent = apt
         ? 'Apartament ' + apt.numer + ' \u2013 chcesz pozna\u0107 szczeg\u00f3\u0142y?'
         : 'Chcesz pozna\u0107 szczeg\u00f3\u0142y?';
