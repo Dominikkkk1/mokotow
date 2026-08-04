@@ -1637,6 +1637,31 @@
     let sessionStartedAt = null;
     let sessionLastActivityAt = null;
     let idleTimer = null;
+    /** Zegar progu czasu - patrz scheduleNudge. */
+    let nudgeTimer = null;
+
+    /**
+     * Odlicza do progu czasu w otwartym pobycie.
+     *
+     * Bez tego prog sprawdzal sie WYLACZNIE przy zamknieciu pobytu, czyli w chwili
+     * wyjscia z pomieszczenia. Ktos, kto oglada jedno miejsce bardzo dlugo i sie
+     * nie rusza, nie zobaczyl zaczepki nigdy - a to najbardziej zainteresowana
+     * osoba na calej stronie.
+     *
+     * Odliczamy tylko brakujaca reszte: kto ma juz 70 sekund w tym mieszkaniu,
+     * czeka 20, a nie kolejne 90.
+     */
+    function scheduleNudge(apartment) {
+      clearTimeout(nudgeTimer);
+      nudgeTimer = null;
+      if (!apartment) return;
+      const seen = apartmentEngagement.get(apartment);
+      const left = NUDGE_MIN_SECONDS - (seen ? seen.seconds : 0);
+      nudgeTimer = setTimeout(
+        () => maybeNudge(apartment, 'long_view'),
+        Math.max(left, 0) * 1000
+      );
+    }
 
     /**
      * Zamyka otwarty pobyt i wysyla go z czasem trwania. `elapsed` to sekunda
@@ -1644,6 +1669,8 @@
      * mamy, wiec liczymy z zegara przegladarki.
      */
     function flushRoomStay(elapsed) {
+      clearTimeout(nudgeTimer);
+      nudgeTimer = null;
       if (!sceneStay) return;
       const stay = sceneStay;
       sceneStay = null;
@@ -1763,6 +1790,7 @@
         flushRoomStay(elapsed);
         if (data.locationName && data.locationName !== BROWSER_LOCATION) {
           sceneStay = { apartment, room: data.locationName, at: elapsed, wall: Date.now() };
+          scheduleNudge(apartment);
         }
       } else {
         // LocationLeave: scena sama mowi, kiedy ktos wychodzi - to najdokladniejszy
