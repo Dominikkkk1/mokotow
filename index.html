@@ -1622,7 +1622,15 @@
 
     /** Ile pomieszczen trzeba obejrzec, zeby wyjscie z mieszkania liczylo sie jako zainteresowanie. */
     const NUDGE_MIN_ROOMS = 2;
-    /** Albo tyle sekund w jednym mieszkaniu - dla kogos, kto oglada jedno pomieszczenie dlugo. */
+    /**
+     * Albo tyle sekund PRZY JEDNYM MIESZKANIU - dla kogos, kto oglada spokojnie
+     * jedno i nie skacze po liscie.
+     *
+     * Liczymy od wejscia do mieszkania, a nie sume pobytow w nazwanych
+     * pomieszczeniach. Obracanie kamery, przejscia miedzy pokojami i sam widok
+     * ogolny to tez ogladanie tego mieszkania - liczone po pokojach wychodzilo
+     * z tego kilkanascie sekund przy dwoch minutach realnego siedzenia w scenie.
+     */
     const NUDGE_MIN_SECONDS = 90;
 
     /** Ile obejrzano w kazdym mieszkaniu: apartment -> { rooms, seconds }. */
@@ -1637,30 +1645,53 @@
     let sessionStartedAt = null;
     let sessionLastActivityAt = null;
     let idleTimer = null;
-    /** Zegar progu czasu - patrz scheduleNudge. */
-    let nudgeTimer = null;
+    // ---------------------------------------------------------------------
+    // Zegar zaczepki
+    //
+    // Odlicza czas przy jednym mieszkaniu i pyta o kontakt, gdy przekroczy prog.
+    // Bez zegara prog sprawdzal sie tylko w chwili wyjscia z pomieszczenia, wiec
+    // kto ogladal spokojnie i sie nie przeklikiwal, nie zobaczyl zaczepki nigdy -
+    // a to najbardziej zainteresowana osoba na stronie.
+    //
+    // Odliczanie STAJE, gdy karta przestaje byc widoczna, i rusza dalej po
+    // powrocie. Czas przy przelaczonej karcie nie jest ogladaniem, a kasowanie
+    // odliczania przy kazdym zerknieciu w inne okno znaczyloby, ze prog osiaga
+    // wylacznie ktos, kto przez poltorej minuty nie tknal komputera.
+    // ---------------------------------------------------------------------
 
-    /**
-     * Odlicza do progu czasu w otwartym pobycie.
-     *
-     * Bez tego prog sprawdzal sie WYLACZNIE przy zamknieciu pobytu, czyli w chwili
-     * wyjscia z pomieszczenia. Ktos, kto oglada jedno miejsce bardzo dlugo i sie
-     * nie rusza, nie zobaczyl zaczepki nigdy - a to najbardziej zainteresowana
-     * osoba na calej stronie.
-     *
-     * Odliczamy tylko brakujaca reszte: kto ma juz 70 sekund w tym mieszkaniu,
-     * czeka 20, a nie kolejne 90.
-     */
-    function scheduleNudge(apartment) {
+    let nudgeTimer = null;
+    /** Poczatek biezacego odcinka odliczania. null = odliczanie stoi. */
+    let apartmentEnteredAt = null;
+    /** Sekundy uzbierane przy TYM mieszkaniu w poprzednich odcinkach. */
+    let apartmentSeconds = 0;
+
+    function startNudgeTimer(apartment) {
+      stopNudgeTimer();
+      if (!apartment) return;
+      apartmentSeconds = 0;
+      resumeNudgeTimer();
+    }
+
+    function resumeNudgeTimer() {
+      if (!sceneApartment || apartmentEnteredAt !== null) return;
+      apartmentEnteredAt = Date.now();
+      const left = Math.max(NUDGE_MIN_SECONDS - apartmentSeconds, 0);
+      nudgeTimer = setTimeout(() => maybeNudge(sceneApartment, 'long_view'), left * 1000);
+    }
+
+    function pauseNudgeTimer() {
       clearTimeout(nudgeTimer);
       nudgeTimer = null;
-      if (!apartment) return;
-      const seen = apartmentEngagement.get(apartment);
-      const left = NUDGE_MIN_SECONDS - (seen ? seen.seconds : 0);
-      nudgeTimer = setTimeout(
-        () => maybeNudge(apartment, 'long_view'),
-        Math.max(left, 0) * 1000
-      );
+      if (apartmentEnteredAt === null) return;
+      apartmentSeconds += (Date.now() - apartmentEnteredAt) / 1000;
+      apartmentEnteredAt = null;
+    }
+
+    function stopNudgeTimer() {
+      clearTimeout(nudgeTimer);
+      nudgeTimer = null;
+      apartmentEnteredAt = null;
+      apartmentSeconds = 0;
     }
 
     /**
@@ -1669,8 +1700,6 @@
      * mamy, wiec liczymy z zegara przegladarki.
      */
     function flushRoomStay(elapsed) {
-      clearTimeout(nudgeTimer);
-      nudgeTimer = null;
       if (!sceneStay) return;
       const stay = sceneStay;
       sceneStay = null;
@@ -1688,8 +1717,8 @@
       seen.rooms += 1;
       seen.seconds += seconds;
       apartmentEngagement.set(stay.apartment, seen);
-      // Dlugie ogladanie jednego mieszkania mowi to samo co obejrzenie kilku pokoi.
-      if (seen.seconds >= NUDGE_MIN_SECONDS) maybeNudge(stay.apartment, 'long_view');
+      // Prog czasu pilnuje zegar, nie ta suma - liczy od wejscia do mieszkania,
+      // wiec zawsze wyprzedzi sume pobytow w pokojach.
     }
 
     function startSession() {
@@ -1749,6 +1778,7 @@
         const left = sceneApartment;
         flushRoomStay(elapsed);
         sceneApartment = null;
+        stopNudgeTimer();
         // Wyjscie na liste to naturalna pauza: wlasnie skonczyl oglada i ma
         // wyrobione zdanie. Zaczepka w trakcie spaceru przerwalaby to, co go
         // przekonuje.
@@ -1776,6 +1806,10 @@
       if (apartment && apartment !== sceneApartment) {
         sceneApartment = apartment;
         clTrack('apartment_select', { apartment, pawn: data.pawnType || null, source: 'scene' });
+        // Od tej chwili liczy sie czas przy tym mieszkaniu. Kazde nastepne
+        // zaczyna odliczanie od zera - przeskakiwanie po liscie to szukanie,
+        // a nie ogladanie.
+        startNudgeTimer(apartment);
       }
 
       if (data.actionType === 'PawnChange') {
@@ -1790,7 +1824,6 @@
         flushRoomStay(elapsed);
         if (data.locationName && data.locationName !== BROWSER_LOCATION) {
           sceneStay = { apartment, room: data.locationName, at: elapsed, wall: Date.now() };
-          scheduleNudge(apartment);
         }
       } else {
         // LocationLeave: scena sama mowi, kiedy ktos wychodzi - to najdokladniejszy
@@ -1803,7 +1836,15 @@
     // pobyt i caly czas ogladania przepadlyby bez sladu.
     window.addEventListener('pagehide', () => endSession('left_page'));
     document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'hidden') endSession('left_page');
+      if (document.visibilityState === 'hidden') {
+        endSession('left_page');
+        pauseNudgeTimer();
+      } else {
+        // Sesja wznawia sie dopiero przy nastepnym zdarzeniu ze sceny, ale
+        // odliczanie ruszamy od razu: wrocil do tego samego mieszkania i patrzy
+        // na nie dalej, nawet jesli akurat nic nie klika.
+        resumeNudgeTimer();
+      }
     });
 
     // StreamPixel raz wysyla obiekt, raz string z JSON-em - normalizujemy oba.
