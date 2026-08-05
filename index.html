@@ -2020,6 +2020,36 @@
     const contactStatus    = document.getElementById('contact-status');
     const contactSubmit    = document.getElementById('contact-submit');
     const contactConsent   = document.getElementById('contact-consent');
+    const contactName      = document.getElementById('contact-name');
+    const contactEmail     = document.getElementById('contact-email');
+    const contactPhone     = document.getElementById('contact-phone');
+    const contactMessage   = document.getElementById('contact-message');
+
+    /**
+     * Kontakt z poprzedniego zgloszenia z TEGO urzadzenia.
+     *
+     * Trzymamy go u odwiedzajacego, a nie pytamy o niego CRM. Adres i telefon
+     * oddawane po samym identyfikatorze z ciasteczka byly danymi osobowymi
+     * wydawanymi kazdemu, kto to ciasteczko podejrzy - klucz strony jest jawny
+     * w zrodle. Tutaj dane nie opuszczaja przegladarki, w ktorej je wpisano.
+     */
+    const CONTACT_MEMORY_KEY = 'cl_contact';
+
+    function rememberContact(data) {
+      try {
+        localStorage.setItem(CONTACT_MEMORY_KEY, JSON.stringify(data));
+      } catch (e) {
+        // Prywatne okno albo pelny dysk. Podpowiedz to wygoda, nie warunek dzialania.
+      }
+    }
+
+    function recallContact() {
+      try {
+        return JSON.parse(localStorage.getItem(CONTACT_MEMORY_KEY)) || null;
+      } catch (e) {
+        return null;
+      }
+    }
 
     /**
      * Scena 3D podaje numer mieszkania ("13"), a CRM zna je pod nazwa wiersza
@@ -2046,8 +2076,24 @@
       contactStatus.classList.remove('error');
       contactSubmit.disabled = false;
       contactOverlay.classList.add('open');
-      document.getElementById('contact-name').focus();
-      clTrack('contact_form_open', { apartment: id });
+
+      // Kto raz zostawil kontakt, nie przepisuje go drugi raz. Pytanie o to samo
+      // imie przy kazdym mieszkaniu jest najczestszym powodem, dla ktorego
+      // powracajacy zamyka formularz zamiast wyslac drugie zapytanie.
+      const known = recallContact();
+      if (known) {
+        contactName.value = known.name || '';
+        contactEmail.value = known.email || '';
+        contactPhone.value = known.phone || '';
+        contactConsent.checked = Boolean(known.sms_consent);
+        // Kursor na tresc: tylko ona jest przy tym mieszkaniu inna. Reszta juz
+        // wypelniona, wiec stawianie kursora w imieniu kazaloby go przeklikac.
+        contactMessage.focus();
+      } else {
+        contactName.focus();
+      }
+
+      clTrack('contact_form_open', { apartment: id, known: Boolean(known) });
     }
 
     function closeContactForm() {
@@ -2147,6 +2193,15 @@
 
         contactSent = true;
         contactNudge.hidden = true;
+        // Zapamietujemy dopiero po udanym wyslaniu - dane, ktorych CRM nie
+        // przyjal, nie maja wracac przy nastepnym otwarciu jako "juz podane".
+        // Tresci wiadomosci nie trzymamy: przy kazdym mieszkaniu jest inna.
+        rememberContact({
+          name: form.name,
+          email: form.email,
+          phone: form.phone,
+          sms_consent: contactConsent.checked,
+        });
         clTrack('form_submit', { apartment: form.apartment || null });
         contactStatus.textContent = 'Dzi\u0119kujemy, odezwiemy si\u0119 wkr\u00f3tce.';
         setTimeout(closeContactForm, 2000);
