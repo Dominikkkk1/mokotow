@@ -1715,8 +1715,11 @@
             el.classList.add('hot');
             const meta = TOUR.units[u.k];
             if (meta) {
-              const STATUS_PL = { free: 'Wolne', reserved: 'Rezerwacja', sold: 'Sprzedane' };
-              const bits = [u.k];
+              // Show real apartment number if mapped
+              var UNIT_LABELS = { 'A_11': 'Apartament 13', 'A_12': 'Apartament 14' };
+              var label = UNIT_LABELS[u.k] || u.k;
+              var STATUS_PL = { free: 'Wolne', reserved: 'Rezerwacja', sold: 'Sprzedane' };
+              var bits = [label];
               if (meta.f !== undefined) bits.push('pi\u0119tro ' + meta.f);
               if (meta.m2) bits.push(meta.m2 + ' m\u00B2');
               if (meta.r) bits.push(meta.r + (meta.r === 1 ? ' pok\u00F3j' : meta.r < 5 ? ' pokoje' : ' pokoi'));
@@ -2027,30 +2030,31 @@
       else if (readyTriggered) { demoStarted = true; switchToStream(); }
     });
 
-    // Orbital viewer: apartment click or CTA button starts StreamPixel
-    function startFromOrbital() {
-      var orbLayer = document.getElementById('orbital-layer');
-      if (orbLayer) orbLayer.classList.add('hidden');
-      connectBtn.style.display = '';
-      scrollToDemo();
-      demoStarted = true;
-      if (!streamLoading) startStreamLoading();
-      if (readyTriggered) switchToStream();
-    }
+    // Mapping: orbital unit key -> real apartment ID in StreamPixel/CRM
+    const ORBITAL_TO_APARTMENT = {
+      'A_11': 'apartment13',
+      'A_12': 'apartment14',
+      // Remaining orbital units don't have a StreamPixel apartment yet.
+      // Clicking them starts the demo in orbital (overview) mode.
+    };
 
     window.onOrbitalUnitClick = function(unitKey) {
       clTrack('orbital_unit_click', { unit: unitKey });
-      startFromOrbital();
+      var aptId = ORBITAL_TO_APARTMENT[unitKey];
+      if (aptId) {
+        // Open specific apartment in first-person walk mode
+        openApartment(aptId, 'first-person');
+      } else {
+        // No mapped apartment - start demo in orbital overview
+        var orbLayer = document.getElementById('orbital-layer');
+        if (orbLayer) orbLayer.classList.add('hidden');
+        connectBtn.style.display = '';
+        scrollToDemo();
+        demoStarted = true;
+        if (!streamLoading) startStreamLoading();
+        if (readyTriggered) switchToStream();
+      }
     };
-
-    var orbCta = document.getElementById('orbital-cta');
-    if (orbCta) {
-      orbCta.addEventListener('click', function(e) {
-        e.stopPropagation();
-        clTrack('orbital_cta_click');
-        startFromOrbital();
-      });
-    }
 
 
     /* ── ZDARZENIA ZE SCENY 3D ──
