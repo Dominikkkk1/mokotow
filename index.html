@@ -1925,10 +1925,10 @@
             if (meta) {
               // Show real apartment number if mapped
               var UNIT_LABELS = {
-                'A_11': 'Apartament A 11', 'A_12': 'Apartament A 12',
-                'A_13': 'Apartament A 13', 'A_14': 'Apartament A 14',
-                'A_21': 'Apartament A 21', 'A_22': 'Apartament A 22',
-                'A_23': 'Apartament A 23', 'A_24': 'Apartament A 24',
+                'A_11': 'Apartament 13', 'A_12': 'Apartament 14',
+                'A_13': 'Apartament 11', 'A_14': 'Apartament 12',
+                'A_21': 'Apartament 21', 'A_22': 'Apartament 22',
+                'A_23': 'Apartament 23', 'A_24': 'Apartament 24',
                 'Lok_01 ': 'Lokal 1', 'Lok_03': 'Lokal 3'
               };
               var label = UNIT_LABELS[u.k] || u.k;
@@ -2026,13 +2026,18 @@
       }
     };
 
-    // Orbital unit display names
+    // Orbital unit display names (orbital ID -> real apartment name)
     var UNIT_NAMES = {
-      'A_11': 'Apartament A 11', 'A_12': 'Apartament A 12',
-      'A_13': 'Apartament A 13', 'A_14': 'Apartament A 14',
-      'A_21': 'Apartament A 21', 'A_22': 'Apartament A 22',
-      'A_23': 'Apartament A 23', 'A_24': 'Apartament A 24',
+      'A_11': 'Apartament 13', 'A_12': 'Apartament 14',
+      'A_13': 'Apartament 11', 'A_14': 'Apartament 12',
+      'A_21': 'Apartament 21', 'A_22': 'Apartament 22',
+      'A_23': 'Apartament 23', 'A_24': 'Apartament 24',
       'Lok_01 ': 'Lokal 1', 'Lok_03': 'Lokal 3'
+    };
+
+    // Floor plan images per orbital unit
+    var UNIT_IMAGES = {
+      'A_11': 'karta-a11.png'
     };
 
     function showAptCard(unitKey) {
@@ -2055,8 +2060,9 @@
       subtitle.textContent = meta ? ('Pi\u0119tro ' + meta.f + ' \u00B7 ' + meta.m2 + ' m\u00B2 \u00B7 ' + meta.r + ' pokoje') : '';
 
       // Floor plan image
-      if (data && data.img) {
-        img.src = data.img;
+      var imgSrc = UNIT_IMAGES[unitKey];
+      if (imgSrc) {
+        img.src = imgSrc;
         img.alt = label;
         img.style.display = 'block';
       } else {
@@ -2077,7 +2083,9 @@
 
       // Action buttons
       var btns = '';
-      btns += '<button class="apt-card-btn" onclick="document.getElementById(\'apt-card-overlay\').classList.remove(\'open\')">Zobacz kart\u0119 lokalu</button>';
+      if (imgSrc) {
+        btns += '<button class="apt-card-btn" onclick="window.open(\'' + imgSrc + '\',\'_blank\')">Zobacz kart\u0119 lokalu</button>';
+      }
       if (avail) {
         btns += '<button class="apt-card-btn" onclick="document.getElementById(\'apt-card-overlay\').classList.remove(\'open\');var b=document.querySelector(\'[data-apartment-id=&quot;' + aptId + '&quot;][data-pawn-type=&quot;apartment-showcase&quot;]\');if(b)b.click();">Zobacz prezentacj\u0119</button>';
         btns += '<button class="apt-card-btn primary" onclick="document.getElementById(\'apt-card-overlay\').classList.remove(\'open\');var b=document.querySelector(\'[data-apartment-id=&quot;' + aptId + '&quot;][data-pawn-type=&quot;first-person&quot;]\');if(b)b.click();">Uruchom spacer</button>';
@@ -2691,6 +2699,7 @@
           <span class="apt-row-price">${priceFormatter.format(apt.cena)} z\u0142</span>
           <span><span class="availability-badge ${apt.dostepnosc ? 'available' : 'unavailable'}">${apt.dostepnosc ? 'Dost\u0119pny' : 'Niedost\u0119pny'}</span></span>
           <span class="apt-row-actions">
+            ${apt.id === 'apartment13' ? '<button type="button" class="apartment-select-btn" onclick="window.open(\'karta-a11.png\',\'_blank\')">Karta lokalu</button>' : ''}
             <button type="button" class="apartment-select-btn" data-apartment-id="${apt.id}" data-pawn-type="apartment-showcase" ${apt.dostepnosc ? '' : 'disabled'}>Prezentacja apartamentu</button>
             <button type="button" class="apartment-select-btn apt-btn-topview" data-apartment-id="${apt.id}" data-pawn-type="top-view">Widok z gory</button>
             <button type="button" class="apartment-select-btn" data-apartment-id="${apt.id}" data-pawn-type="first-person" ${apt.dostepnosc ? '' : 'disabled'}>Spacer</button>
