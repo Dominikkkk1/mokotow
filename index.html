@@ -520,6 +520,30 @@
 
     #connect-btn.hidden { display: none; }
 
+    #back-to-orbital {
+      display: none;
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      z-index: 20;
+      height: 36px;
+      padding: 0 1.2rem;
+      background: rgba(28,46,38,0.85);
+      backdrop-filter: blur(8px);
+      color: var(--dark-fg);
+      border: 1px solid rgba(237,230,216,0.15);
+      font-family: var(--font-body);
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    #back-to-orbital:hover {
+      background: rgba(28,46,38,0.95);
+      border-color: rgba(237,230,216,0.3);
+    }
+
     /* ── ORBITAL VIEWER ── */
     #orbital-layer {
       position: absolute;
@@ -1389,6 +1413,7 @@
             <button id="connect-btn" style="display:none">Uruchom demo</button>
             <span id="queue-text">Kolejka: miejsce <span id="queue-position"></span></span>
           </div>
+          <button id="back-to-orbital" type="button" onclick="document.getElementById('orbital-layer').classList.remove('hidden');this.style.display='none'">&#8592; Widok budynku</button>
         </div>
 
     </div>
@@ -2435,7 +2460,7 @@
     function openApartment(aptId, pawnType) {
       // Hide orbital viewer when entering StreamPixel
       var orbLayer = document.getElementById('orbital-layer');
-      if (orbLayer) orbLayer.classList.add('hidden');
+      if (orbLayer) { orbLayer.classList.add('hidden'); var bb = document.getElementById('back-to-orbital'); if (bb) bb.style.display = ''; }
       connectBtn.style.display = '';
       scrollToDemo();
       if (demoStarted && readyTriggered) { selectApartment(aptId, pawnType); }
@@ -2462,7 +2487,7 @@
       clTrack('pawn_select', { pawn: btn.dataset.pawnSelect });
       // Hide orbital
       var orbLayer = document.getElementById('orbital-layer');
-      if (orbLayer) orbLayer.classList.add('hidden');
+      if (orbLayer) { orbLayer.classList.add('hidden'); var bb = document.getElementById('back-to-orbital'); if (bb) bb.style.display = ''; }
       connectBtn.style.display = '';
       scrollToDemo();
       if (demoStarted && readyTriggered) {
