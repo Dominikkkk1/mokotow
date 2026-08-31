@@ -1716,7 +1716,13 @@
             const meta = TOUR.units[u.k];
             if (meta) {
               // Show real apartment number if mapped
-              var UNIT_LABELS = { 'A_11': 'Apartament 13', 'A_12': 'Apartament 14' };
+              var UNIT_LABELS = {
+                'A_11': 'Apartament 11', 'A_12': 'Apartament 12',
+                'A_13': 'Apartament 13', 'A_14': 'Apartament 14',
+                'A_21': 'Apartament 21', 'A_22': 'Apartament 22',
+                'A_23': 'Apartament 23', 'A_24': 'Apartament 24',
+                'Lok_01 ': 'Lokal 1', 'Lok_03': 'Lokal 3'
+              };
               var label = UNIT_LABELS[u.k] || u.k;
               var STATUS_PL = { free: 'Wolne', reserved: 'Rezerwacja', sold: 'Sprzedane' };
               var bits = [label];
@@ -2031,28 +2037,24 @@
 
     // Mapping: orbital unit key -> real apartment ID in StreamPixel/CRM
     const ORBITAL_TO_APARTMENT = {
-      'A_11': 'apartment13',
-      'A_12': 'apartment14',
-      // Remaining orbital units don't have a StreamPixel apartment yet.
-      // Clicking them starts the demo in orbital (overview) mode.
+      'A_11': 'apartment11',
+      'A_12': 'apartment12',
+      'A_13': 'apartment13',
+      'A_14': 'apartment14',
+      'A_21': 'apartment21',
+      'A_22': 'apartment22',
+      'A_23': 'apartment23',
+      'A_24': 'apartment24',
+      'Lok_01 ': 'apartment1',
+      'Lok_03': 'apartment3',
     };
 
     window.onOrbitalUnitClick = function(unitKey) {
       clTrack('orbital_unit_click', { unit: unitKey });
       var aptId = ORBITAL_TO_APARTMENT[unitKey];
-      if (aptId) {
-        // Open specific apartment in first-person walk mode
-        openApartment(aptId, 'first-person');
-      } else {
-        // No mapped apartment - start demo in orbital overview
-        var orbLayer = document.getElementById('orbital-layer');
-        if (orbLayer) orbLayer.classList.add('hidden');
-        connectBtn.style.display = '';
-        scrollToDemo();
-        demoStarted = true;
-        if (!streamLoading) startStreamLoading();
-        if (readyTriggered) switchToStream();
-      }
+      // Always open in orbital/overview mode - StreamPixel will show
+      // the selected apartment. first-person only for dostepnosc=true.
+      openApartment(aptId || 'apartment13', 'orbital');
     };
 
 
@@ -2328,8 +2330,16 @@
        Po kazdej zmianie w panelu warto ja odswiezyc, ale nic sie nie psuje,
        gdy sie o tym zapomni. */
     const FALLBACK_APARTMENTS = [
-      { "id": "apartment13", "numer": "13", "kierunek": "NE", "powierzchnia": 63.0, "pokoje": 4, "cena": 1230000, "dostepnosc": true },
-      { "id": "apartment14", "numer": "14", "kierunek": "NW", "powierzchnia": 73.0, "pokoje": 5, "cena": 1890000, "dostepnosc": false },
+      { "id": "apartment1",  "numer": "1",  "kierunek": "S",  "powierzchnia": 77.0,  "pokoje": 3, "cena": 890000,  "dostepnosc": false },
+      { "id": "apartment3",  "numer": "3",  "kierunek": "N",  "powierzchnia": 77.0,  "pokoje": 3, "cena": 870000,  "dostepnosc": false },
+      { "id": "apartment11", "numer": "11", "kierunek": "SE", "powierzchnia": 123.0, "pokoje": 4, "cena": 1150000, "dostepnosc": false },
+      { "id": "apartment12", "numer": "12", "kierunek": "NW", "powierzchnia": 123.0, "pokoje": 4, "cena": 1120000, "dostepnosc": false },
+      { "id": "apartment13", "numer": "13", "kierunek": "NE", "powierzchnia": 123.0, "pokoje": 4, "cena": 1230000, "dostepnosc": true },
+      { "id": "apartment14", "numer": "14", "kierunek": "SW", "powierzchnia": 123.0, "pokoje": 4, "cena": 1180000, "dostepnosc": false },
+      { "id": "apartment21", "numer": "21", "kierunek": "SE", "powierzchnia": 142.5, "pokoje": 5, "cena": 1520000, "dostepnosc": false },
+      { "id": "apartment22", "numer": "22", "kierunek": "NW", "powierzchnia": 142.5, "pokoje": 5, "cena": 1480000, "dostepnosc": false },
+      { "id": "apartment23", "numer": "23", "kierunek": "NE", "powierzchnia": 142.5, "pokoje": 5, "cena": 1560000, "dostepnosc": false },
+      { "id": "apartment24", "numer": "24", "kierunek": "SW", "powierzchnia": 142.5, "pokoje": 5, "cena": 1500000, "dostepnosc": false },
     ];
 
     let apartmentsData = FALLBACK_APARTMENTS;
