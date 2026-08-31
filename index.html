@@ -589,13 +589,7 @@
     #orbital-svg polygon.dim:hover { fill-opacity: 0; stroke-opacity: 0; }
     #orbital-svg polygon.hot { fill-opacity: 0.45; stroke-opacity: 0.9; }
 
-    #orbital-click-zone {
-      position: absolute;
-      inset: 0;
-      z-index: 12;
-      cursor: pointer;
-      touch-action: none;
-    }
+    #orbital-click-zone { display: none; }
     #orbital-hint {
       position: absolute;
       left: 50%;
@@ -2094,17 +2088,16 @@
       overlay.classList.add('open');
     }
 
-    // Click zone: catches clicks, detects which unit by point-in-polygon test
-    var clickZone = document.getElementById('orbital-click-zone');
+    // Click on SVG: detect which unit by point-in-polygon, show card
     var czDown = null;
-    clickZone.addEventListener('pointerdown', function(e) {
+    svg.addEventListener('pointerdown', function(e) {
       czDown = { x: e.clientX, y: e.clientY };
     });
-    clickZone.addEventListener('pointerup', function(e) {
+    svg.addEventListener('pointerup', function(e) {
       if (!czDown) return;
       var dx = e.clientX - czDown.x, dy = e.clientY - czDown.y;
       czDown = null;
-      if (dx * dx + dy * dy > 225) return; // drag, not click
+      if (dx * dx + dy * dy > 225) return;
 
       // Convert click position to SVG viewBox coords
       var svgRect = svg.getBoundingClientRect();
