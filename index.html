@@ -422,8 +422,8 @@
     }
 
     #demo-app {
-      height: 80vh;
-      min-height: 560px;
+      aspect-ratio: 3 / 2;
+      max-height: 80vh;
       overflow: hidden;
       border-top: 1px solid rgba(237,230,216,0.08);
       border-bottom: 1px solid rgba(237,230,216,0.08);
@@ -539,7 +539,7 @@
       pointer-events: none;
       visibility: hidden;
     }
-    #orbital-frame { position: relative; line-height: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+    #orbital-frame { position: relative; line-height: 0; width: 100%; height: 100%; }
     #orbital-canvas { display: block; position: relative; z-index: 1; }
     #orbital-svg {
       position: absolute;
@@ -1758,22 +1758,19 @@
       const img = frames[0];
       const box = container.getBoundingClientRect();
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      // Contain: fit image inside container without cropping (sharp, no blur)
-      const s = Math.min(box.width / img.naturalWidth, box.height / img.naturalHeight);
-      const w = Math.round(img.naturalWidth * s);
-      const h = Math.round(img.naturalHeight * s);
+      // Container has same aspect ratio as frames (3:2), so contain = cover = exact fit
+      const w = Math.round(box.width);
+      const h = Math.round(box.height);
       cv.style.width = w + 'px';
       cv.style.height = h + 'px';
       cv.width = Math.round(w * dpr);
       cv.height = Math.round(h * dpr);
-      // Canvas is centered by flex on #orbital-frame, no manual offsets needed
-      cv.style.position = 'relative';
-      cv.style.left = '';
-      cv.style.top = '';
-      // SVG sits on top of canvas, same size
+      cv.style.position = 'absolute';
+      cv.style.left = '0';
+      cv.style.top = '0';
       svg.style.position = 'absolute';
-      svg.style.left = ((box.width - w) / 2) + 'px';
-      svg.style.top = ((box.height - h) / 2) + 'px';
+      svg.style.left = '0';
+      svg.style.top = '0';
       svg.style.width = w + 'px';
       svg.style.height = h + 'px';
       draw();
