@@ -518,6 +518,141 @@
 
     #connect-btn.hidden { display: none; }
 
+    /* ── ORBITAL VIEWER ── */
+    #orbital-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 15;
+      background: #0d1013;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      cursor: ew-resize;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: none;
+      transition: opacity 0.6s ease;
+    }
+    #orbital-layer.hidden {
+      opacity: 0;
+      pointer-events: none;
+      visibility: hidden;
+    }
+    #orbital-frame { position: relative; line-height: 0; }
+    #orbital-canvas { display: block; }
+    #orbital-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+    #orbital-svg polygon {
+      fill-opacity: 0;
+      stroke-opacity: 0;
+      stroke-width: 1.5;
+      vector-effect: non-scaling-stroke;
+      cursor: pointer;
+      transition: fill-opacity 0.13s ease, stroke-opacity 0.13s ease;
+    }
+    #orbital-svg polygon:hover {
+      fill-opacity: 0.5;
+      stroke-opacity: 0.95;
+    }
+    #orbital-svg polygon.dim {
+      pointer-events: none;
+    }
+    #orbital-svg polygon.dim:hover {
+      fill-opacity: 0;
+      stroke-opacity: 0;
+    }
+    #orbital-svg polygon.hot {
+      fill-opacity: 0.5;
+      stroke-opacity: 0.95;
+    }
+    #orbital-hint {
+      position: absolute;
+      left: 50%;
+      bottom: 26px;
+      transform: translateX(-50%);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #8c98a4;
+      background: rgba(13,16,19,0.7);
+      padding: 7px 14px;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    #orbital-tip {
+      position: absolute;
+      right: 18px;
+      top: 16px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      color: #e6eaee;
+      background: rgba(13,16,19,0.82);
+      padding: 7px 12px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+    #orbital-tip.on { opacity: 1; }
+    #orbital-legend {
+      position: absolute;
+      left: 18px;
+      top: 16px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      color: #8c98a4;
+      background: rgba(13,16,19,0.7);
+      padding: 7px 14px;
+    }
+    #orbital-legend i {
+      width: 9px;
+      height: 9px;
+      border-radius: 2px;
+      display: inline-block;
+      margin-right: 5px;
+    }
+    #orbital-load {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      background: rgba(13,16,19,0.94);
+    }
+    #orbital-load.done { display: none; }
+    #orbital-load .cap {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #8c98a4;
+    }
+    #orbital-load .bar {
+      width: min(360px, 70vw);
+      height: 3px;
+      background: #2a323a;
+      overflow: hidden;
+    }
+    #orbital-load .bar i {
+      display: block;
+      height: 100%;
+      width: 0;
+      background: #e6875a;
+      transition: width 0.15s linear;
+    }
+
     #queue-text {
       display: none;
       padding: 0.6rem 1.5rem;
@@ -1150,6 +1285,23 @@
     </div>
     <div id="demo-app">
         <div id="main-view">
+          <div id="orbital-layer">
+            <div id="orbital-frame">
+              <canvas id="orbital-canvas"></canvas>
+              <svg id="orbital-svg" preserveAspectRatio="none"></svg>
+            </div>
+            <div id="orbital-tip"></div>
+            <div id="orbital-legend">
+              <span><i style="background:#3fbf87"></i>wolne</span>
+              <span><i style="background:#e6a33c"></i>rezerwacja</span>
+              <span><i style="background:#d9584e"></i>sprzedane</span>
+            </div>
+            <div id="orbital-hint">Przeciagnij, zeby obrocic · kliknij mieszkanie</div>
+            <div id="orbital-load">
+              <div class="cap">Wczytywanie modelu <span id="orbital-pct">0</span>%</div>
+              <div class="bar"><i id="orbital-bar"></i></div>
+            </div>
+          </div>
           <div id="video-layer">
             <div class="player-wrapper">
               <video id="player" playsinline autoplay muted loop preload="auto">
@@ -1161,7 +1313,7 @@
             <iframe id="streamIframe" allow="autoplay; camera" allowfullscreen></iframe>
           </div>
           <div id="overlay-controls">
-            <button id="connect-btn">Uruchom demo</button>
+            <button id="connect-btn" style="display:none">Uruchom demo</button>
             <span id="queue-text">Kolejka: miejsce <span id="queue-position"></span></span>
           </div>
         </div>
@@ -1428,6 +1580,226 @@
   </footer>
 
   <!-- SCRIPTS -->
+  <script src="tour.js"></script>
+  <script>
+  (function() {
+    const TOUR = window.ARCHVIS_TOUR;
+    if (!TOUR) return;
+
+    const COLOR = { free: '#3fbf87', reserved: '#e6a33c', sold: '#d9584e' };
+    const FRICTION = 0.94;
+    const DRAG_SENS = 720;
+
+    const cv = document.getElementById('orbital-canvas');
+    const ctx = cv.getContext('2d');
+    const svg = document.getElementById('orbital-svg');
+    const container = document.getElementById('orbital-layer');
+    const frameBox = document.getElementById('orbital-frame');
+    const tip = document.getElementById('orbital-tip');
+    const loadEl = document.getElementById('orbital-load');
+    const pctEl = document.getElementById('orbital-pct');
+    const barEl = document.getElementById('orbital-bar');
+
+    const orbitShot = TOUR.shots.Orbit;
+    const FRAME_COUNT = orbitShot.beautyFrames;
+    const NORM = TOUR.norm;
+
+    // Fake CRM status
+    const fakeStatus = {};
+    const states = ['free', 'free', 'reserved', 'sold'];
+    Object.keys(TOUR.units).forEach(function(k, i) {
+      let h = 0;
+      for (let c = 0; c < k.length; c++) h = (h * 31 + k.charCodeAt(c)) & 0xffff;
+      fakeStatus[k] = states[(h + i) % states.length];
+    });
+
+    let frames = [];
+    let pos = 0, vel = 0;
+    let dragging = false, dragX = 0, dragStart = 0, dragMoved = false, lastX = 0, lastT = 0;
+    let spin = null;
+    let hotKey = null;
+
+    function loadImg(src) {
+      return new Promise(function(res) {
+        const img = new Image();
+        img.onload = function() { if (img.decode) img.decode().catch(function(){}); res(img); };
+        img.onerror = function() { res(null); };
+        img.src = src;
+      });
+    }
+
+    function frameIndex(p) {
+      return Math.floor(((p % FRAME_COUNT) + FRAME_COUNT) % FRAME_COUNT);
+    }
+
+    function draw() {
+      if (!frames.length) return;
+      const idx = frameIndex(pos);
+      const img = frames[idx];
+      if (!img) return;
+      ctx.globalAlpha = 1;
+      ctx.drawImage(img, 0, 0, cv.width, cv.height);
+      drawOverlay(idx);
+    }
+
+    function drawOverlay(frameNo) {
+      const scopes = orbitShot.scopes;
+      if (!scopes) { svg.style.display = 'none'; return; }
+
+      const units = [];
+      for (const scopeKey in scopes) {
+        const data = scopes[scopeKey];
+        if (!data.f) continue;
+        const fr = data.f.find(function(x) { return x.i === frameNo; });
+        if (fr) units.push.apply(units, fr.u);
+      }
+
+      if (!units.length) { svg.style.display = 'none'; svg.innerHTML = ''; return; }
+      svg.style.display = 'block';
+      svg.setAttribute('viewBox', '0 0 ' + NORM + ' ' + NORM);
+      svg.innerHTML = '';
+
+      units.forEach(function(u) {
+        const color = COLOR[fakeStatus[u.k]] || '#8c98a4';
+        const isHot = hotKey === u.k;
+        const isDim = u.vis < 0.2;
+
+        u.p.forEach(function(ring) {
+          const el = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+          el.setAttribute('points', ring.map(function(p) { return p.join(','); }).join(' '));
+          el.setAttribute('fill', color);
+          el.setAttribute('stroke', color);
+          if (isHot) el.classList.add('hot');
+          if (isDim) el.classList.add('dim');
+
+          el.addEventListener('pointerenter', function() {
+            hotKey = u.k;
+            const meta = TOUR.units[u.k];
+            if (meta) {
+              const bits = [u.k];
+              if (meta.f !== undefined) bits.push('pietro ' + meta.f);
+              if (meta.m2) bits.push(meta.m2 + ' m\u00B2');
+              if (meta.r) bits.push(meta.r + ' pok.');
+              bits.push(fakeStatus[u.k]);
+              tip.textContent = bits.join(' \u00B7 ');
+              tip.classList.add('on');
+            }
+            draw();
+          });
+
+          el.addEventListener('pointerleave', function() {
+            hotKey = null;
+            tip.classList.remove('on');
+            draw();
+          });
+
+          el.addEventListener('pointerup', function(e) {
+            dragging = false;
+            if (dragMoved) return;
+            e.stopPropagation();
+            // Transition to StreamPixel
+            window.orbitalSelectedUnit = u.k;
+            container.classList.add('hidden');
+            document.getElementById('connect-btn').style.display = '';
+            if (typeof window.onOrbitalUnitClick === 'function') {
+              window.onOrbitalUnitClick(u.k);
+            }
+          });
+
+          svg.appendChild(el);
+        });
+      });
+    }
+
+    function resize() {
+      if (!frames.length) return;
+      const img = frames[0];
+      const box = container.getBoundingClientRect();
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const s = Math.min(box.width / img.naturalWidth, box.height / img.naturalHeight);
+      const w = Math.round(img.naturalWidth * s);
+      const h = Math.round(img.naturalHeight * s);
+      cv.style.width = w + 'px';
+      cv.style.height = h + 'px';
+      cv.width = Math.round(w * dpr);
+      cv.height = Math.round(h * dpr);
+      frameBox.style.width = w + 'px';
+      frameBox.style.height = h + 'px';
+      draw();
+    }
+
+    // Pointer handlers
+    container.addEventListener('pointerdown', function(e) {
+      if (!frames.length) return;
+      if (spin) { cancelAnimationFrame(spin); spin = null; }
+      dragging = true;
+      dragMoved = false;
+      dragX = lastX = e.clientX;
+      dragStart = pos;
+      lastT = performance.now();
+      vel = 0;
+    });
+
+    window.addEventListener('pointermove', function(e) {
+      if (!dragging) return;
+      const dx = e.clientX - dragX;
+      if (Math.abs(dx) > 4) dragMoved = true;
+      if (!dragMoved) return;
+      pos = dragStart - (dx / DRAG_SENS) * FRAME_COUNT;
+      const now = performance.now();
+      const dt = now - lastT;
+      if (dt > 0) { vel = (e.clientX - lastX) / dt; lastX = e.clientX; lastT = now; }
+      draw();
+    });
+
+    window.addEventListener('pointerup', function() {
+      if (!dragging) return;
+      dragging = false;
+      if (!dragMoved) return;
+      if (Math.abs(vel) > 0.05) {
+        var v = (-vel / DRAG_SENS) * FRAME_COUNT * 16;
+        (function glide() {
+          v *= FRICTION;
+          pos += v;
+          draw();
+          if (Math.abs(v) > 0.002) spin = requestAnimationFrame(glide);
+          else spin = null;
+        })();
+      }
+    });
+
+    window.addEventListener('pointercancel', function() { dragging = false; });
+    window.addEventListener('resize', resize);
+    if (window.ResizeObserver) {
+      new ResizeObserver(function() { if (frames.length) resize(); }).observe(container);
+    }
+
+    // Load frames
+    (async function() {
+      let loaded = 0;
+      const promises = [];
+      for (let i = 0; i < FRAME_COUNT; i++) {
+        const n = String(i).padStart(4, '0');
+        promises.push(loadImg('tour/orbit.' + n + '.jpeg').then(function(img) {
+          loaded++;
+          const p = Math.round(loaded / FRAME_COUNT * 100);
+          pctEl.textContent = p;
+          barEl.style.width = p + '%';
+          return img;
+        }));
+      }
+      const imgs = await Promise.all(promises);
+      frames = imgs.filter(Boolean);
+      if (frames[0] && frames[0].decode) {
+        await Promise.race([frames[0].decode().catch(function(){}), new Promise(function(r) { setTimeout(r, 600); })]);
+      }
+      loadEl.classList.add('done');
+      resize();
+      requestAnimationFrame(draw);
+    })();
+  })();
+  </script>
+
   <script>
     const CONFIG = {
       videoSrc: 'https://ue-woodshack.s3.eu-west-1.amazonaws.com/Mokotow_Outsite_Lit_opt_1080.mp4',
@@ -1602,6 +1974,13 @@
       if (!streamLoading) { startStreamLoading(); demoStarted = true; }
       else if (readyTriggered) { demoStarted = true; switchToStream(); }
     });
+
+    // Orbital viewer: apartment click starts StreamPixel
+    window.onOrbitalUnitClick = (unitKey) => {
+      clTrack('orbital_unit_click', { unit: unitKey });
+      if (!streamLoading) { startStreamLoading(); demoStarted = true; }
+      else if (readyTriggered) { demoStarted = true; switchToStream(); }
+    };
 
     /* ── ZDARZENIA ZE SCENY 3D ──
        Scena raportuje wejscie i wyjscie z pomieszczenia oraz zmiane kamery. Czas
