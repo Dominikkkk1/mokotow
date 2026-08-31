@@ -2120,9 +2120,12 @@
     window.onOrbitalUnitClick = function(unitKey) {
       clTrack('orbital_unit_click', { unit: unitKey });
       var aptId = ORBITAL_TO_APARTMENT[unitKey];
-      // Always open in orbital/overview mode - StreamPixel will show
-      // the selected apartment. first-person only for dostepnosc=true.
-      openApartment(aptId || 'apartment13', 'orbital');
+      if (!aptId) { openApartment('apartment13', 'orbital'); return; }
+      // Dostepne apartamenty otwieraja sie w spacerze (first-person),
+      // niedostepne w widoku orbital
+      var apt = apartmentsData.find(function(a) { return a.id === aptId; });
+      var pawn = (apt && apt.dostepnosc) ? 'first-person' : 'orbital';
+      openApartment(aptId, pawn);
     };
 
 
@@ -2398,16 +2401,16 @@
        Po kazdej zmianie w panelu warto ja odswiezyc, ale nic sie nie psuje,
        gdy sie o tym zapomni. */
     const FALLBACK_APARTMENTS = [
-      { "id": "apartment1",  "numer": "1",  "kierunek": "S",  "powierzchnia": 77.0,  "pokoje": 3, "cena": 890000,  "dostepnosc": false },
-      { "id": "apartment3",  "numer": "3",  "kierunek": "N",  "powierzchnia": 77.0,  "pokoje": 3, "cena": 870000,  "dostepnosc": false },
+      { "id": "apartment13", "numer": "13", "kierunek": "NE", "powierzchnia": 63.0,  "pokoje": 4, "cena": 1230000, "dostepnosc": true },
+      { "id": "apartment14", "numer": "14", "kierunek": "NW", "powierzchnia": 73.0,  "pokoje": 5, "cena": 1890000, "dostepnosc": false },
       { "id": "apartment11", "numer": "11", "kierunek": "SE", "powierzchnia": 123.0, "pokoje": 4, "cena": 1150000, "dostepnosc": false },
       { "id": "apartment12", "numer": "12", "kierunek": "NW", "powierzchnia": 123.0, "pokoje": 4, "cena": 1120000, "dostepnosc": false },
-      { "id": "apartment13", "numer": "13", "kierunek": "NE", "powierzchnia": 123.0, "pokoje": 4, "cena": 1230000, "dostepnosc": true },
-      { "id": "apartment14", "numer": "14", "kierunek": "SW", "powierzchnia": 123.0, "pokoje": 4, "cena": 1180000, "dostepnosc": false },
       { "id": "apartment21", "numer": "21", "kierunek": "SE", "powierzchnia": 142.5, "pokoje": 5, "cena": 1520000, "dostepnosc": false },
       { "id": "apartment22", "numer": "22", "kierunek": "NW", "powierzchnia": 142.5, "pokoje": 5, "cena": 1480000, "dostepnosc": false },
       { "id": "apartment23", "numer": "23", "kierunek": "NE", "powierzchnia": 142.5, "pokoje": 5, "cena": 1560000, "dostepnosc": false },
       { "id": "apartment24", "numer": "24", "kierunek": "SW", "powierzchnia": 142.5, "pokoje": 5, "cena": 1500000, "dostepnosc": false },
+      { "id": "apartment1",  "numer": "1",  "kierunek": "S",  "powierzchnia": 77.0,  "pokoje": 3, "cena": 890000,  "dostepnosc": false },
+      { "id": "apartment3",  "numer": "3",  "kierunek": "N",  "powierzchnia": 77.0,  "pokoje": 3, "cena": 870000,  "dostepnosc": false },
     ];
 
     let apartmentsData = FALLBACK_APARTMENTS;
