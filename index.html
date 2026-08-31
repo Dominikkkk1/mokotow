@@ -2460,7 +2460,7 @@
     function openApartment(aptId, pawnType) {
       // Hide orbital viewer when entering StreamPixel
       var orbLayer = document.getElementById('orbital-layer');
-      if (orbLayer) { orbLayer.classList.add('hidden'); var bb = document.getElementById('back-to-orbital'); if (bb) bb.style.display = ''; }
+      if (orbLayer) { orbLayer.classList.add('hidden'); var bb = document.getElementById('back-to-orbital'); if (bb) bb.style.display = 'block'; }
       connectBtn.style.display = '';
       scrollToDemo();
       if (demoStarted && readyTriggered) { selectApartment(aptId, pawnType); }
@@ -2487,7 +2487,7 @@
       clTrack('pawn_select', { pawn: btn.dataset.pawnSelect });
       // Hide orbital
       var orbLayer = document.getElementById('orbital-layer');
-      if (orbLayer) { orbLayer.classList.add('hidden'); var bb = document.getElementById('back-to-orbital'); if (bb) bb.style.display = ''; }
+      if (orbLayer) { orbLayer.classList.add('hidden'); var bb = document.getElementById('back-to-orbital'); if (bb) bb.style.display = 'block'; }
       connectBtn.style.display = '';
       scrollToDemo();
       if (demoStarted && readyTriggered) {
