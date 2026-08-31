@@ -2011,7 +2011,6 @@
     // Apartment card data - keyed by orbital unit
     var APT_CARD_DATA = {
       'A_11': {
-        img: 'karta-a11.png', dostepnosc: true,
         specs: [
           ['Salon z aneksem kuchennym i jadalni\u0105', '69 m\u00B2'],
           ['Komunikacja', '20 m\u00B2'],
@@ -2053,7 +2052,9 @@
 
       var meta = TOUR.units[unitKey];
       var label = UNIT_NAMES[unitKey] || unitKey;
-      var avail = data ? data.dostepnosc : false;
+      // Read availability from CRM/fallback data, not from card data
+      var aptEntry = (typeof apartmentsData !== 'undefined') ? apartmentsData.find(function(a) { return a.id === aptId; }) : null;
+      var avail = aptEntry ? aptEntry.dostepnosc : false;
 
       badgeWrap.innerHTML = '<span class="apt-card-badge ' + (avail ? 'available' : 'unavailable') + '">' + (avail ? 'Dost\u0119pny' : 'Niedost\u0119pny') + '</span>';
       title.textContent = label;
