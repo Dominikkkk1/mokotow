@@ -1871,20 +1871,21 @@
       draw();
     });
 
+    // Click on orbital = same as clicking "Spacer" for apartment 13
+    // Uses window.openApartment which is defined later in main script
+    container.addEventListener('click', function() {
+      if (dragMoved) return;
+      // Simulate clicking the Spacer button for apartment13
+      var btn = document.querySelector('[data-apartment-id="apartment13"][data-pawn-type="first-person"]');
+      if (btn) {
+        btn.click();
+      }
+    });
+
     window.addEventListener('pointerup', function() {
       if (!dragging) return;
       dragging = false;
-      if (!dragMoved) {
-        // Click without drag - launch StreamPixel
-        // Use hovered apartment if available, otherwise default to apartment13
-        var unit = hoveredUnit || 'A_13';
-        window.orbitalSelectedUnit = unit;
-        container.classList.add('hidden');
-        if (typeof window.onOrbitalUnitClick === 'function') {
-          window.onOrbitalUnitClick(unit);
-        }
-        return;
-      }
+      if (!dragMoved) return;
       if (Math.abs(vel) > 0.05) {
         var v = (-vel / DRAG_SENS) * FRAME_COUNT * 16;
         (function glide() {
