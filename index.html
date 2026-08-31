@@ -1825,14 +1825,23 @@
       resize();
       requestAnimationFrame(function() {
         draw();
-        var cvRect = cv.getBoundingClientRect();
         var svgRect = svg.getBoundingClientRect();
         var contRect = container.getBoundingClientRect();
-        dbg.textContent = 'cv:' + Math.round(cvRect.left) + ',' + Math.round(cvRect.top) + ' ' + Math.round(cvRect.width) + 'x' + Math.round(cvRect.height)
-          + ' | svg:' + Math.round(svgRect.left) + ',' + Math.round(svgRect.top) + ' ' + Math.round(svgRect.width) + 'x' + Math.round(svgRect.height)
-          + ' | cont:' + Math.round(contRect.left) + ',' + Math.round(contRect.top) + ' ' + Math.round(contRect.width) + 'x' + Math.round(contRect.height)
-          + ' | svg.style: L=' + svg.style.left + ' T=' + svg.style.top + ' W=' + svg.style.width + ' H=' + svg.style.height
-          + ' | children=' + svg.childNodes.length + ' vb=' + svg.getAttribute('viewBox');
+        // Check if polygons are within visible area
+        var polys = svg.querySelectorAll('polygon');
+        var firstPoly = polys[0];
+        var polyRect = firstPoly ? firstPoly.getBoundingClientRect() : null;
+        var loadDisplay = window.getComputedStyle(loadEl).display;
+        var hintEl = document.getElementById('orbital-hint');
+        var legendEl = document.getElementById('orbital-legend');
+        dbg.textContent = 'polys=' + polys.length
+          + ' | 1st poly:' + (polyRect ? Math.round(polyRect.left) + ',' + Math.round(polyRect.top) + ' ' + Math.round(polyRect.width) + 'x' + Math.round(polyRect.height) : 'none')
+          + ' | cont:' + Math.round(contRect.top) + '-' + Math.round(contRect.bottom)
+          + ' | svg top:' + svg.style.top
+          + ' | load:' + loadDisplay
+          + ' | hint:' + window.getComputedStyle(hintEl).display + '/' + window.getComputedStyle(hintEl).visibility
+          + ' | legend:' + window.getComputedStyle(legendEl).display + '/' + window.getComputedStyle(legendEl).visibility
+          + ' | frame overflow:' + window.getComputedStyle(frameBox).overflow;
       });
     })();
   })();
