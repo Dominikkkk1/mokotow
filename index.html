@@ -523,7 +523,7 @@
       position: absolute;
       inset: 0;
       z-index: 15;
-      background: #0d1013;
+      background: var(--dark);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -539,85 +539,88 @@
       pointer-events: none;
       visibility: hidden;
     }
-    #orbital-frame { position: relative; line-height: 0; }
+    #orbital-frame { position: relative; line-height: 0; width: 100%; height: 100%; overflow: hidden; }
     #orbital-canvas { display: block; }
     #orbital-svg {
       position: absolute;
-      inset: 0;
       width: 100%;
       height: 100%;
     }
     #orbital-svg polygon {
       fill-opacity: 0;
       stroke-opacity: 0;
-      stroke-width: 1.5;
+      stroke-width: 2;
       vector-effect: non-scaling-stroke;
       cursor: pointer;
-      transition: fill-opacity 0.13s ease, stroke-opacity 0.13s ease;
+      transition: fill-opacity 0.15s ease, stroke-opacity 0.15s ease;
     }
     #orbital-svg polygon:hover {
-      fill-opacity: 0.5;
-      stroke-opacity: 0.95;
+      fill-opacity: 0.45;
+      stroke-opacity: 0.9;
     }
-    #orbital-svg polygon.dim {
-      pointer-events: none;
-    }
-    #orbital-svg polygon.dim:hover {
-      fill-opacity: 0;
-      stroke-opacity: 0;
-    }
-    #orbital-svg polygon.hot {
-      fill-opacity: 0.5;
-      stroke-opacity: 0.95;
-    }
+    #orbital-svg polygon.dim { pointer-events: none; }
+    #orbital-svg polygon.dim:hover { fill-opacity: 0; stroke-opacity: 0; }
+    #orbital-svg polygon.hot { fill-opacity: 0.45; stroke-opacity: 0.9; }
+
     #orbital-hint {
       position: absolute;
       left: 50%;
-      bottom: 26px;
+      bottom: 24px;
       transform: translateX(-50%);
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      font-size: 11px;
-      letter-spacing: 0.14em;
+      font-family: var(--font-body);
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: #8c98a4;
-      background: rgba(13,16,19,0.7);
-      padding: 7px 14px;
+      color: rgba(237,230,216,0.5);
+      background: rgba(28,46,38,0.85);
+      backdrop-filter: blur(6px);
+      padding: 8px 18px;
+      border: 1px solid rgba(237,230,216,0.1);
       pointer-events: none;
       white-space: nowrap;
     }
     #orbital-tip {
       position: absolute;
-      right: 18px;
+      left: 50%;
       top: 16px;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      font-size: 11px;
-      letter-spacing: 0.1em;
-      color: #e6eaee;
-      background: rgba(13,16,19,0.82);
-      padding: 7px 12px;
+      transform: translateX(-50%);
+      font-family: var(--font-body);
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--dark-fg);
+      background: rgba(28,46,38,0.9);
+      backdrop-filter: blur(8px);
+      padding: 10px 20px;
+      border: 1px solid rgba(237,230,216,0.15);
       pointer-events: none;
       opacity: 0;
-      transition: opacity 0.15s;
+      transition: opacity 0.2s;
+      white-space: nowrap;
     }
     #orbital-tip.on { opacity: 1; }
     #orbital-legend {
       position: absolute;
-      left: 18px;
-      top: 16px;
+      left: 16px;
+      bottom: 16px;
       display: flex;
-      gap: 12px;
+      gap: 16px;
       align-items: center;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      font-size: 11px;
-      letter-spacing: 0.1em;
-      color: #8c98a4;
-      background: rgba(13,16,19,0.7);
-      padding: 7px 14px;
+      font-family: var(--font-body);
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: rgba(237,230,216,0.45);
+      background: rgba(28,46,38,0.75);
+      backdrop-filter: blur(6px);
+      padding: 8px 16px;
+      border: 1px solid rgba(237,230,216,0.08);
     }
     #orbital-legend i {
-      width: 9px;
-      height: 9px;
-      border-radius: 2px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
       display: inline-block;
       margin-right: 5px;
     }
@@ -628,28 +631,29 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 18px;
-      background: rgba(13,16,19,0.94);
+      gap: 20px;
+      background: var(--dark);
     }
     #orbital-load.done { display: none; }
     #orbital-load .cap {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      font-size: 12px;
-      letter-spacing: 0.14em;
+      font-family: var(--font-body);
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
-      color: #8c98a4;
+      color: rgba(237,230,216,0.4);
     }
     #orbital-load .bar {
-      width: min(360px, 70vw);
-      height: 3px;
-      background: #2a323a;
+      width: min(320px, 60vw);
+      height: 2px;
+      background: rgba(237,230,216,0.1);
       overflow: hidden;
     }
     #orbital-load .bar i {
       display: block;
       height: 100%;
       width: 0;
-      background: #e6875a;
+      background: var(--secondary);
       transition: width 0.15s linear;
     }
 
@@ -1281,7 +1285,7 @@
     <div class="container" style="max-width:1400px">
       <span class="section-label">Podgląd interaktywny</span>
       <h2 class="section-title">Zwiedzaj inwestycję w 3D</h2>
-      <p class="section-subtitle">Uruchom podgląd i wybierz apartament, aby zobaczyć go w pełnym 3D opartym o Unreal Engine 5.</p>
+      <p class="section-subtitle">Obracaj budynek i wybierz apartament, aby wejsc do srodka w pelnym 3D.</p>
     </div>
     <div id="demo-app">
         <div id="main-view">
@@ -1292,11 +1296,11 @@
             </div>
             <div id="orbital-tip"></div>
             <div id="orbital-legend">
-              <span><i style="background:#3fbf87"></i>wolne</span>
-              <span><i style="background:#e6a33c"></i>rezerwacja</span>
-              <span><i style="background:#d9584e"></i>sprzedane</span>
+              <span><i style="background:#3fbf87"></i>Wolne</span>
+              <span><i style="background:#e6a33c"></i>Rezerwacja</span>
+              <span><i style="background:#d9584e"></i>Sprzedane</span>
             </div>
-            <div id="orbital-hint">Przeciagnij, zeby obrocic · kliknij mieszkanie</div>
+            <div id="orbital-hint">Przeciagnij, zeby obrocic budynek · kliknij mieszkanie, zeby wejsc do srodka</div>
             <div id="orbital-load">
               <div class="cap">Wczytywanie modelu <span id="orbital-pct">0</span>%</div>
               <div class="bar"><i id="orbital-bar"></i></div>
@@ -1676,12 +1680,13 @@
             hotKey = u.k;
             const meta = TOUR.units[u.k];
             if (meta) {
+              const STATUS_PL = { free: 'Wolne', reserved: 'Rezerwacja', sold: 'Sprzedane' };
               const bits = [u.k];
-              if (meta.f !== undefined) bits.push('pietro ' + meta.f);
+              if (meta.f !== undefined) bits.push('pi\u0119tro ' + meta.f);
               if (meta.m2) bits.push(meta.m2 + ' m\u00B2');
-              if (meta.r) bits.push(meta.r + ' pok.');
-              bits.push(fakeStatus[u.k]);
-              tip.textContent = bits.join(' \u00B7 ');
+              if (meta.r) bits.push(meta.r + (meta.r === 1 ? ' pok\u00F3j' : meta.r < 5 ? ' pokoje' : ' pokoi'));
+              bits.push(STATUS_PL[fakeStatus[u.k]] || fakeStatus[u.k]);
+              tip.textContent = bits.join('  \u00B7  ');
               tip.classList.add('on');
             }
             draw();
@@ -1697,10 +1702,8 @@
             dragging = false;
             if (dragMoved) return;
             e.stopPropagation();
-            // Transition to StreamPixel
             window.orbitalSelectedUnit = u.k;
             container.classList.add('hidden');
-            document.getElementById('connect-btn').style.display = '';
             if (typeof window.onOrbitalUnitClick === 'function') {
               window.onOrbitalUnitClick(u.k);
             }
@@ -1716,15 +1719,25 @@
       const img = frames[0];
       const box = container.getBoundingClientRect();
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      const s = Math.min(box.width / img.naturalWidth, box.height / img.naturalHeight);
+      // Fill the entire container (cover), cropping if needed
+      const s = Math.max(box.width / img.naturalWidth, box.height / img.naturalHeight);
       const w = Math.round(img.naturalWidth * s);
       const h = Math.round(img.naturalHeight * s);
       cv.style.width = w + 'px';
       cv.style.height = h + 'px';
       cv.width = Math.round(w * dpr);
       cv.height = Math.round(h * dpr);
-      frameBox.style.width = w + 'px';
-      frameBox.style.height = h + 'px';
+      // Center canvas in container (may overflow)
+      const offsetX = Math.round((box.width - w) / 2);
+      const offsetY = Math.round((box.height - h) / 2);
+      cv.style.position = 'absolute';
+      cv.style.left = offsetX + 'px';
+      cv.style.top = offsetY + 'px';
+      // SVG must match canvas exactly
+      svg.style.left = offsetX + 'px';
+      svg.style.top = offsetY + 'px';
+      svg.style.width = w + 'px';
+      svg.style.height = h + 'px';
       draw();
     }
 
@@ -1975,11 +1988,12 @@
       else if (readyTriggered) { demoStarted = true; switchToStream(); }
     });
 
-    // Orbital viewer: apartment click starts StreamPixel
+    // Orbital viewer: apartment click starts StreamPixel directly
     window.onOrbitalUnitClick = (unitKey) => {
       clTrack('orbital_unit_click', { unit: unitKey });
-      if (!streamLoading) { startStreamLoading(); demoStarted = true; }
-      else if (readyTriggered) { demoStarted = true; switchToStream(); }
+      demoStarted = true;
+      if (!streamLoading) { startStreamLoading(); }
+      if (readyTriggered) { switchToStream(); }
     };
 
     /* ── ZDARZENIA ZE SCENY 3D ──
