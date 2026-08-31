@@ -1823,10 +1823,16 @@
       }
       loadEl.classList.add('done');
       resize();
-      dbg.textContent = 'ORBITAL: ready, frames=' + frames.length + ', svg children=' + svg.childNodes.length + ', container=' + container.offsetWidth + 'x' + container.offsetHeight;
       requestAnimationFrame(function() {
         draw();
-        dbg.textContent += ' | after draw: svg children=' + svg.childNodes.length + ', svg display=' + svg.style.display;
+        var cvRect = cv.getBoundingClientRect();
+        var svgRect = svg.getBoundingClientRect();
+        var contRect = container.getBoundingClientRect();
+        dbg.textContent = 'cv:' + Math.round(cvRect.left) + ',' + Math.round(cvRect.top) + ' ' + Math.round(cvRect.width) + 'x' + Math.round(cvRect.height)
+          + ' | svg:' + Math.round(svgRect.left) + ',' + Math.round(svgRect.top) + ' ' + Math.round(svgRect.width) + 'x' + Math.round(svgRect.height)
+          + ' | cont:' + Math.round(contRect.left) + ',' + Math.round(contRect.top) + ' ' + Math.round(contRect.width) + 'x' + Math.round(contRect.height)
+          + ' | svg.style: L=' + svg.style.left + ' T=' + svg.style.top + ' W=' + svg.style.width + ' H=' + svg.style.height
+          + ' | children=' + svg.childNodes.length + ' vb=' + svg.getAttribute('viewBox');
       });
     })();
   })();
