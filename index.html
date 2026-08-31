@@ -424,9 +424,11 @@
     #demo-app {
       aspect-ratio: 3 / 2;
       max-height: 80vh;
+      max-width: 1200px;
+      margin-left: auto;
+      margin-right: auto;
       overflow: hidden;
-      border-top: 1px solid rgba(237,230,216,0.08);
-      border-bottom: 1px solid rgba(237,230,216,0.08);
+      border: 1px solid rgba(237,230,216,0.08);
       position: relative;
     }
 
@@ -703,7 +705,44 @@
       margin-bottom: 2rem;
       border: 1px solid rgba(237,230,216,0.1);
       background: rgba(237,230,216,0.03);
+      max-height: 280px;
+      overflow: hidden;
+      position: relative;
+      transition: max-height 0.4s ease;
     }
+    #apartment-browser.expanded {
+      max-height: none;
+    }
+    #apartment-browser:not(.expanded)::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: linear-gradient(to bottom, transparent, var(--dark));
+      pointer-events: none;
+    }
+    #apt-show-more {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      background: rgba(237,230,216,0.05);
+      border: 1px solid rgba(237,230,216,0.1);
+      border-top: none;
+      color: var(--dark-fg);
+      font-family: var(--font-body);
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    #apt-show-more:hover {
+      background: rgba(237,230,216,0.1);
+    }
+    #apt-show-more.hidden { display: none; }
 
     #apartment-count {
       font-family: var(--font-body);
@@ -1357,7 +1396,7 @@
 
   <!-- APARTMENT BROWSER -->
   <section class="section-dark section" style="padding-top:1rem">
-    <div class="container">
+    <div class="container" style="max-width:1200px">
       <div class="pawn-actions" style="margin-bottom:2.5rem">
         <button type="button" class="pawn-btn active" data-pawn-select="orbital">Poznaj nasza inwestycje</button>
         <button type="button" class="pawn-btn pawn-btn-satellite" data-pawn-select="satellite" style="display:none">Widok z lotu ptaka</button>
@@ -1380,6 +1419,7 @@
           <div id="apartments-list"></div>
         </div>
       </div>
+      <button id="apt-show-more" type="button">Zobacz wszystkie lokale &#9660;</button>
     </div>
   </section>
 
@@ -2363,6 +2403,18 @@
           </span>
         </div>
       `).join('');
+    }
+
+    // Show more / collapse apartment table
+    var showMoreBtn = document.getElementById('apt-show-more');
+    var browserEl = document.getElementById('apartment-browser');
+    if (showMoreBtn && browserEl) {
+      showMoreBtn.addEventListener('click', function() {
+        var expanded = browserEl.classList.toggle('expanded');
+        showMoreBtn.innerHTML = expanded
+          ? 'Zwi\u0144 list\u0119 &#9650;'
+          : 'Zobacz wszystkie lokale &#9660;';
+      });
     }
 
     function sendStreamPixelMessage(message, targetOrigin = 'https://share.streampixel.io') {
