@@ -2835,6 +2835,11 @@
       } catch (error) {
         console.warn('[CRM] nie udalo sie pobrac listy mieszkan, uzywam kopii lokalnej', error);
       }
+      // Preserve local status overrides (CRM returns only true/false)
+      var STATUS_OVERRIDES = { 'apartment13': 'reserved' };
+      apartmentsData.forEach(function(a) {
+        if (STATUS_OVERRIDES[a.id]) a.dostepnosc = STATUS_OVERRIDES[a.id];
+      });
       renderApartments(apartmentsData);
       applyDeepLink();
     }
