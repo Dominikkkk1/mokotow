@@ -806,6 +806,43 @@
     .apt-card-badge.reserved { background: rgba(230,163,60,0.15); color: #e6a33c; border: 1px solid rgba(230,163,60,0.3); }
     .apt-card-badge.unavailable { background: rgba(191,59,59,0.15); color: var(--red); border: 1px solid rgba(191,59,59,0.3); }
 
+    /* ── Image Modal ── */
+    #img-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: rgba(13,16,19,0.95);
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      cursor: zoom-out;
+    }
+    #img-modal.open { display: flex; }
+    #img-modal img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+    #img-modal-close {
+      position: absolute;
+      top: 20px;
+      right: 24px;
+      background: none;
+      border: none;
+      color: rgba(237,230,216,0.6);
+      font-size: 2.5rem;
+      cursor: pointer;
+      line-height: 1;
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1;
+    }
+    #img-modal-close:hover { color: var(--dark-fg); }
+
     #orbital-load {
       position: absolute;
       inset: 0;
@@ -2111,7 +2148,7 @@
       var close = "document.getElementById('apt-card-overlay').classList.remove('open');";
       var clickBtn = function(sel) { return close + "var b=document.querySelector('" + sel + "');if(b)b.click();"; };
       var btns = '';
-      btns += '<button class="apt-card-btn" ' + (imgSrc ? 'onclick="window.open(\'' + imgSrc + '\',\'_blank\')"' : 'disabled') + '>Karta lokalu</button>';
+      btns += '<button class="apt-card-btn" ' + (imgSrc ? 'onclick="showImageModal(\'' + imgSrc + '\')"' : 'disabled') + '>Karta lokalu</button>';
       btns += '<button class="apt-card-btn" ' + (canInteract ? 'onclick="' + clickBtn('[data-apartment-id=&quot;' + aptId + '&quot;][data-pawn-type=&quot;apartment-showcase&quot;]') + '"' : 'disabled') + '>Prezentacja apartamentu</button>';
       btns += '<button class="apt-card-btn" onclick="' + clickBtn('[data-apartment-id=&quot;' + aptId + '&quot;][data-pawn-type=&quot;top-view&quot;]') + '">Widok z g\u00F3ry</button>';
       btns += '<button class="apt-card-btn primary" ' + (canInteract ? 'onclick="' + clickBtn('[data-apartment-id=&quot;' + aptId + '&quot;][data-pawn-type=&quot;first-person&quot;]') + '"' : 'disabled') + '>Spacer</button>';
@@ -2695,16 +2732,16 @@
        Po kazdej zmianie w panelu warto ja odswiezyc, ale nic sie nie psuje,
        gdy sie o tym zapomni. */
     const FALLBACK_APARTMENTS = [
-      { "id": "apartment13", "numer": "13", "kierunek": "NE", "powierzchnia": 63.0,  "pokoje": 4, "cena": 1230000, "dostepnosc": "reserved" },
-      { "id": "apartment14", "numer": "14", "kierunek": "NW", "powierzchnia": 73.0,  "pokoje": 5, "cena": 1890000, "dostepnosc": false },
-      { "id": "apartment11", "numer": "11", "kierunek": "SE", "powierzchnia": 123.0, "pokoje": 4, "cena": 1150000, "dostepnosc": false },
-      { "id": "apartment12", "numer": "12", "kierunek": "NW", "powierzchnia": 123.0, "pokoje": 4, "cena": 1120000, "dostepnosc": false },
-      { "id": "apartment21", "numer": "21", "kierunek": "SE", "powierzchnia": 142.5, "pokoje": 5, "cena": 1520000, "dostepnosc": false },
-      { "id": "apartment22", "numer": "22", "kierunek": "NW", "powierzchnia": 142.5, "pokoje": 5, "cena": 1480000, "dostepnosc": false },
-      { "id": "apartment23", "numer": "23", "kierunek": "NE", "powierzchnia": 142.5, "pokoje": 5, "cena": 1560000, "dostepnosc": false },
-      { "id": "apartment24", "numer": "24", "kierunek": "SW", "powierzchnia": 142.5, "pokoje": 5, "cena": 1500000, "dostepnosc": false },
-      { "id": "apartment1",  "numer": "1",  "kierunek": "S",  "powierzchnia": 77.0,  "pokoje": 3, "cena": 890000,  "dostepnosc": false },
-      { "id": "apartment3",  "numer": "3",  "kierunek": "N",  "powierzchnia": 77.0,  "pokoje": 3, "cena": 870000,  "dostepnosc": false },
+      { "id": "apartment13", "numer": "13", "kierunek": "NE", "powierzchnia": 212.0, "pokoje": 4, "cena": 3500000, "dostepnosc": "reserved" },
+      { "id": "apartment14", "numer": "14", "kierunek": "NW", "powierzchnia": 198.0, "pokoje": 5, "cena": 3200000, "dostepnosc": false },
+      { "id": "apartment11", "numer": "11", "kierunek": "SE", "powierzchnia": 185.0, "pokoje": 4, "cena": 2950000, "dostepnosc": false },
+      { "id": "apartment12", "numer": "12", "kierunek": "NW", "powierzchnia": 185.0, "pokoje": 4, "cena": 2900000, "dostepnosc": false },
+      { "id": "apartment21", "numer": "21", "kierunek": "SE", "powierzchnia": 220.0, "pokoje": 5, "cena": 3800000, "dostepnosc": false },
+      { "id": "apartment22", "numer": "22", "kierunek": "NW", "powierzchnia": 220.0, "pokoje": 5, "cena": 3750000, "dostepnosc": false },
+      { "id": "apartment23", "numer": "23", "kierunek": "NE", "powierzchnia": 220.0, "pokoje": 5, "cena": 3900000, "dostepnosc": false },
+      { "id": "apartment24", "numer": "24", "kierunek": "SW", "powierzchnia": 220.0, "pokoje": 5, "cena": 3700000, "dostepnosc": false },
+      { "id": "apartment1",  "numer": "1",  "kierunek": "S",  "powierzchnia": 113.0, "pokoje": 3, "cena": 1950000, "dostepnosc": false },
+      { "id": "apartment3",  "numer": "3",  "kierunek": "N",  "powierzchnia": 113.0, "pokoje": 3, "cena": 1900000, "dostepnosc": false },
     ];
 
     // Local status overrides (CRM returns only true/false, we need "reserved")
@@ -2733,7 +2770,7 @@
           <span class="apt-row-price">${priceFormatter.format(apt.cena)} z\u0142</span>
           <span><span class="availability-badge ${apt.dostepnosc === 'reserved' ? 'reserved' : apt.dostepnosc ? 'available' : 'unavailable'}">${apt.dostepnosc === 'reserved' ? 'Rezerwacja' : apt.dostepnosc ? 'Dost\u0119pny' : 'Niedost\u0119pny'}</span></span>
           <span class="apt-row-actions">
-            <button type="button" class="apartment-select-btn" ${apt.id === 'apartment13' ? 'onclick="window.open(\'karta-a11.png\',\'_blank\')"' : 'disabled'}>Karta lokalu</button>
+            <button type="button" class="apartment-select-btn" ${apt.id === 'apartment13' ? 'onclick="showImageModal(\'karta-a11.png\')"' : 'disabled'}>Karta lokalu</button>
             <button type="button" class="apartment-select-btn" data-apartment-id="${apt.id}" data-pawn-type="apartment-showcase" ${apt.dostepnosc ? '' : 'disabled'}>Prezentacja apartamentu</button>
             <button type="button" class="apartment-select-btn apt-btn-topview" data-apartment-id="${apt.id}" data-pawn-type="top-view">Widok z gory</button>
             <button type="button" class="apartment-select-btn" data-apartment-id="${apt.id}" data-pawn-type="first-person" ${apt.dostepnosc ? '' : 'disabled'}>Spacer</button>
@@ -3118,5 +3155,16 @@
     }, { threshold: 0.1 });
     observer.observe(heroEl);
   </script>
+<div id="img-modal" onclick="this.classList.remove('open')">
+  <button id="img-modal-close" type="button">&times;</button>
+  <img id="img-modal-img" src="" alt="" />
+</div>
+<script>
+window.showImageModal = function(src) {
+  var m = document.getElementById('img-modal');
+  document.getElementById('img-modal-img').src = src;
+  m.classList.add('open');
+};
+</script>
 </body>
 </html>
