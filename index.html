@@ -592,7 +592,7 @@
     #orbital-hint {
       position: absolute;
       left: 50%;
-      bottom: 24px;
+      bottom: 56px;
       transform: translateX(-50%);
       z-index: 10;
       font-family: var(--font-body);
@@ -1413,7 +1413,13 @@
             <button id="connect-btn" style="display:none">Uruchom demo</button>
             <span id="queue-text">Kolejka: miejsce <span id="queue-position"></span></span>
           </div>
-          <button id="back-to-orbital" type="button" onclick="document.getElementById('orbital-layer').classList.remove('hidden');this.style.display='none'">&#8592; Widok budynku</button>
+          <button id="back-to-orbital" type="button" onclick="
+            document.getElementById('orbital-layer').classList.remove('hidden');
+            this.style.display='none';
+            document.getElementById('video-layer').classList.remove('fade-out');
+            document.getElementById('stream-layer').style.zIndex='1';
+            document.getElementById('main-view').classList.remove('stream-active');
+          ">&#8592; Widok budynku</button>
         </div>
 
     </div>
@@ -2463,7 +2469,7 @@
       if (orbLayer) { orbLayer.classList.add('hidden'); var bb = document.getElementById('back-to-orbital'); if (bb) bb.style.display = 'block'; }
       connectBtn.style.display = '';
       scrollToDemo();
-      if (demoStarted && readyTriggered) { selectApartment(aptId, pawnType); }
+      if (demoStarted && readyTriggered) { switchToStream(); selectApartment(aptId, pawnType); }
       else {
         pendingApartment = { id: aptId, pawnType: pawnType || 'orbital' };
         demoStarted = true;
