@@ -679,6 +679,112 @@
       transform: translateX(-50%) scale(1.03);
     }
 
+    /* ── Apartment Card Popup ── */
+    #apt-card-overlay {
+      display: none;
+      position: absolute;
+      inset: 0;
+      z-index: 30;
+      background: rgba(13,16,19,0.75);
+      backdrop-filter: blur(4px);
+      align-items: center;
+      justify-content: center;
+    }
+    #apt-card-overlay.open { display: flex; }
+    #apt-card {
+      background: var(--dark);
+      border: 1px solid rgba(237,230,216,0.15);
+      max-width: 520px;
+      width: 90%;
+      padding: 2rem 2.2rem;
+      position: relative;
+    }
+    #apt-card-close {
+      position: absolute;
+      top: 12px;
+      right: 14px;
+      background: none;
+      border: none;
+      color: rgba(237,230,216,0.4);
+      font-size: 1.4rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+    #apt-card-close:hover { color: var(--dark-fg); }
+    #apt-card-title {
+      font-family: var(--font-heading);
+      font-size: 1.6rem;
+      font-weight: 600;
+      color: var(--dark-fg);
+      margin-bottom: 0.3rem;
+    }
+    #apt-card-subtitle {
+      font-family: var(--font-body);
+      font-size: 0.78rem;
+      color: rgba(237,230,216,0.4);
+      margin-bottom: 1.5rem;
+    }
+    .apt-card-specs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.6rem 2rem;
+      margin-bottom: 1.8rem;
+      font-size: 0.82rem;
+    }
+    .apt-card-spec {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.4rem 0;
+      border-bottom: 1px solid rgba(237,230,216,0.06);
+      color: rgba(237,230,216,0.6);
+    }
+    .apt-card-spec strong { color: var(--dark-fg); font-weight: 500; }
+    .apt-card-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .apt-card-btn {
+      display: block;
+      width: 100%;
+      padding: 12px 16px;
+      background: transparent;
+      border: 1px solid rgba(237,230,216,0.15);
+      color: var(--dark-fg);
+      font-family: var(--font-body);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .apt-card-btn:hover {
+      background: rgba(237,230,216,0.06);
+      border-color: rgba(237,230,216,0.3);
+    }
+    .apt-card-btn.primary {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: var(--primary-fg);
+    }
+    .apt-card-btn.primary:hover { background: var(--secondary); }
+    .apt-card-btn:disabled {
+      opacity: 0.35;
+      cursor: default;
+    }
+    .apt-card-badge {
+      display: inline-block;
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      margin-bottom: 1rem;
+    }
+    .apt-card-badge.available { background: rgba(46,204,113,0.15); color: var(--green); border: 1px solid rgba(46,204,113,0.3); }
+    .apt-card-badge.unavailable { background: rgba(191,59,59,0.15); color: var(--red); border: 1px solid rgba(191,59,59,0.3); }
+
     #orbital-load {
       position: absolute;
       inset: 0;
@@ -1393,7 +1499,17 @@
               <span><i style="background:#e6a33c"></i>Rezerwacja</span>
               <span><i style="background:#d9584e"></i>Sprzedane</span>
             </div>
-            <div id="orbital-hint">Przeciagnij, zeby obrocic · kliknij mieszkanie, zeby wejsc</div>
+            <div id="orbital-hint">Przeciagnij, zeby obrocic · kliknij mieszkanie</div>
+            <div id="apt-card-overlay">
+              <div id="apt-card">
+                <button id="apt-card-close" type="button" onclick="document.getElementById('apt-card-overlay').classList.remove('open')">&times;</button>
+                <div id="apt-card-badge-wrap"></div>
+                <div id="apt-card-title"></div>
+                <div id="apt-card-subtitle"></div>
+                <div id="apt-card-specs" class="apt-card-specs"></div>
+                <div id="apt-card-actions" class="apt-card-actions"></div>
+              </div>
+            </div>
             <div id="orbital-load">
               <div class="cap">Wczytywanie modelu <span id="orbital-pct">0</span>%</div>
               <div class="bar"><i id="orbital-bar"></i></div>
@@ -1871,15 +1987,66 @@
       draw();
     });
 
-    // Click on orbital = same as clicking "Spacer" for apartment 13
-    // Uses window.openApartment which is defined later in main script
-    container.addEventListener('click', function() {
-      if (dragMoved) return;
-      // Simulate clicking the Spacer button for apartment13
-      var btn = document.querySelector('[data-apartment-id="apartment13"][data-pawn-type="first-person"]');
-      if (btn) {
-        btn.click();
+    // Apartment card data
+    var APT_CARD_DATA = {
+      'A_13': {
+        id: 'apartment13', name: 'Apartament 13', dostepnosc: true,
+        specs: [
+          ['Salon z aneksem', '69 m\u00B2'], ['Komunikacja', '20 m\u00B2'],
+          ['WC', '5,5 m\u00B2'], ['Sypialnia', '18,5 m\u00B2'],
+          ['Pok\u00F3j', '17,2 m\u00B2'], ['Pok\u00F3j', '25,7 m\u00B2'],
+          ['\u0141azienka', '6,5 m\u00B2'], ['Antresola', '47,6 m\u00B2']
+        ],
+        suma: '212 m\u00B2', taras: '36 m\u00B2'
       }
+    };
+
+    function showAptCard(unitKey) {
+      var aptId = ORBITAL_TO_APARTMENT[unitKey] || 'apartment13';
+      var data = APT_CARD_DATA[unitKey];
+      var overlay = document.getElementById('apt-card-overlay');
+      var title = document.getElementById('apt-card-title');
+      var subtitle = document.getElementById('apt-card-subtitle');
+      var specs = document.getElementById('apt-card-specs');
+      var actions = document.getElementById('apt-card-actions');
+      var badgeWrap = document.getElementById('apt-card-badge-wrap');
+
+      var meta = TOUR.units[unitKey];
+      var label = {'A_11':'Apartament 11','A_12':'Apartament 12','A_13':'Apartament 13','A_14':'Apartament 14','A_21':'Apartament 21','A_22':'Apartament 22','A_23':'Apartament 23','A_24':'Apartament 24','Lok_01 ':'Lokal 1','Lok_03':'Lokal 3'}[unitKey] || unitKey;
+      var avail = data ? data.dostepnosc : false;
+
+      badgeWrap.innerHTML = '<span class="apt-card-badge ' + (avail ? 'available' : 'unavailable') + '">' + (avail ? 'Dost\u0119pny' : 'Niedost\u0119pny') + '</span>';
+      title.textContent = label;
+      subtitle.textContent = meta ? ('Pi\u0119tro ' + meta.f + ' \u00B7 ' + meta.m2 + ' m\u00B2 \u00B7 ' + meta.r + ' pokoje') : '';
+
+      if (data && data.specs) {
+        specs.innerHTML = data.specs.map(function(s) {
+          return '<div class="apt-card-spec"><span>' + s[0] + '</span><strong>' + s[1] + '</strong></div>';
+        }).join('') +
+        '<div class="apt-card-spec"><span><strong>Suma</strong></span><strong>' + data.suma + '</strong></div>' +
+        '<div class="apt-card-spec"><span>+ Taras</span><strong>' + data.taras + '</strong></div>';
+      } else {
+        specs.innerHTML = '';
+      }
+
+      var btns = '';
+      if (avail) {
+        btns += '<button class="apt-card-btn primary" onclick="document.getElementById(\'apt-card-overlay\').classList.remove(\'open\');var b=document.querySelector(\'[data-apartment-id=&quot;' + aptId + '&quot;][data-pawn-type=&quot;first-person&quot;]\');if(b)b.click();">Uruchom spacer</button>';
+        btns += '<button class="apt-card-btn" onclick="document.getElementById(\'apt-card-overlay\').classList.remove(\'open\');var b=document.querySelector(\'[data-apartment-id=&quot;' + aptId + '&quot;][data-pawn-type=&quot;apartment-showcase&quot;]\');if(b)b.click();">Zobacz prezentacj\u0119</button>';
+      }
+      btns += '<button class="apt-card-btn" onclick="document.getElementById(\'apt-card-overlay\').classList.remove(\'open\');var b=document.querySelector(\'[data-apartment-id=&quot;' + aptId + '&quot;][data-pawn-type=&quot;top-view&quot;]\');if(b)b.click();">Widok z g\u00F3ry</button>';
+      btns += '<button class="apt-card-btn" onclick="document.getElementById(\'apt-card-overlay\').classList.remove(\'open\');var b=document.querySelector(\'[data-open-contact=&quot;' + aptId + '&quot;]\');if(b)b.click();">Zapytaj</button>';
+      actions.innerHTML = btns;
+
+      overlay.classList.add('open');
+    }
+
+    // Click on orbital = show apartment card
+    container.addEventListener('click', function(e) {
+      if (dragMoved) return;
+      if (e.target.closest('#apt-card-overlay') || e.target.closest('#orbital-load')) return;
+      var unit = hoveredUnit || 'A_13';
+      showAptCard(unit);
     });
 
     window.addEventListener('pointerup', function() {
