@@ -1330,8 +1330,8 @@
               <span><i style="background:#e6a33c"></i>Rezerwacja</span>
               <span><i style="background:#d9584e"></i>Sprzedane</span>
             </div>
-            <div id="orbital-hint">Przeciagnij, zeby obrocic budynek</div>
-            <button id="orbital-cta" type="button">Uruchom demo 3D</button>
+            <div id="orbital-hint">Przeciagnij, zeby obrocic · kliknij mieszkanie, zeby wejsc</div>
+            <button id="orbital-cta" type="button">Wejdz do inwestycji</button>
             <div id="orbital-load">
               <div class="cap">Wczytywanie modelu <span id="orbital-pct">0</span>%</div>
               <div class="bar"><i id="orbital-bar"></i></div>
@@ -1653,6 +1653,7 @@
     let dragging = false, dragX = 0, dragStart = 0, dragMoved = false, lastX = 0, lastT = 0;
     let spin = null;
     let hotKey = null;
+    let hoveredUnit = null; // unit key currently under cursor
 
     function loadImg(src) {
       return new Promise(function(res) {
@@ -1710,6 +1711,7 @@
 
           el.addEventListener('pointerenter', function() {
             hotKey = u.k;
+            hoveredUnit = u.k;
             const meta = TOUR.units[u.k];
             if (meta) {
               const STATUS_PL = { free: 'Wolne', reserved: 'Rezerwacja', sold: 'Sprzedane' };
@@ -1726,6 +1728,7 @@
 
           el.addEventListener('pointerleave', function() {
             hotKey = null;
+            hoveredUnit = null;
             tip.classList.remove('on');
             draw();
           });
@@ -1790,6 +1793,15 @@
     window.addEventListener('pointerup', function() {
       if (!dragging) return;
       dragging = false;
+      if (!dragMoved && hoveredUnit) {
+        // Click on apartment polygon - launch StreamPixel
+        window.orbitalSelectedUnit = hoveredUnit;
+        container.classList.add('hidden');
+        if (typeof window.onOrbitalUnitClick === 'function') {
+          window.onOrbitalUnitClick(hoveredUnit);
+        }
+        return;
+      }
       if (!dragMoved) return;
       if (Math.abs(vel) > 0.05) {
         var v = (-vel / DRAG_SENS) * FRAME_COUNT * 16;
@@ -2010,19 +2022,28 @@
       else if (readyTriggered) { demoStarted = true; switchToStream(); }
     });
 
-    // CTA button on orbital viewer - starts StreamPixel
+    // Orbital viewer: apartment click or CTA button starts StreamPixel
+    function startFromOrbital() {
+      var orbLayer = document.getElementById('orbital-layer');
+      if (orbLayer) orbLayer.classList.add('hidden');
+      connectBtn.style.display = '';
+      scrollToDemo();
+      demoStarted = true;
+      if (!streamLoading) startStreamLoading();
+      if (readyTriggered) switchToStream();
+    }
+
+    window.onOrbitalUnitClick = function(unitKey) {
+      clTrack('orbital_unit_click', { unit: unitKey });
+      startFromOrbital();
+    };
+
     var orbCta = document.getElementById('orbital-cta');
     if (orbCta) {
       orbCta.addEventListener('click', function(e) {
         e.stopPropagation();
         clTrack('orbital_cta_click');
-        var orbLayer = document.getElementById('orbital-layer');
-        if (orbLayer) orbLayer.classList.add('hidden');
-        connectBtn.style.display = '';
-        scrollToDemo();
-        demoStarted = true;
-        if (!streamLoading) startStreamLoading();
-        if (readyTriggered) switchToStream();
+        startFromOrbital();
       });
     }
 
