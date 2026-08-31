@@ -1331,7 +1331,6 @@
               <span><i style="background:#d9584e"></i>Sprzedane</span>
             </div>
             <div id="orbital-hint">Przeciagnij, zeby obrocic · kliknij mieszkanie, zeby wejsc</div>
-            <button id="orbital-cta" type="button">Wejdz do inwestycji</button>
             <div id="orbital-load">
               <div class="cap">Wczytywanie modelu <span id="orbital-pct">0</span>%</div>
               <div class="bar"><i id="orbital-bar"></i></div>
@@ -1712,6 +1711,8 @@
           el.addEventListener('pointerenter', function() {
             hotKey = u.k;
             hoveredUnit = u.k;
+            // Apply highlight directly - do NOT call draw() which destroys this polygon
+            el.classList.add('hot');
             const meta = TOUR.units[u.k];
             if (meta) {
               const STATUS_PL = { free: 'Wolne', reserved: 'Rezerwacja', sold: 'Sprzedane' };
@@ -1723,14 +1724,14 @@
               tip.textContent = bits.join('  \u00B7  ');
               tip.classList.add('on');
             }
-            draw();
           });
 
           el.addEventListener('pointerleave', function() {
             hotKey = null;
-            hoveredUnit = null;
+            // Do NOT clear hoveredUnit here - polygon gets destroyed by draw()
+            // which fires pointerleave, making hoveredUnit null before click arrives
+            el.classList.remove('hot');
             tip.classList.remove('on');
-            draw();
           });
 
           svg.appendChild(el);
@@ -1738,6 +1739,10 @@
       });
     }
 
+    // Clear hoveredUnit only when pointer truly leaves the SVG area
+    svg.addEventListener('pointerleave', function() {
+      hoveredUnit = null;
+    });
 
     function resize() {
       if (!frames.length) return;
