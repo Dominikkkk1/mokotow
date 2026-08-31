@@ -568,6 +568,7 @@
       left: 50%;
       bottom: 24px;
       transform: translateX(-50%);
+      z-index: 10;
       font-family: var(--font-body);
       font-size: 0.72rem;
       font-weight: 500;
@@ -586,6 +587,7 @@
       left: 50%;
       top: 16px;
       transform: translateX(-50%);
+      z-index: 10;
       font-family: var(--font-body);
       font-size: 0.78rem;
       font-weight: 500;
@@ -604,6 +606,7 @@
       position: absolute;
       left: 16px;
       bottom: 16px;
+      z-index: 10;
       display: flex;
       gap: 16px;
       align-items: center;
@@ -628,6 +631,7 @@
     #orbital-load {
       position: absolute;
       inset: 0;
+      z-index: 20;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -1791,58 +1795,28 @@
       new ResizeObserver(function() { if (frames.length) resize(); }).observe(container);
     }
 
-    // Debug helper - shows state on page
-    var dbg = document.createElement('div');
-    dbg.id = 'orbital-debug';
-    dbg.style.cssText = 'position:fixed;top:0;left:0;z-index:99999;background:red;color:#fff;padding:8px 12px;font:12px monospace;pointer-events:none';
-    dbg.textContent = 'ORBITAL: init ok, TOUR=' + (TOUR ? 'yes' : 'no') + ', frames=' + FRAME_COUNT;
-    document.body.appendChild(dbg);
-
     // Load frames
     (async function() {
       let loaded = 0;
-      var failCount = 0;
       const promises = [];
       for (let i = 0; i < FRAME_COUNT; i++) {
         const n = String(i).padStart(4, '0');
         promises.push(loadImg('tour/orbit.' + n + '.jpeg').then(function(img) {
           loaded++;
-          if (!img) failCount++;
           const p = Math.round(loaded / FRAME_COUNT * 100);
           pctEl.textContent = p;
           barEl.style.width = p + '%';
-          dbg.textContent = 'ORBITAL: loading ' + loaded + '/' + FRAME_COUNT + ' (fail:' + failCount + ')';
           return img;
         }));
       }
       const imgs = await Promise.all(promises);
       frames = imgs.filter(Boolean);
-      dbg.textContent = 'ORBITAL: loaded ' + frames.length + ' frames, failed=' + failCount;
       if (frames[0] && frames[0].decode) {
         await Promise.race([frames[0].decode().catch(function(){}), new Promise(function(r) { setTimeout(r, 600); })]);
       }
       loadEl.classList.add('done');
       resize();
-      requestAnimationFrame(function() {
-        draw();
-        var svgRect = svg.getBoundingClientRect();
-        var contRect = container.getBoundingClientRect();
-        // Check if polygons are within visible area
-        var polys = svg.querySelectorAll('polygon');
-        var firstPoly = polys[0];
-        var polyRect = firstPoly ? firstPoly.getBoundingClientRect() : null;
-        var loadDisplay = window.getComputedStyle(loadEl).display;
-        var hintEl = document.getElementById('orbital-hint');
-        var legendEl = document.getElementById('orbital-legend');
-        dbg.textContent = 'polys=' + polys.length
-          + ' | 1st poly:' + (polyRect ? Math.round(polyRect.left) + ',' + Math.round(polyRect.top) + ' ' + Math.round(polyRect.width) + 'x' + Math.round(polyRect.height) : 'none')
-          + ' | cont:' + Math.round(contRect.top) + '-' + Math.round(contRect.bottom)
-          + ' | svg top:' + svg.style.top
-          + ' | load:' + loadDisplay
-          + ' | hint:' + window.getComputedStyle(hintEl).display + '/' + window.getComputedStyle(hintEl).visibility
-          + ' | legend:' + window.getComputedStyle(legendEl).display + '/' + window.getComputedStyle(legendEl).visibility
-          + ' | frame overflow:' + window.getComputedStyle(frameBox).overflow;
-      });
+      requestAnimationFrame(draw);
     })();
   })();
   </script>
