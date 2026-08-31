@@ -1791,28 +1791,43 @@
       new ResizeObserver(function() { if (frames.length) resize(); }).observe(container);
     }
 
+    // Debug helper - shows state on page
+    var dbg = document.createElement('div');
+    dbg.id = 'orbital-debug';
+    dbg.style.cssText = 'position:fixed;top:0;left:0;z-index:99999;background:red;color:#fff;padding:8px 12px;font:12px monospace;pointer-events:none';
+    dbg.textContent = 'ORBITAL: init ok, TOUR=' + (TOUR ? 'yes' : 'no') + ', frames=' + FRAME_COUNT;
+    document.body.appendChild(dbg);
+
     // Load frames
     (async function() {
       let loaded = 0;
+      var failCount = 0;
       const promises = [];
       for (let i = 0; i < FRAME_COUNT; i++) {
         const n = String(i).padStart(4, '0');
         promises.push(loadImg('tour/orbit.' + n + '.jpeg').then(function(img) {
           loaded++;
+          if (!img) failCount++;
           const p = Math.round(loaded / FRAME_COUNT * 100);
           pctEl.textContent = p;
           barEl.style.width = p + '%';
+          dbg.textContent = 'ORBITAL: loading ' + loaded + '/' + FRAME_COUNT + ' (fail:' + failCount + ')';
           return img;
         }));
       }
       const imgs = await Promise.all(promises);
       frames = imgs.filter(Boolean);
+      dbg.textContent = 'ORBITAL: loaded ' + frames.length + ' frames, failed=' + failCount;
       if (frames[0] && frames[0].decode) {
         await Promise.race([frames[0].decode().catch(function(){}), new Promise(function(r) { setTimeout(r, 600); })]);
       }
       loadEl.classList.add('done');
       resize();
-      requestAnimationFrame(draw);
+      dbg.textContent = 'ORBITAL: ready, frames=' + frames.length + ', svg children=' + svg.childNodes.length + ', container=' + container.offsetWidth + 'x' + container.offsetHeight;
+      requestAnimationFrame(function() {
+        draw();
+        dbg.textContent += ' | after draw: svg children=' + svg.childNodes.length + ', svg display=' + svg.style.display;
+      });
     })();
   })();
   </script>
