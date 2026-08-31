@@ -721,9 +721,14 @@
       background: none;
       border: none;
       color: rgba(237,230,216,0.4);
-      font-size: 1.4rem;
+      font-size: 2rem;
       cursor: pointer;
       line-height: 1;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     #apt-card-close:hover { color: var(--dark-fg); }
     #apt-card-title {
@@ -2101,16 +2106,16 @@
         specs.style.display = 'none';
       }
 
-      // Action buttons
+      // Action buttons - same as table row, all 5
+      var canInteract = avail || reserved;
+      var close = "document.getElementById('apt-card-overlay').classList.remove('open');";
+      var clickBtn = function(sel) { return close + "var b=document.querySelector('" + sel + "');if(b)b.click();"; };
       var btns = '';
-      if (imgSrc) {
-        btns += '<button class="apt-card-btn" onclick="window.open(\'' + imgSrc + '\',\'_blank\')">Zobacz kart\u0119 lokalu</button>';
-      }
-      if (avail || reserved) {
-        btns += '<button class="apt-card-btn" onclick="document.getElementById(\'apt-card-overlay\').classList.remove(\'open\');var b=document.querySelector(\'[data-apartment-id=&quot;' + aptId + '&quot;][data-pawn-type=&quot;apartment-showcase&quot;]\');if(b)b.click();">Zobacz prezentacj\u0119</button>';
-        btns += '<button class="apt-card-btn primary" onclick="document.getElementById(\'apt-card-overlay\').classList.remove(\'open\');var b=document.querySelector(\'[data-apartment-id=&quot;' + aptId + '&quot;][data-pawn-type=&quot;first-person&quot;]\');if(b)b.click();">Uruchom spacer</button>';
-      }
-      btns += '<button class="apt-card-btn" onclick="document.getElementById(\'apt-card-overlay\').classList.remove(\'open\');var b=document.querySelector(\'[data-open-contact=&quot;' + aptId + '&quot;]\');if(b)b.click();">Zapytaj</button>';
+      btns += '<button class="apt-card-btn" ' + (imgSrc ? 'onclick="window.open(\'' + imgSrc + '\',\'_blank\')"' : 'disabled') + '>Karta lokalu</button>';
+      btns += '<button class="apt-card-btn" ' + (canInteract ? 'onclick="' + clickBtn('[data-apartment-id=&quot;' + aptId + '&quot;][data-pawn-type=&quot;apartment-showcase&quot;]') + '"' : 'disabled') + '>Prezentacja apartamentu</button>';
+      btns += '<button class="apt-card-btn" onclick="' + clickBtn('[data-apartment-id=&quot;' + aptId + '&quot;][data-pawn-type=&quot;top-view&quot;]') + '">Widok z g\u00F3ry</button>';
+      btns += '<button class="apt-card-btn primary" ' + (canInteract ? 'onclick="' + clickBtn('[data-apartment-id=&quot;' + aptId + '&quot;][data-pawn-type=&quot;first-person&quot;]') + '"' : 'disabled') + '>Spacer</button>';
+      btns += '<button class="apt-card-btn" onclick="' + clickBtn('[data-open-contact=&quot;' + aptId + '&quot;]') + '">Zapytaj</button>';
       actions.innerHTML = btns;
 
       overlay.classList.add('open');
@@ -2394,10 +2399,10 @@
 
     // Mapping: orbital unit key -> real apartment ID in StreamPixel/CRM
     const ORBITAL_TO_APARTMENT = {
-      'A_11': 'apartment11',
-      'A_12': 'apartment12',
-      'A_13': 'apartment13',
-      'A_14': 'apartment14',
+      'A_11': 'apartment13',
+      'A_12': 'apartment14',
+      'A_13': 'apartment11',
+      'A_14': 'apartment12',
       'A_21': 'apartment21',
       'A_22': 'apartment22',
       'A_23': 'apartment23',
