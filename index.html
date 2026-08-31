@@ -798,6 +798,7 @@
       margin-bottom: 1rem;
     }
     .apt-card-badge.available { background: rgba(46,204,113,0.15); color: var(--green); border: 1px solid rgba(46,204,113,0.3); }
+    .apt-card-badge.reserved { background: rgba(230,163,60,0.15); color: #e6a33c; border: 1px solid rgba(230,163,60,0.3); }
     .apt-card-badge.unavailable { background: rgba(191,59,59,0.15); color: var(--red); border: 1px solid rgba(191,59,59,0.3); }
 
     #orbital-load {
@@ -984,6 +985,11 @@
     .availability-badge.available {
       background: rgba(46,204,113,0.1);
       color: var(--green);
+    }
+
+    .availability-badge.reserved {
+      background: rgba(230,163,60,0.1);
+      color: #e6a33c;
     }
 
     .availability-badge.unavailable {
@@ -2054,9 +2060,13 @@
       var label = UNIT_NAMES[unitKey] || unitKey;
       // Read availability from CRM/fallback data, not from card data
       var aptEntry = (typeof apartmentsData !== 'undefined') ? apartmentsData.find(function(a) { return a.id === aptId; }) : null;
-      var avail = aptEntry ? aptEntry.dostepnosc : false;
+      var rawStatus = aptEntry ? aptEntry.dostepnosc : false;
+      var avail = rawStatus === true;
+      var reserved = rawStatus === 'reserved';
+      var badgeClass = reserved ? 'reserved' : avail ? 'available' : 'unavailable';
+      var badgeText = reserved ? 'Rezerwacja' : avail ? 'Dost\u0119pny' : 'Niedost\u0119pny';
 
-      badgeWrap.innerHTML = '<span class="apt-card-badge ' + (avail ? 'available' : 'unavailable') + '">' + (avail ? 'Dost\u0119pny' : 'Niedost\u0119pny') + '</span>';
+      badgeWrap.innerHTML = '<span class="apt-card-badge ' + badgeClass + '">' + badgeText + '</span>';
       title.textContent = label;
       subtitle.textContent = meta ? ('Pi\u0119tro ' + meta.f + ' \u00B7 ' + meta.m2 + ' m\u00B2 \u00B7 ' + meta.r + ' pokoje') : '';
 
@@ -2087,7 +2097,7 @@
       if (imgSrc) {
         btns += '<button class="apt-card-btn" onclick="window.open(\'' + imgSrc + '\',\'_blank\')">Zobacz kart\u0119 lokalu</button>';
       }
-      if (avail) {
+      if (avail || reserved) {
         btns += '<button class="apt-card-btn" onclick="document.getElementById(\'apt-card-overlay\').classList.remove(\'open\');var b=document.querySelector(\'[data-apartment-id=&quot;' + aptId + '&quot;][data-pawn-type=&quot;apartment-showcase&quot;]\');if(b)b.click();">Zobacz prezentacj\u0119</button>';
         btns += '<button class="apt-card-btn primary" onclick="document.getElementById(\'apt-card-overlay\').classList.remove(\'open\');var b=document.querySelector(\'[data-apartment-id=&quot;' + aptId + '&quot;][data-pawn-type=&quot;first-person&quot;]\');if(b)b.click();">Uruchom spacer</button>';
       }
@@ -2671,7 +2681,7 @@
        Po kazdej zmianie w panelu warto ja odswiezyc, ale nic sie nie psuje,
        gdy sie o tym zapomni. */
     const FALLBACK_APARTMENTS = [
-      { "id": "apartment13", "numer": "13", "kierunek": "NE", "powierzchnia": 63.0,  "pokoje": 4, "cena": 1230000, "dostepnosc": true },
+      { "id": "apartment13", "numer": "13", "kierunek": "NE", "powierzchnia": 63.0,  "pokoje": 4, "cena": 1230000, "dostepnosc": "reserved" },
       { "id": "apartment14", "numer": "14", "kierunek": "NW", "powierzchnia": 73.0,  "pokoje": 5, "cena": 1890000, "dostepnosc": false },
       { "id": "apartment11", "numer": "11", "kierunek": "SE", "powierzchnia": 123.0, "pokoje": 4, "cena": 1150000, "dostepnosc": false },
       { "id": "apartment12", "numer": "12", "kierunek": "NW", "powierzchnia": 123.0, "pokoje": 4, "cena": 1120000, "dostepnosc": false },
@@ -2698,7 +2708,7 @@
           <span class="apt-row-dim">${apt.pokoje} ${apt.pokoje === 1 ? 'pok\u00f3j' : apt.pokoje < 5 ? 'pokoje' : 'pokoi'}</span>
           <span class="apt-row-dim">${apt.kierunek}</span>
           <span class="apt-row-price">${priceFormatter.format(apt.cena)} z\u0142</span>
-          <span><span class="availability-badge ${apt.dostepnosc ? 'available' : 'unavailable'}">${apt.dostepnosc ? 'Dost\u0119pny' : 'Niedost\u0119pny'}</span></span>
+          <span><span class="availability-badge ${apt.dostepnosc === 'reserved' ? 'reserved' : apt.dostepnosc ? 'available' : 'unavailable'}">${apt.dostepnosc === 'reserved' ? 'Rezerwacja' : apt.dostepnosc ? 'Dost\u0119pny' : 'Niedost\u0119pny'}</span></span>
           <span class="apt-row-actions">
             ${apt.id === 'apartment13' ? '<button type="button" class="apartment-select-btn" onclick="window.open(\'karta-a11.png\',\'_blank\')">Karta lokalu</button>' : ''}
             <button type="button" class="apartment-select-btn" data-apartment-id="${apt.id}" data-pawn-type="apartment-showcase" ${apt.dostepnosc ? '' : 'disabled'}>Prezentacja apartamentu</button>
