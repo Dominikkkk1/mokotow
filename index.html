@@ -1419,7 +1419,7 @@
           <div id="apartments-list"></div>
         </div>
       </div>
-      <button id="apt-show-more" type="button">Zobacz wszystkie lokale &#9660;</button>
+      <button id="apt-show-more" type="button" onclick="var b=document.getElementById('apartment-browser');var e=b.classList.toggle('expanded');this.innerHTML=e?'Zwi\u0144 list\u0119 &#9650;':'Zobacz wszystkie lokale &#9660;'">Zobacz wszystkie lokale &#9660;</button>
     </div>
   </section>
 
@@ -2403,18 +2403,6 @@
           </span>
         </div>
       `).join('');
-    }
-
-    // Show more / collapse apartment table
-    var showMoreBtn = document.getElementById('apt-show-more');
-    var browserEl = document.getElementById('apartment-browser');
-    if (showMoreBtn && browserEl) {
-      showMoreBtn.addEventListener('click', function() {
-        var expanded = browserEl.classList.toggle('expanded');
-        showMoreBtn.innerHTML = expanded
-          ? 'Zwi\u0144 list\u0119 &#9650;'
-          : 'Zobacz wszystkie lokale &#9660;';
-      });
     }
 
     function sendStreamPixelMessage(message, targetOrigin = 'https://share.streampixel.io') {
