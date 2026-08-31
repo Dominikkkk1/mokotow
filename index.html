@@ -2068,7 +2068,16 @@
 
       badgeWrap.innerHTML = '<span class="apt-card-badge ' + badgeClass + '">' + badgeText + '</span>';
       title.textContent = label;
-      subtitle.textContent = meta ? ('Pi\u0119tro ' + meta.f + ' \u00B7 ' + meta.m2 + ' m\u00B2 \u00B7 ' + meta.r + ' pokoje') : '';
+      var priceStr = aptEntry && aptEntry.cena ? new Intl.NumberFormat('pl-PL').format(aptEntry.cena) + ' z\u0142' : '';
+      var parts = [];
+      if (meta) {
+        parts.push('Pi\u0119tro ' + meta.f);
+        if (aptEntry) parts.push(aptEntry.powierzchnia + ' m\u00B2');
+        else parts.push(meta.m2 + ' m\u00B2');
+        parts.push(meta.r + ' pokoje');
+      }
+      if (priceStr) parts.push(priceStr);
+      subtitle.textContent = parts.join(' \u00B7 ');
 
       // Floor plan image
       var imgSrc = UNIT_IMAGES[unitKey];
@@ -2693,7 +2702,16 @@
       { "id": "apartment3",  "numer": "3",  "kierunek": "N",  "powierzchnia": 77.0,  "pokoje": 3, "cena": 870000,  "dostepnosc": false },
     ];
 
+    // Local status overrides (CRM returns only true/false, we need "reserved")
+    var STATUS_OVERRIDES = { 'apartment13': 'reserved' };
+    function applyStatusOverrides() {
+      apartmentsData.forEach(function(a) {
+        if (STATUS_OVERRIDES[a.id]) a.dostepnosc = STATUS_OVERRIDES[a.id];
+      });
+    }
+
     let apartmentsData = FALLBACK_APARTMENTS;
+    applyStatusOverrides();
 
     const apartmentsList = document.getElementById('apartments-list');
     const priceFormatter = new Intl.NumberFormat('pl-PL');
@@ -2710,7 +2728,7 @@
           <span class="apt-row-price">${priceFormatter.format(apt.cena)} z\u0142</span>
           <span><span class="availability-badge ${apt.dostepnosc === 'reserved' ? 'reserved' : apt.dostepnosc ? 'available' : 'unavailable'}">${apt.dostepnosc === 'reserved' ? 'Rezerwacja' : apt.dostepnosc ? 'Dost\u0119pny' : 'Niedost\u0119pny'}</span></span>
           <span class="apt-row-actions">
-            ${apt.id === 'apartment13' ? '<button type="button" class="apartment-select-btn" onclick="window.open(\'karta-a11.png\',\'_blank\')">Karta lokalu</button>' : ''}
+            <button type="button" class="apartment-select-btn" ${apt.id === 'apartment13' ? 'onclick="window.open(\'karta-a11.png\',\'_blank\')"' : 'disabled'}>Karta lokalu</button>
             <button type="button" class="apartment-select-btn" data-apartment-id="${apt.id}" data-pawn-type="apartment-showcase" ${apt.dostepnosc ? '' : 'disabled'}>Prezentacja apartamentu</button>
             <button type="button" class="apartment-select-btn apt-btn-topview" data-apartment-id="${apt.id}" data-pawn-type="top-view">Widok z gory</button>
             <button type="button" class="apartment-select-btn" data-apartment-id="${apt.id}" data-pawn-type="first-person" ${apt.dostepnosc ? '' : 'disabled'}>Spacer</button>
@@ -2835,11 +2853,7 @@
       } catch (error) {
         console.warn('[CRM] nie udalo sie pobrac listy mieszkan, uzywam kopii lokalnej', error);
       }
-      // Preserve local status overrides (CRM returns only true/false)
-      var STATUS_OVERRIDES = { 'apartment13': 'reserved' };
-      apartmentsData.forEach(function(a) {
-        if (STATUS_OVERRIDES[a.id]) a.dostepnosc = STATUS_OVERRIDES[a.id];
-      });
+      applyStatusOverrides();
       renderApartments(apartmentsData);
       applyDeepLink();
     }
