@@ -1520,7 +1520,7 @@
               <span><i style="background:#e6a33c"></i>Rezerwacja</span>
               <span><i style="background:#d9584e"></i>Sprzedane</span>
             </div>
-            <div id="orbital-click-zone" onclick="if(!window._orbDragged){window._orbShowCard(window._orbHovered||'A_11')}" onpointerdown="window._orbDragged=false;window._orbDownX=event.clientX;window._orbDownY=event.clientY" onpointermove="if(window._orbDownX!=null){var dx=event.clientX-window._orbDownX,dy=event.clientY-window._orbDownY;if(dx*dx+dy*dy>225)window._orbDragged=true}" onpointerup="window._orbDownX=null"></div>
+            <div id="orbital-click-zone"></div>
             <div id="orbital-hint">Przeciagnij, zeby obrocic · kliknij mieszkanie</div>
             <div id="apt-card-overlay" onclick="if(event.target===this)this.classList.remove('open')">
               <div id="apt-card">
@@ -2094,10 +2094,59 @@
       overlay.classList.add('open');
     }
 
-    // Expose for inline onclick on #orbital-click-zone
-    window._orbShowCard = showAptCard;
-    // Keep hoveredUnit accessible
-    Object.defineProperty(window, '_orbHovered', { get: function() { return hoveredUnit; } });
+    // Click zone: catches clicks, detects which unit by point-in-polygon test
+    var clickZone = document.getElementById('orbital-click-zone');
+    var czDown = null;
+    clickZone.addEventListener('pointerdown', function(e) {
+      czDown = { x: e.clientX, y: e.clientY };
+    });
+    clickZone.addEventListener('pointerup', function(e) {
+      if (!czDown) return;
+      var dx = e.clientX - czDown.x, dy = e.clientY - czDown.y;
+      czDown = null;
+      if (dx * dx + dy * dy > 225) return; // drag, not click
+
+      // Convert click position to SVG viewBox coords
+      var svgRect = svg.getBoundingClientRect();
+      if (!svgRect.width || !svgRect.height) return;
+      var nx = ((e.clientX - svgRect.left) / svgRect.width) * NORM;
+      var ny = ((e.clientY - svgRect.top) / svgRect.height) * NORM;
+
+      // Find which unit polygon contains this point
+      var idx = frameIndex(pos);
+      var scopes = orbitShot.scopes;
+      var hitUnit = null;
+      for (var sk in scopes) {
+        var sd = scopes[sk];
+        if (!sd.f) continue;
+        var fr = sd.f.find(function(x) { return x.i === idx; });
+        if (!fr) continue;
+        for (var ui = 0; ui < fr.u.length; ui++) {
+          var u = fr.u[ui];
+          if (u.vis < 0.2) continue;
+          for (var ri = 0; ri < u.p.length; ri++) {
+            if (pointInPolygon(nx, ny, u.p[ri])) { hitUnit = u.k; break; }
+          }
+          if (hitUnit) break;
+        }
+        if (hitUnit) break;
+      }
+
+      showAptCard(hitUnit || 'A_11');
+    });
+
+    // Ray-casting point-in-polygon
+    function pointInPolygon(x, y, ring) {
+      var inside = false;
+      for (var i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+        var xi = ring[i][0], yi = ring[i][1];
+        var xj = ring[j][0], yj = ring[j][1];
+        if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) {
+          inside = !inside;
+        }
+      }
+      return inside;
+    }
 
     window.addEventListener('pointerup', function() {
       if (!dragging) return;
