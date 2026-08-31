@@ -589,6 +589,12 @@
     #orbital-svg polygon.dim:hover { fill-opacity: 0; stroke-opacity: 0; }
     #orbital-svg polygon.hot { fill-opacity: 0.45; stroke-opacity: 0.9; }
 
+    #orbital-click-zone {
+      position: absolute;
+      inset: 0;
+      z-index: 12;
+      cursor: pointer;
+    }
     #orbital-hint {
       position: absolute;
       left: 50%;
@@ -1499,6 +1505,7 @@
               <span><i style="background:#e6a33c"></i>Rezerwacja</span>
               <span><i style="background:#d9584e"></i>Sprzedane</span>
             </div>
+            <div id="orbital-click-zone" onclick="if(!window._orbDragged){window._orbShowCard(window._orbHovered||'A_13')}" onpointerdown="window._orbDragged=false;window._orbDownX=event.clientX;window._orbDownY=event.clientY" onpointermove="if(window._orbDownX!=null){var dx=event.clientX-window._orbDownX,dy=event.clientY-window._orbDownY;if(dx*dx+dy*dy>225)window._orbDragged=true}" onpointerup="window._orbDownX=null"></div>
             <div id="orbital-hint">Przeciagnij, zeby obrocic · kliknij mieszkanie</div>
             <div id="apt-card-overlay">
               <div id="apt-card">
@@ -2041,13 +2048,10 @@
       overlay.classList.add('open');
     }
 
-    // Click on orbital = show apartment card
-    container.addEventListener('click', function(e) {
-      if (dragMoved) return;
-      if (e.target.closest('#apt-card-overlay') || e.target.closest('#orbital-load')) return;
-      var unit = hoveredUnit || 'A_13';
-      showAptCard(unit);
-    });
+    // Expose for inline onclick on #orbital-click-zone
+    window._orbShowCard = showAptCard;
+    // Keep hoveredUnit accessible
+    Object.defineProperty(window, '_orbHovered', { get: function() { return hoveredUnit; } });
 
     window.addEventListener('pointerup', function() {
       if (!dragging) return;
