@@ -2529,7 +2529,18 @@
         if (!response.ok) throw new Error('HTTP ' + response.status);
         const data = await response.json();
         if (Array.isArray(data.apartments) && data.apartments.length) {
-          apartmentsData = data.apartments;
+          // Merge: CRM updates existing entries, fallback-only entries stay
+          var crmById = {};
+          data.apartments.forEach(function(a) { crmById[a.id] = a; });
+          apartmentsData = FALLBACK_APARTMENTS.map(function(fb) {
+            return crmById[fb.id] || fb;
+          });
+          // Add any CRM-only apartments not in fallback
+          data.apartments.forEach(function(a) {
+            if (!FALLBACK_APARTMENTS.find(function(fb) { return fb.id === a.id; })) {
+              apartmentsData.push(a);
+            }
+          });
         }
       } catch (error) {
         console.warn('[CRM] nie udalo sie pobrac listy mieszkan, uzywam kopii lokalnej', error);
