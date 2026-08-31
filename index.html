@@ -1709,39 +1709,6 @@
       });
     }
 
-    // Click tracking lives OUTSIDE drawOverlay because drawOverlay destroys
-    // and recreates all polygons on every frame. Listeners on individual
-    // polygons lose their pointerdown state when the polygon is replaced.
-    var svgDownPos = null;
-    var svgDownUnit = null;
-    svg.addEventListener('pointerdown', function(e) {
-      var t = e.target.closest ? e.target.closest('polygon') : (e.target.tagName === 'polygon' ? e.target : null);
-      if (!t || !t.dataset.unit) return;
-      svgDownPos = { x: e.clientX, y: e.clientY };
-      svgDownUnit = t.dataset.unit;
-      console.log('[orbital] pointerdown on', svgDownUnit);
-    });
-    svg.addEventListener('pointerup', function(e) {
-      if (!svgDownPos || !svgDownUnit) return;
-      var dx = e.clientX - svgDownPos.x;
-      var dy = e.clientY - svgDownPos.y;
-      var dist = Math.sqrt(dx*dx + dy*dy);
-      var unitKey = svgDownUnit;
-      svgDownPos = null;
-      svgDownUnit = null;
-      console.log('[orbital] pointerup dist=' + dist.toFixed(1) + ' unit=' + unitKey);
-      if (dist > 10) return;
-      e.stopPropagation();
-      dragging = false;
-      console.log('[orbital] CLICK on', unitKey, '-> starting StreamPixel');
-      window.orbitalSelectedUnit = unitKey;
-      container.classList.add('hidden');
-      if (typeof window.onOrbitalUnitClick === 'function') {
-        window.onOrbitalUnitClick(unitKey);
-      } else {
-        console.error('[orbital] onOrbitalUnitClick not defined!');
-      }
-    });
 
     function resize() {
       if (!frames.length) return;
@@ -1797,7 +1764,14 @@
     window.addEventListener('pointerup', function() {
       if (!dragging) return;
       dragging = false;
-      if (!dragMoved) return;
+      if (!dragMoved) {
+        // No movement = click. Launch StreamPixel.
+        container.classList.add('hidden');
+        if (typeof window.onOrbitalUnitClick === 'function') {
+          window.onOrbitalUnitClick('orbital');
+        }
+        return;
+      }
       if (Math.abs(vel) > 0.05) {
         var v = (-vel / DRAG_SENS) * FRAME_COUNT * 16;
         (function glide() {
