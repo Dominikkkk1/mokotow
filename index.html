@@ -1673,6 +1673,7 @@
           el.setAttribute('points', ring.map(function(p) { return p.join(','); }).join(' '));
           el.setAttribute('fill', color);
           el.setAttribute('stroke', color);
+          el.dataset.unit = u.k;
           if (isHot) el.classList.add('hot');
           if (isDim) el.classList.add('dim');
 
@@ -1698,21 +1699,23 @@
             draw();
           });
 
-          el.addEventListener('pointerup', function(e) {
-            dragging = false;
-            if (dragMoved) return;
-            e.stopPropagation();
-            window.orbitalSelectedUnit = u.k;
-            container.classList.add('hidden');
-            if (typeof window.onOrbitalUnitClick === 'function') {
-              window.onOrbitalUnitClick(u.k);
-            }
-          });
-
           svg.appendChild(el);
         });
       });
     }
+
+    // Single click handler on SVG - fires only if user didn't drag
+    svg.addEventListener('click', function(e) {
+      if (dragMoved) return;
+      var target = e.target;
+      if (target.tagName !== 'polygon' || !target.dataset.unit) return;
+      var unitKey = target.dataset.unit;
+      window.orbitalSelectedUnit = unitKey;
+      container.classList.add('hidden');
+      if (typeof window.onOrbitalUnitClick === 'function') {
+        window.onOrbitalUnitClick(unitKey);
+      }
+    });
 
     function resize() {
       if (!frames.length) return;
@@ -1992,6 +1995,7 @@
     window.onOrbitalUnitClick = (unitKey) => {
       clTrack('orbital_unit_click', { unit: unitKey });
       demoStarted = true;
+      connectBtn.style.display = '';
       if (!streamLoading) { startStreamLoading(); }
       if (readyTriggered) { switchToStream(); }
     };
