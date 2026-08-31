@@ -628,6 +628,31 @@
       display: inline-block;
       margin-right: 5px;
     }
+    #orbital-cta {
+      position: absolute;
+      bottom: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      height: 48px;
+      padding: 0 2.2rem;
+      background: var(--primary);
+      color: var(--primary-fg);
+      border: none;
+      font-family: var(--font-body);
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s;
+      white-space: nowrap;
+    }
+    #orbital-cta:hover {
+      background: var(--secondary);
+      transform: translateX(-50%) scale(1.03);
+    }
+
     #orbital-load {
       position: absolute;
       inset: 0;
@@ -1305,7 +1330,8 @@
               <span><i style="background:#e6a33c"></i>Rezerwacja</span>
               <span><i style="background:#d9584e"></i>Sprzedane</span>
             </div>
-            <div id="orbital-hint">Przeciagnij, zeby obrocic budynek · kliknij mieszkanie, zeby wejsc do srodka</div>
+            <div id="orbital-hint">Przeciagnij, zeby obrocic budynek</div>
+            <button id="orbital-cta" type="button">Uruchom demo 3D</button>
             <div id="orbital-load">
               <div class="cap">Wczytywanie modelu <span id="orbital-pct">0</span>%</div>
               <div class="bar"><i id="orbital-bar"></i></div>
@@ -1764,14 +1790,7 @@
     window.addEventListener('pointerup', function() {
       if (!dragging) return;
       dragging = false;
-      if (!dragMoved) {
-        // No movement = click. Launch StreamPixel.
-        container.classList.add('hidden');
-        if (typeof window.onOrbitalUnitClick === 'function') {
-          window.onOrbitalUnitClick('orbital');
-        }
-        return;
-      }
+      if (!dragMoved) return;
       if (Math.abs(vel) > 0.05) {
         var v = (-vel / DRAG_SENS) * FRAME_COUNT * 16;
         (function glide() {
@@ -1991,14 +2010,22 @@
       else if (readyTriggered) { demoStarted = true; switchToStream(); }
     });
 
-    // Orbital viewer: apartment click starts StreamPixel directly
-    window.onOrbitalUnitClick = (unitKey) => {
-      clTrack('orbital_unit_click', { unit: unitKey });
-      demoStarted = true;
-      connectBtn.style.display = '';
-      if (!streamLoading) { startStreamLoading(); }
-      if (readyTriggered) { switchToStream(); }
-    };
+    // CTA button on orbital viewer - starts StreamPixel
+    var orbCta = document.getElementById('orbital-cta');
+    if (orbCta) {
+      orbCta.addEventListener('click', function(e) {
+        e.stopPropagation();
+        clTrack('orbital_cta_click');
+        var orbLayer = document.getElementById('orbital-layer');
+        if (orbLayer) orbLayer.classList.add('hidden');
+        connectBtn.style.display = '';
+        scrollToDemo();
+        demoStarted = true;
+        if (!streamLoading) startStreamLoading();
+        if (readyTriggered) switchToStream();
+      });
+    }
+
 
     /* ── ZDARZENIA ZE SCENY 3D ──
        Scena raportuje wejscie i wyjscie z pomieszczenia oraz zmiane kamery. Czas
@@ -2330,6 +2357,10 @@
      * Wolane z dwoch miejsc: przyciskow w liscie i linku z adresu (patrz nizej).
      */
     function openApartment(aptId, pawnType) {
+      // Hide orbital viewer when entering StreamPixel
+      var orbLayer = document.getElementById('orbital-layer');
+      if (orbLayer) orbLayer.classList.add('hidden');
+      connectBtn.style.display = '';
       scrollToDemo();
       if (demoStarted && readyTriggered) { selectApartment(aptId, pawnType); }
       else {
@@ -2353,6 +2384,10 @@
       document.querySelectorAll('.pawn-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       clTrack('pawn_select', { pawn: btn.dataset.pawnSelect });
+      // Hide orbital
+      var orbLayer = document.getElementById('orbital-layer');
+      if (orbLayer) orbLayer.classList.add('hidden');
+      connectBtn.style.display = '';
       scrollToDemo();
       if (demoStarted && readyTriggered) {
         sendStreamPixelMessage({ type: 'pawn-selection', pawnType: btn.dataset.pawnSelect });
