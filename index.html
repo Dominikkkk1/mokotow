@@ -1461,8 +1461,9 @@
       #demo-section { padding: 3.5rem 1.25rem 4rem; }
 
       #demo-app {
-        height: 55vh;
-        min-height: 360px;
+        aspect-ratio: 4 / 3;
+        max-height: 55vh;
+        min-height: 300px;
       }
 
       .apt-table-header { display: none; }
@@ -1511,6 +1512,73 @@
       .apt-name { font-size: 1rem; }
 
       .btn { height: 48px; padding: 0 1.5rem; font-size: 0.72rem; }
+
+      /* Orbital viewer mobile */
+      #orbital-legend {
+        left: 8px;
+        bottom: 8px;
+        padding: 5px 10px;
+        font-size: 0.58rem;
+        gap: 8px;
+      }
+      #orbital-legend i { width: 6px; height: 6px; margin-right: 3px; }
+      #orbital-hint {
+        bottom: 38px;
+        padding: 6px 12px;
+        font-size: 0.6rem;
+      }
+      #orbital-tip {
+        font-size: 0.65rem;
+        padding: 7px 14px;
+        top: 10px;
+      }
+
+      /* Apartment card popup mobile */
+      #apt-card {
+        max-width: 100%;
+        width: 100%;
+        padding: 1.25rem 1rem;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+      #apt-card-body {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+      #apt-card-title { font-size: 1.3rem; }
+      #apt-card-subtitle { font-size: 0.7rem; margin-bottom: 1rem; }
+      .apt-card-specs {
+        grid-template-columns: 1fr;
+        gap: 0.3rem;
+      }
+      .apt-card-btn {
+        padding: 10px 12px;
+        font-size: 0.65rem;
+      }
+      #apt-card-close { top: 8px; right: 8px; }
+
+      /* Image modal mobile */
+      #img-modal-inner {
+        width: 100%;
+        max-width: 100%;
+        padding: 1rem;
+        margin: 1rem;
+      }
+
+      /* Back to orbital button mobile */
+      #back-to-orbital {
+        height: 32px;
+        padding: 0 0.8rem;
+        font-size: 0.6rem;
+        top: 10px;
+        left: 10px;
+      }
+
+      /* Show more button mobile */
+      #apt-show-more {
+        font-size: 0.65rem;
+        padding: 12px;
+      }
     }
   </style>
 </head>
