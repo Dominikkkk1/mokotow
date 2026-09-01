@@ -1486,13 +1486,17 @@
       .apt-row-actions {
         width: 100%;
         margin-top: 0.5rem;
+        flex-wrap: wrap;
       }
 
       .apt-row-actions .apartment-select-btn {
-        flex: 1;
-        font-size: 0.6rem;
-        padding: 0 0.5rem;
-        letter-spacing: 0.05em;
+        flex: none;
+        width: 100%;
+        font-size: 0.68rem;
+        padding: 10px 0.75rem;
+        letter-spacing: 0.06em;
+        height: auto;
+        text-align: left;
       }
 
 
@@ -1576,9 +1580,13 @@
       }
 
       /* Image modal mobile - fullscreen */
+      #img-modal {
+        padding: 0;
+      }
       #img-modal-inner {
-        width: 100%;
-        max-width: 100%;
+        width: 100vw;
+        max-width: 100vw;
+        height: 100vh;
         max-height: 100vh;
         padding: 0;
         margin: 0;
@@ -1587,14 +1595,22 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        min-height: 100vh;
+        overflow: auto;
+      }
+      #img-modal img {
+        width: 100%;
+        height: auto;
+        object-fit: contain;
       }
       #img-modal-close {
+        position: fixed;
         top: 12px;
         right: 12px;
-        width: 48px;
-        height: 48px;
-        font-size: 2rem;
+        width: 52px;
+        height: 52px;
+        font-size: 2.2rem;
+        background: rgba(28,46,38,0.95);
+        border: 1px solid rgba(237,230,216,0.2);
       }
 
       /* Back to orbital button mobile */
