@@ -1542,24 +1542,26 @@
         top: 10px;
       }
 
-      /* Apartment card popup mobile - fullscreen overlay */
+      /* Apartment card popup mobile - fullscreen scrollable */
       #apt-card-overlay {
         position: fixed;
         inset: 0;
         padding: 0;
-        align-items: stretch;
-        justify-content: stretch;
-        overflow: hidden;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
       }
       #apt-card {
         max-width: 100%;
         width: 100%;
-        height: 100%;
-        padding: 3.5rem 1rem 2rem;
-        overflow-y: auto;
-        overflow-x: hidden;
+        min-height: 100%;
+        height: auto;
+        padding: 3.5rem 1rem 6rem;
         border: none;
-        -webkit-overflow-scrolling: touch;
+        overflow: visible;
       }
       #apt-card-body {
         grid-template-columns: 1fr;
