@@ -1534,12 +1534,18 @@
       }
 
       /* Apartment card popup mobile */
+      #apt-card-overlay {
+        padding: 0;
+        align-items: flex-start;
+      }
       #apt-card {
         max-width: 100%;
         width: 100%;
-        padding: 1.25rem 1rem;
-        max-height: 90vh;
+        padding: 1.25rem 1rem 2rem;
+        max-height: 100vh;
+        min-height: 100vh;
         overflow-y: auto;
+        border: none;
       }
       #apt-card-body {
         grid-template-columns: 1fr;
@@ -1552,17 +1558,40 @@
         gap: 0.3rem;
       }
       .apt-card-btn {
-        padding: 10px 12px;
-        font-size: 0.65rem;
+        padding: 12px 14px;
+        font-size: 0.7rem;
       }
-      #apt-card-close { top: 8px; right: 8px; }
+      #apt-card-close {
+        top: 10px;
+        right: 10px;
+        width: 48px;
+        height: 48px;
+        font-size: 2.2rem;
+        background: rgba(28,46,38,0.8);
+        border: 1px solid rgba(237,230,216,0.15);
+        z-index: 5;
+      }
 
-      /* Image modal mobile */
+      /* Image modal mobile - fullscreen */
       #img-modal-inner {
         width: 100%;
         max-width: 100%;
-        padding: 1rem;
-        margin: 1rem;
+        max-height: 100vh;
+        padding: 0;
+        margin: 0;
+        border: none;
+        background: #0d1013;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+      }
+      #img-modal-close {
+        top: 12px;
+        right: 12px;
+        width: 48px;
+        height: 48px;
+        font-size: 2rem;
       }
 
       /* Back to orbital button mobile */
