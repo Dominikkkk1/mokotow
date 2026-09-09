@@ -123,6 +123,11 @@
       color: var(--dark);
     }
 
+    nav.nav-hidden {
+      transform: translateY(-100%);
+      transition: transform 0.3s ease;
+    }
+
     /* ── HERO ── */
     #hero {
       position: relative;
@@ -322,7 +327,7 @@
     }
 
     .section-dark .section-label { color: var(--secondary); }
-    .section-dark .section-subtitle { color: rgba(237,230,216,0.5); }
+    .section-dark .section-subtitle { color: rgba(237,230,216,0.65); }
 
     /* ── DIVIDER ── */
     .divider {
@@ -529,22 +534,22 @@
       top: 16px;
       left: 16px;
       z-index: 20;
-      height: 36px;
-      padding: 0 1.2rem;
-      background: rgba(28,46,38,0.85);
-      backdrop-filter: blur(8px);
-      color: var(--dark-fg);
+      height: 40px;
+      padding: 0 1.5rem;
+      background: var(--primary);
+      color: var(--primary-fg);
       border: 1px solid rgba(237,230,216,0.15);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
       font-family: var(--font-body);
-      font-size: 0.7rem;
+      font-size: 0.72rem;
       font-weight: 500;
       letter-spacing: 0.06em;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: background 0.2s, box-shadow 0.2s;
     }
     #back-to-orbital:hover {
-      background: rgba(28,46,38,0.95);
-      border-color: rgba(237,230,216,0.3);
+      background: var(--secondary);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.35);
     }
 
     /* ── ORBITAL VIEWER ── */
@@ -603,7 +608,7 @@
       font-weight: 500;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: rgba(237,230,216,0.5);
+      color: rgba(237,230,216,0.75);
       background: rgba(28,46,38,0.85);
       backdrop-filter: blur(6px);
       padding: 8px 18px;
@@ -644,7 +649,7 @@
       font-weight: 500;
       letter-spacing: 0.06em;
       text-transform: uppercase;
-      color: rgba(237,230,216,0.45);
+      color: rgba(237,230,216,0.7);
       background: rgba(28,46,38,0.75);
       backdrop-filter: blur(6px);
       padding: 8px 16px;
@@ -698,7 +703,7 @@
     #apt-card {
       background: var(--dark);
       border: 1px solid rgba(237,230,216,0.15);
-      max-width: 820px;
+      max-width: 1100px;
       width: 94%;
       padding: 2rem 2.5rem;
       position: relative;
@@ -706,7 +711,7 @@
     }
     #apt-card-body {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 3fr 2fr;
       gap: 2rem;
       align-items: start;
     }
@@ -738,16 +743,16 @@
     #apt-card-close:hover { color: var(--dark-fg); }
     #apt-card-title {
       font-family: var(--font-heading);
-      font-size: 1.6rem;
+      font-size: 2.2rem;
       font-weight: 600;
       color: var(--dark-fg);
       margin-bottom: 0.3rem;
     }
     #apt-card-subtitle {
       font-family: var(--font-body);
-      font-size: 0.78rem;
-      color: rgba(237,230,216,0.4);
-      margin-bottom: 1.5rem;
+      font-size: 0.88rem;
+      color: rgba(237,230,216,0.6);
+      margin-bottom: 2rem;
     }
     .apt-card-specs {
       display: grid;
@@ -761,9 +766,17 @@
       justify-content: space-between;
       padding: 0.4rem 0;
       border-bottom: 1px solid rgba(237,230,216,0.06);
-      color: rgba(237,230,216,0.6);
+      color: rgba(237,230,216,0.75);
     }
     .apt-card-spec strong { color: var(--dark-fg); font-weight: 500; }
+    .apt-card-spec-total {
+      border-top: 1px solid rgba(237,230,216,0.2);
+      border-bottom: none;
+      padding-top: 0.8rem;
+      margin-top: 0.4rem;
+      font-size: 0.92rem;
+      color: var(--dark-fg);
+    }
     .apt-card-actions {
       display: flex;
       flex-direction: column;
@@ -772,12 +785,12 @@
     .apt-card-btn {
       display: block;
       width: 100%;
-      padding: 12px 16px;
+      padding: 8px 14px;
       background: transparent;
       border: 1px solid rgba(237,230,216,0.15);
       color: var(--dark-fg);
       font-family: var(--font-body);
-      font-size: 0.72rem;
+      font-size: 0.65rem;
       font-weight: 600;
       letter-spacing: 0.1em;
       text-transform: uppercase;
@@ -801,10 +814,10 @@
     }
     .apt-card-badge {
       display: inline-block;
-      font-size: 0.65rem;
+      font-size: 0.72rem;
       letter-spacing: 0.1em;
       text-transform: uppercase;
-      padding: 3px 10px;
+      padding: 5px 14px;
       margin-bottom: 1rem;
     }
     .apt-card-badge.available { background: rgba(46,204,113,0.15); color: var(--green); border: 1px solid rgba(46,204,113,0.3); }
@@ -1571,8 +1584,8 @@
         grid-template-columns: 1fr;
         gap: 1rem;
       }
-      #apt-card-title { font-size: 1.3rem; }
-      #apt-card-subtitle { font-size: 0.7rem; margin-bottom: 1rem; }
+      #apt-card-title { font-size: 1.5rem; }
+      #apt-card-subtitle { font-size: 0.75rem; margin-bottom: 1rem; }
       #apt-card-image { width: 100%; }
       .apt-card-specs {
         grid-template-columns: 1fr;
@@ -1582,6 +1595,7 @@
       .apt-card-btn {
         padding: 14px;
         font-size: 0.72rem;
+        min-height: 44px;
       }
       #apt-card-close {
         position: fixed;
@@ -1633,11 +1647,19 @@
 
       /* Back to orbital button mobile */
       #back-to-orbital {
-        height: 32px;
-        padding: 0 0.8rem;
-        font-size: 0.6rem;
+        height: 40px;
+        padding: 0 1rem;
+        font-size: 0.65rem;
         top: 10px;
         left: 10px;
+        min-width: 44px;
+      }
+
+      /* Loading facts mobile */
+      #loading-facts {
+        max-width: 280px !important;
+        font-size: 0.75rem !important;
+        padding: 0 0.75rem !important;
       }
 
       /* Show more button mobile */
@@ -1732,7 +1754,8 @@
             document.getElementById('stream-layer').style.zIndex='1';
             document.getElementById('main-view').classList.remove('stream-active');
             document.body.classList.remove('stream-locked');
-          ">&#8592; Widok budynku</button>
+          document.getElementById('main-nav').classList.remove('nav-hidden');
+          ">&#8592; Wr&#243;&#263; do wyboru</button>
         </div>
 
     </div>
@@ -2266,7 +2289,7 @@
         specs.innerHTML = data.specs.map(function(s) {
           return '<div class="apt-card-spec"><span>' + s[0] + '</span><strong>' + s[1] + '</strong></div>';
         }).join('') +
-        '<div class="apt-card-spec" style="border-bottom:none;padding-top:0.6rem"><span><strong>Suma powierzchni</strong></span><strong>' + data.suma + '</strong></div>' +
+        '<div class="apt-card-spec apt-card-spec-total"><span><strong>Suma powierzchni</strong></span><strong>' + data.suma + '</strong></div>' +
         '<div class="apt-card-spec"><span>+ Taras</span><strong>' + data.taras + '</strong></div>';
       } else {
         specs.style.display = 'none';
@@ -2278,6 +2301,7 @@
       var clickBtn = function(sel) { return close + "var b=document.querySelector('" + sel + "');if(b)b.click();"; };
       var btns = '';
       btns += '<button class="apt-card-btn" ' + (imgSrc ? 'onclick="showImageModal(\'' + imgSrc + '\')"' : 'disabled') + '>Karta lokalu</button>';
+      if (imgSrc) { btns += '<a class="apt-card-btn" href="' + imgSrc + '" download="' + label.replace(/ /g, '-') + '-Karta-Lokalu.png" style="text-align:center;font-size:0.6rem;padding:6px 14px;text-decoration:none">\u2B07 Pobierz kart\u0119</a>'; }
       btns += '<button class="apt-card-btn" ' + (canInteract ? 'onclick="' + clickBtn('[data-apartment-id=&quot;' + aptId + '&quot;][data-pawn-type=&quot;apartment-showcase&quot;]') + '"' : 'disabled') + '>Prezentacja apartamentu</button>';
       btns += '<button class="apt-card-btn" onclick="' + clickBtn('[data-apartment-id=&quot;' + aptId + '&quot;][data-pawn-type=&quot;top-view&quot;]') + '">Widok z g\u00F3ry</button>';
       btns += '<button class="apt-card-btn primary" ' + (canInteract ? 'onclick="' + clickBtn('[data-apartment-id=&quot;' + aptId + '&quot;][data-pawn-type=&quot;first-person&quot;]') + '"' : 'disabled') + '>Spacer</button>';
@@ -2593,6 +2617,7 @@
       videoLayer.classList.add('fade-out');
       streamLayer.style.zIndex = 3;
       document.getElementById('main-view').classList.add('stream-active');
+      mainNav.classList.add('nav-hidden');
       // Lock scroll so user stays on StreamPixel view
       document.getElementById('demo-app').scrollIntoView({ behavior: 'smooth', block: 'start' });
       document.body.classList.add('stream-locked');
