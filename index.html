@@ -1702,21 +1702,6 @@
             </div>
             <div id="orbital-click-zone"></div>
             <div id="orbital-hint">Przeciagnij, zeby obrocic · kliknij mieszkanie</div>
-            <div id="apt-card-overlay" onclick="if(event.target===this)this.classList.remove('open')">
-              <div id="apt-card">
-                <button id="apt-card-close" type="button" onclick="document.getElementById('apt-card-overlay').classList.remove('open')">&times;</button>
-                <div id="apt-card-badge-wrap"></div>
-                <div id="apt-card-title"></div>
-                <div id="apt-card-subtitle"></div>
-                <div id="apt-card-body">
-                  <div>
-                    <img id="apt-card-image" src="" alt="" style="display:none" />
-                    <div id="apt-card-specs" class="apt-card-specs"></div>
-                  </div>
-                  <div id="apt-card-actions" class="apt-card-actions"></div>
-                </div>
-              </div>
-            </div>
             <div id="orbital-load">
               <div class="cap">Wczytywanie modelu <span id="orbital-pct">0</span>%</div>
               <div class="bar"><i id="orbital-bar"></i></div>
@@ -3298,6 +3283,22 @@
     }, { threshold: 0.1 });
     observer.observe(heroEl);
   </script>
+<div id="apt-card-overlay" onclick="if(event.target===this)this.classList.remove('open')">
+  <div id="apt-card">
+    <button id="apt-card-close" type="button" onclick="document.getElementById('apt-card-overlay').classList.remove('open')">&times;</button>
+    <div id="apt-card-badge-wrap"></div>
+    <div id="apt-card-title"></div>
+    <div id="apt-card-subtitle"></div>
+    <div id="apt-card-body">
+      <div>
+        <img id="apt-card-image" src="" alt="" style="display:none" />
+        <div id="apt-card-specs" class="apt-card-specs"></div>
+      </div>
+      <div id="apt-card-actions" class="apt-card-actions"></div>
+    </div>
+  </div>
+</div>
+
 <div id="img-modal" onclick="if(event.target===this)this.classList.remove('open')">
   <div id="img-modal-inner">
     <button id="img-modal-close" type="button" onclick="document.getElementById('img-modal').classList.remove('open')">&times;</button>
