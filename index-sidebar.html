@@ -463,8 +463,9 @@
         flex-shrink: 0;
         width: 320px;
         transition: width 0.3s ease;
+        overflow: hidden;
     }
-    #sidebar-wrap.collapsed { width: 0; }
+    #sidebar-wrap.collapsed { width: 0; overflow: hidden; }
 
     #sidebar-toggle {
         position: absolute;
@@ -544,55 +545,77 @@
 
     /* Column headers */
     .sb-head {
-        display: flex;
+        display: grid;
+        grid-template-columns: 2fr 1.2fr 0.8fr 0.8fr 1fr;
         align-items: center;
-        padding: 0.5rem 1.25rem;
+        padding: 0.5rem 1rem;
         border-bottom: 1px solid var(--border);
         font-family: var(--font-body);
-        font-size: 0.7rem;
+        font-size: 0.65rem;
         font-weight: 700;
         color: var(--fg);
-        gap: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
     }
-    .sb-head span { flex: 1; }
-    .sb-head span:first-child { flex: 1.5; }
 
     /* Rows */
     .sb-row {
-        display: flex;
+        display: grid;
+        grid-template-columns: 2fr 1.2fr 0.8fr 0.8fr 1fr;
         align-items: center;
-        padding: 0.85rem 1.25rem;
+        padding: 0.75rem 1rem;
         border-bottom: 1px solid rgba(0,0,0,0.06);
         cursor: pointer;
         transition: background 0.12s;
-        gap: 1rem;
-        font-size: 0.82rem;
+        font-size: 0.78rem;
         color: var(--fg);
     }
     .sb-row:hover { background: rgba(53,90,74,0.06); }
     .sb-row.active { background: rgba(53,90,74,0.12); }
-    .sb-row span { flex: 1; }
-    .sb-row span:first-child { flex: 1.5; display: flex; align-items: center; gap: 0.5rem; }
+    .sb-cell-name {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
     .sb-dot {
-        width: 10px;
-        height: 10px;
+        width: 8px;
+        height: 8px;
+        min-width: 8px;
+        min-height: 8px;
         border-radius: 50%;
         flex-shrink: 0;
+        display: inline-block;
     }
     .sb-dot.ok { background: #3fbf87; }
     .sb-dot.na { background: #d9584e; }
     .sb-dot.rs { background: #e6a33c; }
-    .sb-name {
-        font-weight: 700;
-        color: var(--fg);
+    .sb-name { font-weight: 700; }
+    .sb-spacer-btn {
+        background: var(--primary);
+        color: var(--primary-fg);
+        border: none;
+        font-family: var(--font-body);
+        font-size: 0.55rem;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        padding: 4px 8px;
+        cursor: pointer;
+        transition: background 0.15s;
     }
+    .sb-spacer-btn:hover { background: var(--secondary); }
+    .sb-spacer-btn:disabled { opacity: 0.2; cursor: not-allowed; background: var(--muted); }
 
     @media (max-width: 900px) {
         #demo-split { flex-direction: column; top: 60px; }
+        #demo-split #demo-app { height: 50vh; min-height: 280px; }
         #sidebar-wrap { width: 100%; }
-        #sidebar-wrap.collapsed { width: 100%; height: 0; }
-        #sidebar-apartments { max-height: 250px; border-left: none; border-top: 1px solid var(--border); }
+        #sidebar-wrap.collapsed { width: 100%; height: 0; overflow: hidden; }
+        #sidebar-apartments { max-height: 300px; border-left: none; border-top: 1px solid var(--border); height: auto; min-height: 0; }
         #sidebar-toggle { display: none; }
+        .sb-head, .sb-row { grid-template-columns: 2fr 1fr 1fr; font-size: 0.72rem; padding: 0.6rem 0.75rem; }
+        .sb-head span:nth-child(3), .sb-head span:nth-child(4),
+        .sb-row span:nth-child(3), .sb-row span:nth-child(4) { display: none; }
     }
 
     /* Demo main view */
@@ -1943,7 +1966,7 @@
                     </select>
                 </label>
             </div>
-            <div class="sb-head"><span>Lokal</span><span>Pow.</span><span>Pi&#281;t.</span><span>Pok.</span></div>
+            <div class="sb-head"><span>Lokal</span><span>Pow.</span><span>Pi&#281;t.</span><span>Pok.</span><span></span></div>
             <div id="sidebar-list"></div>
         </div>
     </div>
@@ -3172,12 +3195,14 @@
         if (countEl) countEl.textContent = apartments.length + ' lokali';
         sidebar.innerHTML = apartments.map(function(apt) {
             var dotCls = apt.dostepnosc === 'reserved' ? 'rs' : apt.dostepnosc ? 'ok' : 'na';
-            var floor = apt.pietro || '-';
+            var floor = apt.pietro !== undefined ? apt.pietro : '-';
+            var canWalk = apt.dostepnosc === true || apt.dostepnosc === 'reserved';
             return '<div class="sb-row" data-apt-id="' + apt.id + '">' +
-                '<span><span class="sb-dot ' + dotCls + '"></span><span class="sb-name">' + apt.numer + '</span></span>' +
+                '<span class="sb-cell-name"><span class="sb-dot ' + dotCls + '"></span><span class="sb-name">' + apt.numer + '</span></span>' +
                 '<span>' + apt.powierzchnia + ' m\u00B2</span>' +
                 '<span>' + floor + '</span>' +
                 '<span>' + apt.pokoje + '</span>' +
+                '<span><button class="sb-spacer-btn" data-walk="' + apt.id + '"' + (canWalk ? '' : ' disabled') + '>Spacer</button></span>' +
                 '</div>';
         }).join('');
     }
@@ -3357,8 +3382,20 @@
     for (var k in ORBITAL_TO_APARTMENT) { APT_TO_UNIT[ORBITAL_TO_APARTMENT[k]] = k; }
 
     if (sidebarList) {
+        // Spacer button click
+        sidebarList.addEventListener('click', function(e) {
+            var walkBtn = e.target.closest('[data-walk]');
+            if (walkBtn && !walkBtn.disabled) {
+                e.stopPropagation();
+                var realBtn = document.querySelector('[data-apartment-id="' + walkBtn.dataset.walk + '"][data-pawn-type="first-person"]');
+                if (realBtn) realBtn.click();
+                return;
+            }
+        });
+
         // Click: rotate orbital + show card
         sidebarList.addEventListener('click', function(e) {
+            if (e.target.closest('[data-walk]')) return;
             var row = e.target.closest('.sb-row');
             if (!row) return;
             var aptId = row.dataset.aptId;
