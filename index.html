@@ -765,11 +765,13 @@
     .apt-card-spec {
       display: flex;
       justify-content: space-between;
+      gap: 0.8rem;
       padding: 0.4rem 0;
       border-bottom: 1px solid rgba(237,230,216,0.06);
       color: rgba(237,230,216,0.75);
     }
-    .apt-card-spec strong { color: var(--dark-fg); font-weight: 500; }
+    .apt-card-spec span { flex: 1; }
+    .apt-card-spec strong { color: var(--dark-fg); font-weight: 500; text-align: right; white-space: nowrap; }
     .apt-card-spec-total {
       border-top: 1px solid rgba(237,230,216,0.2);
       border-bottom: none;
@@ -3444,9 +3446,10 @@ window.downloadAptCard = function() {
   w.document.write('.sub{font-size:0.95rem;color:#5C6E64;margin-bottom:2rem}');
   w.document.write('.layout{display:grid;grid-template-columns:3fr 2fr;gap:2rem;align-items:start}');
   w.document.write('img{width:100%;border:1px solid #D8CFBE;margin-bottom:1.5rem}');
-  w.document.write('.specs{display:grid;grid-template-columns:1fr 1fr;gap:0}');
-  w.document.write('.spec{display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid #eee;font-size:0.85rem}');
-  w.document.write('.spec strong{font-weight:600}');
+  w.document.write('.specs{display:grid;grid-template-columns:1fr 1fr;gap:0 2.5rem}');
+  w.document.write('.spec{display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid #eee;font-size:0.85rem;gap:1rem}');
+  w.document.write('.spec span{flex:1}');
+  w.document.write('.spec strong{font-weight:600;text-align:right;white-space:nowrap}');
   w.document.write('.total{border-top:2px solid #1C2E26;border-bottom:none;padding-top:0.8rem;margin-top:0.3rem;font-size:1rem;font-weight:600}');
   w.document.write('.contact{margin-top:2.5rem;padding-top:1.5rem;border-top:1px solid #D8CFBE;font-size:0.85rem;color:#5C6E64}');
   w.document.write('.contact strong{color:#1C2E26}');
