@@ -442,11 +442,19 @@
         display: grid;
         grid-template-columns: 1fr 320px;
         max-width: 1920px;
+        width: 100%;
         margin: 0 auto;
         gap: 0;
         position: sticky;
         top: 72px;
         z-index: 10;
+        min-height: 500px;
+    }
+
+    #demo-split #demo-app {
+        position: relative;
+        max-width: none;
+        margin: 0;
     }
 
     #sidebar-apartments {
@@ -1835,8 +1843,10 @@
         </div>
 
     </div>
-    <div id="sidebar-apartments">
-        <div id="sidebar-list"></div>
+    <div id="sidebar-apartments" style="background:var(--dark);min-width:320px">
+        <div id="sidebar-list">
+          <div style="padding:1.5rem 1.25rem;color:rgba(237,230,216,0.3);font-size:0.8rem">Ładowanie lokali...</div>
+        </div>
     </div>
     </div><!-- /demo-split -->
 
