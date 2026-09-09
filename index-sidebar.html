@@ -2704,8 +2704,7 @@
       var close = "document.getElementById('apt-card-overlay').classList.remove('open');";
       var clickBtn = function(sel) { return close + "var b=document.querySelector('" + sel + "');if(b)b.click();"; };
       var btns = '';
-      btns += '<button class="apt-card-btn" ' + (imgSrc ? 'onclick="showImageModal(\'' + imgSrc + '\')"' : 'disabled') + '>Karta lokalu</button>';
-      if (imgSrc) { btns += '<button class="apt-card-btn" style="text-align:left;font-size:0.6rem;padding:6px 14px" onclick="downloadAptCard()">&#11015; Pobierz kart\u0119 lokalu (PDF)</button>'; }
+      if (imgSrc) { btns += '<button class="apt-card-btn" style="font-size:0.6rem;padding:6px 14px" onclick="downloadAptCard()">\u2B07 Pobierz kart\u0119 lokalu (PDF)</button>'; }
       btns += '<button class="apt-card-btn" ' + (canInteract ? 'onclick="' + clickBtn('[data-apartment-id=&quot;' + aptId + '&quot;][data-pawn-type=&quot;apartment-showcase&quot;]') + '"' : 'disabled') + '>Prezentacja apartamentu</button>';
       btns += '<button class="apt-card-btn" onclick="' + clickBtn('[data-apartment-id=&quot;' + aptId + '&quot;][data-pawn-type=&quot;top-view&quot;]') + '">Widok z g\u00F3ry</button>';
       btns += '<button class="apt-card-btn primary" ' + (canInteract ? 'onclick="' + clickBtn('[data-apartment-id=&quot;' + aptId + '&quot;][data-pawn-type=&quot;first-person&quot;]') + '"' : 'disabled') + '>Spacer</button>';
@@ -3112,18 +3111,28 @@
       var badgeCls = apt.dostepnosc ? 'ok' : 'na';
       var statusText = apt.dostepnosc === 'reserved' ? 'Rezerwacja' : apt.dostepnosc ? 'Dost\u0119pne' : 'Niedost\u0119pne';
       var floor = apt.pietro !== undefined ? apt.pietro : '-';
-      var imgSrc = unitKey && UNIT_IMAGES[unitKey] ? UNIT_IMAGES[unitKey] : null;
+      var imgSrc = unitKey && window.UNIT_IMAGES && window.UNIT_IMAGES[unitKey] ? window.UNIT_IMAGES[unitKey] : null;
+      var label = 'Apartament ' + apt.numer;
+
+      // Highlight on orbital
+      if (window.orbitalSetHighlight && unitKey) window.orbitalSetHighlight(unitKey);
 
       var html = '<button class="sb-back" onclick="closeSidebarDetail()">&#8592; Mokot&#243;w Prestige</button>';
-      html += '<div class="sbd-head"><span class="sbd-name">Apartament ' + apt.numer + '</span><span class="sbd-badge ' + badgeCls + '">' + statusText + '</span></div>';
+      html += '<div class="sbd-head"><span class="sbd-name">' + label + '</span><span class="sbd-badge ' + badgeCls + '">' + statusText + '</span></div>';
       html += '<div class="sbd-stats">';
       html += '<div class="sbd-stat">Pow.<strong>' + apt.powierzchnia + ' m\u00B2</strong></div>';
       html += '<div class="sbd-stat">Pokoje<strong>' + apt.pokoje + '</strong></div>';
       html += '<div class="sbd-stat">Pi\u0119tro<strong>' + floor + '</strong></div>';
       html += '</div>';
-      if (imgSrc) { html += '<img class="sbd-img" src="' + imgSrc + '" alt="Karta lokalu" onclick="showImageModal(\'' + imgSrc + '\')">'; }
+      if (imgSrc) { html += '<img class="sbd-img" src="' + imgSrc + '" alt="' + label + '" onclick="showImageModal(\'' + imgSrc + '\')">'; }
       html += '<div class="sbd-actions">';
-      if (imgSrc) { html += '<button class="sbd-btn" onclick="showImageModal(\'' + imgSrc + '\')">Karta lokalu</button>'; }
+      // All actions matching the full card
+      if (imgSrc) {
+        html += '<button class="sbd-btn" onclick="showImageModal(\'' + imgSrc + '\')">Karta lokalu</button>';
+        html += '<button class="sbd-btn" onclick="downloadAptCard()" style="font-size:0.58rem">\u2B07 Pobierz kart\u0119 lokalu (PDF)</button>';
+      }
+      html += '<button class="sbd-btn" onclick="var b=document.querySelector(\'[data-apartment-id=&quot;' + aptId + '&quot;][data-pawn-type=&quot;apartment-showcase&quot;]\');if(b)b.click();"' + (avail ? '' : ' disabled') + '>Prezentacja apartamentu</button>';
+      html += '<button class="sbd-btn" onclick="var b=document.querySelector(\'[data-apartment-id=&quot;' + aptId + '&quot;][data-pawn-type=&quot;top-view&quot;]\');if(b)b.click();">Widok z g\u00F3ry</button>';
       html += '<button class="sbd-btn primary" onclick="var b=document.querySelector(\'[data-apartment-id=&quot;' + aptId + '&quot;][data-pawn-type=&quot;first-person&quot;]\');if(b)b.click();"' + (avail ? '' : ' disabled') + '>Spacer</button>';
       html += '<button class="sbd-btn" onclick="var b=document.querySelector(\'[data-open-contact=&quot;' + aptId + '&quot;]\');if(b)b.click();">Zapytaj</button>';
       html += '</div>';
@@ -3131,7 +3140,6 @@
       var detail = document.getElementById('sb-detail');
       detail.innerHTML = html;
       detail.classList.add('open');
-      // Hide list, show detail
       document.getElementById('sidebar-list').style.display = 'none';
       document.querySelector('.sb-head').style.display = 'none';
       var hdr = document.getElementById('sidebar-header');
@@ -3141,6 +3149,8 @@
     }
 
     function closeSidebarDetail() {
+      // Clear highlight
+      if (window.orbitalSetHighlight) window.orbitalSetHighlight(null);
       var detail = document.getElementById('sb-detail');
       detail.classList.remove('open');
       detail.innerHTML = '';
