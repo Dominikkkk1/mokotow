@@ -2636,8 +2636,8 @@
       'Lok_01 ': 'Lokal 1', 'Lok_03': 'Lokal 3'
     };
 
-    // Floor plan images per orbital unit
-    var UNIT_IMAGES = {
+    // Floor plan images per orbital unit (window for cross-script access)
+    window.UNIT_IMAGES = {
       'A_11': 'karta-a11.png'
     };
 
@@ -3105,9 +3105,8 @@
 
     // Show apartment detail in sidebar (replaces list view)
     function showSidebarDetail(aptId) {
-      console.log('[sidebar] showSidebarDetail called with', aptId);
       var apt = apartmentsData.find(function(a) { return a.id === aptId; });
-      if (!apt) { console.log('[sidebar] apartment not found!'); return; }
+      if (!apt) return;
       var unitKey = APT_TO_UNIT_MAP[aptId];
       var avail = apt.dostepnosc === true || apt.dostepnosc === 'reserved';
       var badgeCls = apt.dostepnosc ? 'ok' : 'na';
