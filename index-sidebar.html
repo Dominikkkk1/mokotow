@@ -618,6 +618,109 @@
         .sb-row span:nth-child(3), .sb-row span:nth-child(4) { display: none; }
     }
 
+    /* ── Mini apartment card (bottom-right overlay on orbital) ── */
+    #mini-card {
+        display: none;
+        position: absolute;
+        bottom: 16px;
+        right: 16px;
+        z-index: 14;
+        width: 300px;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        font-family: var(--font-body);
+        color: var(--fg);
+        overflow: hidden;
+    }
+    #mini-card.open { display: block; }
+    #mini-card-close {
+        position: absolute;
+        top: 6px;
+        right: 8px;
+        background: none;
+        border: none;
+        color: var(--muted);
+        font-size: 1.2rem;
+        cursor: pointer;
+        line-height: 1;
+        z-index: 1;
+    }
+    #mini-card-head {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--border);
+    }
+    #mini-card-name {
+        font-family: var(--font-heading);
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+    #mini-card-badge {
+        display: inline-block;
+        font-size: 0.55rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 2px 8px;
+        margin-left: 0.5rem;
+        vertical-align: middle;
+    }
+    #mini-card-badge.ok { background: rgba(46,204,113,0.15); color: #2e7d32; }
+    #mini-card-badge.na { background: rgba(191,59,59,0.15); color: #c62828; }
+    #mini-card-stats {
+        display: flex;
+        gap: 0;
+        border-bottom: 1px solid var(--border);
+    }
+    .mc-stat {
+        flex: 1;
+        text-align: center;
+        padding: 0.5rem 0.25rem;
+        border-right: 1px solid var(--border);
+        font-size: 0.65rem;
+        color: var(--muted);
+    }
+    .mc-stat:last-child { border-right: none; }
+    .mc-stat strong {
+        display: block;
+        font-size: 0.9rem;
+        color: var(--fg);
+        font-weight: 600;
+    }
+    #mini-card-img {
+        width: 100%;
+        display: block;
+        border-bottom: 1px solid var(--border);
+    }
+    #mini-card-actions {
+        display: flex;
+        gap: 0;
+    }
+    .mc-btn {
+        flex: 1;
+        padding: 0.6rem 0.25rem;
+        background: none;
+        border: none;
+        border-right: 1px solid var(--border);
+        color: var(--primary);
+        font-family: var(--font-body);
+        font-size: 0.58rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: background 0.12s;
+    }
+    .mc-btn:last-child { border-right: none; }
+    .mc-btn:hover { background: rgba(53,90,74,0.08); }
+    .mc-btn:disabled { color: var(--muted); opacity: 0.4; cursor: not-allowed; }
+    .mc-btn.primary { background: var(--primary); color: var(--primary-fg); }
+    .mc-btn.primary:hover { background: var(--secondary); }
+
+    @media (max-width: 900px) {
+        #mini-card { width: 260px; bottom: 8px; right: 8px; }
+    }
+
     /* Demo main view */
     #main-view {
       position: absolute;
@@ -1939,6 +2042,18 @@
             document.body.classList.remove('stream-locked');
           document.getElementById('main-nav').classList.remove('nav-hidden');
           ">&#8592; Wr&#243;&#263; do wyboru</button>
+
+          <!-- Mini apartment card overlay -->
+          <div id="mini-card">
+            <button id="mini-card-close" onclick="this.parentElement.classList.remove('open')">&times;</button>
+            <div id="mini-card-head">
+              <span id="mini-card-name"></span>
+              <span id="mini-card-badge"></span>
+            </div>
+            <div id="mini-card-stats"></div>
+            <img id="mini-card-img" src="" alt="" style="display:none" />
+            <div id="mini-card-actions"></div>
+          </div>
         </div>
 
     </div>
@@ -2431,6 +2546,55 @@
     var UNIT_IMAGES = {
       'A_11': 'karta-a11.png'
     };
+
+    // Mini card in bottom-right corner of orbital
+    function showMiniCard(aptId) {
+      var mc = document.getElementById('mini-card');
+      if (!mc) return;
+      var apt = apartmentsData.find(function(a) { return a.id === aptId; });
+      if (!apt) { mc.classList.remove('open'); return; }
+
+      var unitKey = APT_TO_UNIT[aptId];
+      var avail = apt.dostepnosc === true || apt.dostepnosc === 'reserved';
+      var statusText = apt.dostepnosc === 'reserved' ? 'Rezerwacja' : apt.dostepnosc ? 'Dost\u0119pne' : 'Niedost\u0119pne';
+      var badgeCls = apt.dostepnosc === 'reserved' ? 'rs' : apt.dostepnosc ? 'ok' : 'na';
+
+      document.getElementById('mini-card-name').textContent = 'Apartament ' + apt.numer;
+      var badge = document.getElementById('mini-card-badge');
+      badge.textContent = statusText;
+      badge.className = 'ok na rs'.split(' ').reduce(function(c) { return c; }, '') ;
+      badge.className = badgeCls === 'ok' ? 'ok' : badgeCls === 'na' ? 'na' : '';
+      badge.id = 'mini-card-badge';
+      badge.style.background = badgeCls === 'ok' ? 'rgba(46,204,113,0.15)' : badgeCls === 'rs' ? 'rgba(230,163,60,0.15)' : 'rgba(191,59,59,0.15)';
+      badge.style.color = badgeCls === 'ok' ? '#2e7d32' : badgeCls === 'rs' ? '#b8860b' : '#c62828';
+
+      // Stats
+      var floor = apt.pietro !== undefined ? apt.pietro : '-';
+      document.getElementById('mini-card-stats').innerHTML =
+        '<div class="mc-stat">Powierzchnia<strong>' + apt.powierzchnia + ' m\u00B2</strong></div>' +
+        '<div class="mc-stat">Pokoje<strong>' + apt.pokoje + '</strong></div>' +
+        '<div class="mc-stat">Pi\u0119tro<strong>' + floor + '</strong></div>';
+
+      // Image
+      var imgEl = document.getElementById('mini-card-img');
+      var imgSrc = UNIT_IMAGES[unitKey];
+      if (imgSrc) { imgEl.src = imgSrc; imgEl.style.display = 'block'; imgEl.onclick = function() { showImageModal(imgSrc); }; imgEl.style.cursor = 'zoom-in'; }
+      else { imgEl.style.display = 'none'; }
+
+      // Actions
+      var btns = '';
+      btns += '<button class="mc-btn" onclick="showImageModal(\'' + (imgSrc || '') + '\')"' + (imgSrc ? '' : ' disabled') + '>Karta</button>';
+      btns += '<button class="mc-btn primary" onclick="var b=document.querySelector(\'[data-apartment-id=&quot;' + aptId + '&quot;][data-pawn-type=&quot;first-person&quot;]\');if(b)b.click();"' + (avail ? '' : ' disabled') + '>Spacer</button>';
+      btns += '<button class="mc-btn" onclick="var b=document.querySelector(\'[data-open-contact=&quot;' + aptId + '&quot;]\');if(b)b.click();">Zapytaj</button>';
+      btns += '<button class="mc-btn" onclick="document.getElementById(\'mini-card\').classList.remove(\'open\')">Zamknij</button>';
+      document.getElementById('mini-card-actions').innerHTML = btns;
+
+      mc.classList.add('open');
+    }
+
+    // Reverse mapping for mini card
+    var APT_TO_UNIT = {};
+    for (var _k in ORBITAL_TO_APARTMENT) { APT_TO_UNIT[ORBITAL_TO_APARTMENT[_k]] = _k; }
 
     function showAptCard(unitKey) {
       var aptId = ORBITAL_TO_APARTMENT[unitKey] || 'apartment13';
@@ -3393,7 +3557,7 @@
             }
         });
 
-        // Click: rotate orbital + show card
+        // Click: rotate orbital + show mini card
         sidebarList.addEventListener('click', function(e) {
             if (e.target.closest('[data-walk]')) return;
             var row = e.target.closest('.sb-row');
@@ -3404,8 +3568,7 @@
             if (window.orbitalAnimateToFrame && APT_VIEW_FRAMES[aptId] !== undefined) {
                 window.orbitalAnimateToFrame(APT_VIEW_FRAMES[aptId]);
             }
-            var unitKey = APT_TO_UNIT[aptId];
-            if (unitKey) showAptCard(unitKey);
+            showMiniCard(aptId);
         });
 
         // Hover: highlight polygon on orbital
