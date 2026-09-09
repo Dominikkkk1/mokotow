@@ -424,7 +424,8 @@
 
     /* ── DEMO SECTION ── */
     #demo-section {
-      padding: 5rem 1.5rem 1rem;
+      padding: 5rem 1.5rem 0;
+      margin-bottom: 0;
     }
 
     #demo-app {
@@ -536,20 +537,20 @@
       z-index: 20;
       height: 40px;
       padding: 0 1.5rem;
-      background: var(--primary);
-      color: var(--primary-fg);
-      border: 1px solid rgba(237,230,216,0.15);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+      background: rgba(237,230,216,0.12);
+      color: var(--dark-fg);
+      border: 1px solid rgba(237,230,216,0.25);
+      backdrop-filter: blur(8px);
       font-family: var(--font-body);
       font-size: 0.72rem;
       font-weight: 500;
       letter-spacing: 0.06em;
       cursor: pointer;
-      transition: background 0.2s, box-shadow 0.2s;
+      transition: background 0.2s, border-color 0.2s;
     }
     #back-to-orbital:hover {
-      background: var(--secondary);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+      background: rgba(237,230,216,0.2);
+      border-color: rgba(237,230,216,0.4);
     }
 
     /* ── ORBITAL VIEWER ── */
@@ -1745,7 +1746,7 @@
           <div id="overlay-controls">
             <button id="connect-btn" style="display:none">Uruchom demo</button>
             <span id="queue-text">Kolejka: miejsce <span id="queue-position"></span></span>
-            <div id="loading-facts" style="display:none;color:rgba(237,230,216,0.5);font-size:0.82rem;font-family:var(--font-body);text-align:center;max-width:400px;padding:0 1rem;pointer-events:none;transition:opacity 0.4s ease"></div>
+            <div id="loading-facts" style="display:none;color:rgba(237,230,216,0.85);font-size:0.92rem;font-family:var(--font-body);text-align:center;max-width:500px;padding:0.5rem 1.5rem;pointer-events:none;transition:opacity 0.4s ease;font-style:italic"></div>
           </div>
           <button id="back-to-orbital" type="button" onclick="
             document.getElementById('orbital-layer').classList.remove('hidden');
@@ -1759,10 +1760,9 @@
         </div>
 
     </div>
-  </section>
 
-  <!-- APARTMENT BROWSER -->
-  <section class="section-dark" style="padding:0 1.5rem 2rem">
+  <!-- APARTMENT BROWSER (same section, no gap) -->
+  <div class="section-dark" style="padding:0 1.5rem 2rem">
     <div class="container" style="max-width:1920px">
       <div class="pawn-actions" style="margin-bottom:1rem;display:none">
         <button type="button" class="pawn-btn active" data-pawn-select="orbital">Poznaj nasza inwestycje</button>
@@ -1785,6 +1785,7 @@
       </div>
       <button id="apt-show-more" type="button" onclick="var b=document.getElementById('apartment-browser');var e=b.classList.toggle('expanded');this.innerHTML=e?'Zwi\u0144 list\u0119 &#9650;':'Zobacz wszystkie lokale &#9660;'">Zobacz wszystkie lokale &#9660;</button>
     </div>
+  </div>
   </section>
 
   <!-- O INWESTYCJI -->
@@ -2301,7 +2302,7 @@
       var clickBtn = function(sel) { return close + "var b=document.querySelector('" + sel + "');if(b)b.click();"; };
       var btns = '';
       btns += '<button class="apt-card-btn" ' + (imgSrc ? 'onclick="showImageModal(\'' + imgSrc + '\')"' : 'disabled') + '>Karta lokalu</button>';
-      if (imgSrc) { btns += '<a class="apt-card-btn" href="' + imgSrc + '" download="' + label.replace(/ /g, '-') + '-Karta-Lokalu.png" style="text-align:center;font-size:0.6rem;padding:6px 14px;text-decoration:none">\u2B07 Pobierz kart\u0119</a>'; }
+      if (imgSrc) { btns += '<a class="apt-card-btn" href="' + imgSrc + '" download="' + label.replace(/ /g, '-') + '-Karta-Lokalu.png" style="text-align:left;font-size:0.6rem;padding:6px 14px;text-decoration:none">\u2B07 Pobierz kart\u0119 lokalu (PDF)</a>'; }
       btns += '<button class="apt-card-btn" ' + (canInteract ? 'onclick="' + clickBtn('[data-apartment-id=&quot;' + aptId + '&quot;][data-pawn-type=&quot;apartment-showcase&quot;]') + '"' : 'disabled') + '>Prezentacja apartamentu</button>';
       btns += '<button class="apt-card-btn" onclick="' + clickBtn('[data-apartment-id=&quot;' + aptId + '&quot;][data-pawn-type=&quot;top-view&quot;]') + '">Widok z g\u00F3ry</button>';
       btns += '<button class="apt-card-btn primary" ' + (canInteract ? 'onclick="' + clickBtn('[data-apartment-id=&quot;' + aptId + '&quot;][data-pawn-type=&quot;first-person&quot;]') + '"' : 'disabled') + '>Spacer</button>';
@@ -2936,7 +2937,7 @@
        Po kazdej zmianie w panelu warto ja odswiezyc, ale nic sie nie psuje,
        gdy sie o tym zapomni. */
     const FALLBACK_APARTMENTS = [
-      { "id": "apartment13", "numer": "13", "kierunek": "NE", "powierzchnia": 212.0, "pokoje": 4, "cena": 3500000, "dostepnosc": "reserved" },
+      { "id": "apartment13", "numer": "13", "kierunek": "NE", "powierzchnia": 212.0, "pokoje": 4, "cena": 3500000, "dostepnosc": true },
       { "id": "apartment14", "numer": "14", "kierunek": "NW", "powierzchnia": 198.0, "pokoje": 5, "cena": 3200000, "dostepnosc": false },
       { "id": "apartment11", "numer": "11", "kierunek": "SE", "powierzchnia": 185.0, "pokoje": 4, "cena": 2950000, "dostepnosc": false },
       { "id": "apartment12", "numer": "12", "kierunek": "NW", "powierzchnia": 185.0, "pokoje": 4, "cena": 2900000, "dostepnosc": false },
@@ -2950,7 +2951,7 @@
 
     // Local overrides - CRM only has 2 apartments with old data
     var LOCAL_OVERRIDES = {
-      'apartment13': { dostepnosc: 'reserved', powierzchnia: 212.0, cena: 3500000 }
+      'apartment13': { dostepnosc: true, powierzchnia: 212.0, cena: 3500000 }
     };
     function applyLocalOverrides() {
       apartmentsData.forEach(function(a) {
