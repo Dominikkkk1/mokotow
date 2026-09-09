@@ -425,7 +425,7 @@
     #demo-app {
       aspect-ratio: 3 / 2;
       max-height: 80vh;
-      max-width: 1600px;
+      max-width: 1920px;
       margin-left: auto;
       margin-right: auto;
       overflow: hidden;
@@ -577,8 +577,8 @@
       z-index: 2;
     }
     #orbital-svg polygon {
-      fill-opacity: 0.08;
-      stroke-opacity: 0.4;
+      fill-opacity: 0;
+      stroke-opacity: 0.15;
       stroke-width: 2;
       vector-effect: non-scaling-stroke;
       cursor: pointer;
@@ -595,9 +595,8 @@
     #orbital-click-zone { display: none; }
     #orbital-hint {
       position: absolute;
-      left: 50%;
-      bottom: 56px;
-      transform: translateX(-50%);
+      top: 16px;
+      right: 16px;
       z-index: 10;
       font-family: var(--font-body);
       font-size: 0.72rem;
@@ -688,11 +687,12 @@
       display: none;
       position: fixed;
       inset: 0;
-      z-index: 9000;
+      z-index: 150;
       background: rgba(13,16,19,0.75);
       backdrop-filter: blur(4px);
       align-items: center;
       justify-content: center;
+      cursor: default;
     }
     #apt-card-overlay.open { display: flex; }
     #apt-card {
@@ -702,6 +702,7 @@
       width: 94%;
       padding: 2rem 2.5rem;
       position: relative;
+      cursor: default;
     }
     #apt-card-body {
       display: grid;
@@ -713,6 +714,7 @@
       width: 100%;
       border: 1px solid rgba(237,230,216,0.1);
       margin-bottom: 1rem;
+      cursor: zoom-in;
     }
     @media (max-width: 640px) {
       #apt-card-body { grid-template-columns: 1fr; }
@@ -1533,7 +1535,8 @@
       }
       #orbital-legend i { width: 6px; height: 6px; margin-right: 3px; }
       #orbital-hint {
-        bottom: 38px;
+        top: 10px;
+        right: 10px;
         padding: 6px 12px;
         font-size: 0.6rem;
       }
@@ -1683,10 +1686,10 @@
 
   <!-- DEMO 3D -->
   <section id="demo-section" class="section-dark">
-    <div class="container" style="max-width:1400px">
-      <span class="section-label">Podgląd interaktywny</span>
-      <h2 class="section-title">Zwiedzaj inwestycję w 3D</h2>
-      <p class="section-subtitle">Obracaj budynek i wybierz apartament, aby wejsc do srodka w pelnym 3D.</p>
+    <div class="container" style="max-width:1920px">
+      <span class="section-label">Wybierz apartament</span>
+      <h2 class="section-title">Mokot&#243;w Prestige <span id="apartment-count"></span></h2>
+      <p class="section-subtitle">Obracaj budynek i wybierz apartament, aby zobaczy&#263; szczeg&#243;&#322;y lokalu.</p>
     </div>
     <div id="demo-app">
         <div id="main-view">
@@ -1701,7 +1704,7 @@
               <span><i style="background:#d9584e"></i>Niedostepne</span>
             </div>
             <div id="orbital-click-zone"></div>
-            <div id="orbital-hint">Przeciagnij, zeby obrocic · kliknij mieszkanie</div>
+            <div id="orbital-hint">&#8596; Przeci&#261;gnij aby obr&#243;ci&#263;</div>
             <div id="orbital-load">
               <div class="cap">Wczytywanie modelu <span id="orbital-pct">0</span>%</div>
               <div class="bar"><i id="orbital-bar"></i></div>
@@ -1720,6 +1723,7 @@
           <div id="overlay-controls">
             <button id="connect-btn" style="display:none">Uruchom demo</button>
             <span id="queue-text">Kolejka: miejsce <span id="queue-position"></span></span>
+            <div id="loading-facts" style="display:none;color:rgba(237,230,216,0.5);font-size:0.82rem;font-family:var(--font-body);text-align:center;max-width:400px;padding:0 1rem;pointer-events:none;transition:opacity 0.4s ease"></div>
           </div>
           <button id="back-to-orbital" type="button" onclick="
             document.getElementById('orbital-layer').classList.remove('hidden');
@@ -1735,15 +1739,12 @@
   </section>
 
   <!-- APARTMENT BROWSER -->
-  <section class="section-dark" style="padding:0.5rem 1.5rem 3rem">
-    <div class="container" style="max-width:1200px">
+  <section class="section-dark" style="padding:0 1.5rem 2rem">
+    <div class="container" style="max-width:1920px">
       <div class="pawn-actions" style="margin-bottom:1rem;display:none">
         <button type="button" class="pawn-btn active" data-pawn-select="orbital">Poznaj nasza inwestycje</button>
         <button type="button" class="pawn-btn pawn-btn-satellite" data-pawn-select="satellite" style="display:none">Widok z lotu ptaka</button>
       </div>
-
-      <span class="section-label reveal">Wyszukiwarka lokali</span>
-      <h2 class="section-title reveal reveal-delay-1">Wybierz apartament <span id="apartment-count"></span></h2>
 
       <div id="apartment-browser">
         <div id="apartment-browser-table">
@@ -2103,13 +2104,16 @@
                 'Lok_01 ': 'Lokal 1', 'Lok_03': 'Lokal 3'
               };
               var label = UNIT_LABELS[u.k] || u.k;
-              var STATUS_PL = { free: 'Wolne', reserved: 'Rezerwacja', sold: 'Sprzedane' };
+              var STATUS_PL = { free: 'Dost\u0119pne', reserved: 'Rezerwacja', sold: 'Niedost\u0119pne' };
+              var STATUS_COLOR = { free: '#3fbf87', reserved: '#e6a33c', sold: '#d9584e' };
+              var statusKey = fakeStatus[u.k] || 'sold';
+              var statusLabel = STATUS_PL[statusKey] || statusKey;
+              var statusColor = STATUS_COLOR[statusKey] || '#8c98a4';
               var bits = [label];
               if (meta.f !== undefined) bits.push('pi\u0119tro ' + meta.f);
               if (meta.m2) bits.push(meta.m2 + ' m\u00B2');
               if (meta.r) bits.push(meta.r + (meta.r === 1 ? ' pok\u00F3j' : meta.r < 5 ? ' pokoje' : ' pokoi'));
-              bits.push(STATUS_PL[fakeStatus[u.k]] || fakeStatus[u.k]);
-              tip.textContent = bits.join('  \u00B7  ');
+              tip.innerHTML = '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + statusColor + ';margin-right:6px;vertical-align:middle"></span><span style="color:' + statusColor + ';margin-right:8px">' + statusLabel + '</span>' + bits.join('  \u00B7  ');
               tip.classList.add('on');
             }
           });
@@ -2250,8 +2254,10 @@
         img.src = imgSrc;
         img.alt = label;
         img.style.display = 'block';
+        img.onclick = function() { showImageModal(imgSrc); };
       } else {
         img.style.display = 'none';
+        img.onclick = null;
       }
 
       // Specs table
@@ -2275,7 +2281,7 @@
       btns += '<button class="apt-card-btn" ' + (canInteract ? 'onclick="' + clickBtn('[data-apartment-id=&quot;' + aptId + '&quot;][data-pawn-type=&quot;apartment-showcase&quot;]') + '"' : 'disabled') + '>Prezentacja apartamentu</button>';
       btns += '<button class="apt-card-btn" onclick="' + clickBtn('[data-apartment-id=&quot;' + aptId + '&quot;][data-pawn-type=&quot;top-view&quot;]') + '">Widok z g\u00F3ry</button>';
       btns += '<button class="apt-card-btn primary" ' + (canInteract ? 'onclick="' + clickBtn('[data-apartment-id=&quot;' + aptId + '&quot;][data-pawn-type=&quot;first-person&quot;]') + '"' : 'disabled') + '>Spacer</button>';
-      btns += '<button class="apt-card-btn" onclick="' + clickBtn('[data-open-contact=&quot;' + aptId + '&quot;]') + '">Zapytaj</button>';
+      btns += '<button class="apt-card-btn" onclick="document.querySelector(\'[data-open-contact=&quot;' + aptId + '&quot;]\').click();">Zapytaj</button>';
       actions.innerHTML = btns;
 
       overlay.classList.add('open');
@@ -2355,6 +2361,26 @@
     if (window.ResizeObserver) {
       new ResizeObserver(function() { if (frames.length) resize(); }).observe(container);
     }
+
+    // Expose orbital animation to outside scripts
+    window.orbitalAnimateToFrame = function(targetFrame) {
+      var n = FRAME_COUNT;
+      var target = targetFrame;
+      var current = ((pos % n) + n) % n;
+      var dist = ((target - current) % n + n) % n;
+      if (dist > n / 2) dist -= n;
+      var start = pos;
+      var duration = Math.abs(dist) * 30;
+      var t0 = performance.now();
+      function step(now) {
+        var t = Math.min(1, (now - t0) / Math.max(duration, 1));
+        var ease = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+        pos = start + dist * ease;
+        draw();
+        if (t < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    };
 
     // Load frames
     (async function() {
@@ -2495,6 +2521,16 @@
 
     let progressInterval = null;
 
+    var LOADING_FACTS = [
+      '7 minut pieszo do stacji Metro Wierzbno',
+      '10 minut pieszo do Parku Kr\u00f3likarni',
+      'Prywatny ogr\u00f3d na dachu dla wszystkich mieszka\u0144c\u00f3w',
+      'Du\u017cy, relaksuj\u0105cy taras przy ka\u017cdym apartamencie',
+      'Gara\u017c podziemny z \u0142adowarkami EV',
+      'System Smart Home w standardzie'
+    ];
+    var factsInterval = null;
+
     function startStreamLoading() {
       if (streamLoading) return;
       streamLoading = true;
@@ -2505,6 +2541,21 @@
       progressInterval = setInterval(() => {
         if (!streamComplete && !inQueue) targetProgress = Math.min(90, targetProgress + 0.4);
       }, 400);
+      // Start rotating facts during loading
+      var factsEl = document.getElementById('loading-facts');
+      if (factsEl) {
+        var factIdx = 0;
+        factsEl.textContent = LOADING_FACTS[0];
+        factsEl.style.display = '';
+        factsInterval = setInterval(function() {
+          factIdx = (factIdx + 1) % LOADING_FACTS.length;
+          factsEl.style.opacity = '0';
+          setTimeout(function() {
+            factsEl.textContent = LOADING_FACTS[factIdx];
+            factsEl.style.opacity = '1';
+          }, 400);
+        }, 4000);
+      }
     }
 
     function onStreamStateChange(state) {
@@ -2525,6 +2576,9 @@
     }
 
     function onStreamReady() {
+      if (factsInterval) { clearInterval(factsInterval); factsInterval = null; }
+      var factsEl = document.getElementById('loading-facts');
+      if (factsEl) factsEl.style.display = 'none';
       if (demoStarted) { switchToStream(); }
       else { connectBtn.classList.remove('loading'); connectBtn.classList.add('ready'); connectBtn.textContent = 'DEMO \u25B6'; }
     }
@@ -2950,10 +3004,38 @@
       }
     }
 
+    // Mapping from apartment ID to best orbital viewing frame
+    var APT_VIEW_FRAMES = {
+      'apartment13': 3,
+      'apartment14': 61,
+      'apartment11': 26,
+      'apartment12': 38,
+      'apartment21': 7,
+      'apartment22': 59,
+      'apartment23': 23,
+      'apartment24': 42,
+      'apartment1': 3,
+      'apartment3': 22,
+    };
+
     apartmentsList.addEventListener('click', (event) => {
       const button = event.target.closest('[data-apartment-id]');
-      if (!button || button.disabled) return;
-      openApartment(button.dataset.apartmentId, button.dataset.pawnType || 'orbital');
+      if (button && !button.disabled) {
+        openApartment(button.dataset.apartmentId, button.dataset.pawnType || 'orbital');
+        return;
+      }
+      // Clicking on row name or row itself rotates the orbital
+      const row = event.target.closest('.apt-row');
+      if (row && !event.target.closest('button')) {
+        var aptId = row.dataset.id;
+        var frame = APT_VIEW_FRAMES[aptId];
+        if (frame !== undefined && window.orbitalAnimateToFrame) {
+          window.orbitalAnimateToFrame(frame);
+          // Scroll to orbital if not visible
+          var demoApp = document.getElementById('demo-app');
+          if (demoApp) demoApp.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
     });
 
     // Global pawn selection
