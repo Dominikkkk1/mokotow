@@ -1,5 +1,6 @@
 {
   "rewrites": [
+    { "source": "/sidebar", "destination": "/index-sidebar.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

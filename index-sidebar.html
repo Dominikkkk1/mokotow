@@ -1,0 +1,3583 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mokotów Prestige - Podgląd Inwestycji</title>
+  <meta name="description" content="Mokotów Prestige  / nowoczesna inwestycja mieszkaniowa na Mokotowie. Interaktywny podgląd 3D w technologii Unreal Engine 5." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #F0EBE3;
+      --bg-card: #F2EBE0;
+      --fg: #243A2F;
+      --primary: #355A4A;
+      --primary-fg: #F0EBE3;
+      --secondary: #577A65;
+      --muted: #5C6E64;
+      --border: #D8CFBE;
+      --dark: #1C2E26;
+      --dark-fg: #EDE6D8;
+      --green: #2ecc71;
+      --red: #BF3B3B;
+      --font-heading: 'Cormorant Garamond', serif;
+      --font-body: 'DM Sans', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; overflow-x: hidden; }
+    body.stream-locked { overflow: hidden; }
+
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--font-body);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 0 2rem;
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(240,235,227,0.9);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    nav.dark-nav {
+      background: rgba(28,46,38,0.92);
+      border-bottom-color: rgba(237,230,216,0.08);
+    }
+
+    .nav-logo {
+      font-family: var(--font-heading);
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--fg);
+      letter-spacing: -0.02em;
+    }
+
+    nav.dark-nav .nav-logo { color: var(--dark-fg); }
+
+    .nav-logo span {
+      font-weight: 400;
+      color: var(--primary);
+    }
+
+    nav.dark-nav .nav-logo span { color: var(--secondary); }
+
+    .nav-links {
+      display: flex;
+      gap: 2.5rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--primary); }
+    nav.dark-nav .nav-links a { color: rgba(237,230,216,0.5); }
+    nav.dark-nav .nav-links a:hover { color: var(--dark-fg); }
+
+    .nav-cta {
+      height: 36px;
+      padding: 0 1.25rem;
+      background: var(--primary);
+      color: var(--primary-fg);
+      font-size: 0.7rem;
+      font-weight: 600;
+      font-family: var(--font-body);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      transition: all 0.2s ease;
+    }
+
+    .nav-cta:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(53,90,74,0.3);
+    }
+
+    nav.dark-nav .nav-cta {
+      background: var(--dark-fg);
+      color: var(--dark);
+    }
+
+    nav.nav-hidden {
+      transform: translateY(-100%);
+      transition: transform 0.3s ease;
+    }
+
+    /* ── HERO ── */
+    #hero {
+      position: relative;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: var(--dark);
+    }
+
+    #hero-video-bg {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+    }
+
+    #hero-video-bg video {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      opacity: 0.55;
+      pointer-events: none;
+    }
+
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg,
+        rgba(28,46,38,0.3) 0%,
+        rgba(28,46,38,0.5) 50%,
+        rgba(28,46,38,0.95) 100%);
+      z-index: 1;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      max-width: 820px;
+      padding: 0 2rem;
+    }
+
+    .hero-label {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--secondary);
+      margin-bottom: 2rem;
+    }
+
+    .hero-content h1 {
+      font-family: var(--font-heading);
+      font-size: clamp(2.8rem, 6vw, 5rem);
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      color: var(--dark-fg);
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-content p {
+      font-size: 1.05rem;
+      color: rgba(237,230,216,0.6);
+      max-width: 520px;
+      margin: 0 auto 3rem;
+      line-height: 1.7;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      height: 56px;
+      padding: 0 2rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      font-family: var(--font-body);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: none;
+    }
+
+    .btn-primary {
+      background: var(--dark-fg);
+      color: var(--dark);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(28,46,38,0.3);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--dark-fg);
+      border: 1px solid rgba(237,230,216,0.25);
+    }
+
+    .btn-outline:hover {
+      border-color: rgba(237,230,216,0.5);
+      background: rgba(237,230,216,0.05);
+    }
+
+    .btn-dark {
+      background: var(--primary);
+      color: var(--primary-fg);
+    }
+
+    .btn-dark:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(53,90,74,0.3);
+    }
+
+    .scroll-hint {
+      position: absolute;
+      bottom: 2.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2;
+      color: rgba(237,230,216,0.3);
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .scroll-hint::after {
+      content: '';
+      width: 1px;
+      height: 32px;
+      background: linear-gradient(180deg, rgba(237,230,216,0.3), transparent);
+      animation: scrollPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes scrollPulse {
+      0%, 100% { opacity: 0.3; transform: scaleY(1); }
+      50% { opacity: 1; transform: scaleY(1.2); }
+    }
+
+    /* ── SECTIONS ── */
+    .section { padding: 5rem 1.5rem; }
+    .section-lg { padding: 6rem 1.5rem; }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 0.5rem;
+    }
+
+    .section-label {
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    .section-title {
+      font-family: var(--font-heading);
+      font-size: clamp(1.8rem, 3.5vw, 3rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+    }
+
+    .section-subtitle {
+      font-size: 0.95rem;
+      color: var(--muted);
+      max-width: 560px;
+      line-height: 1.7;
+      margin-bottom: 3.5rem;
+    }
+
+    /* dark section variants */
+    .section-dark {
+      background: var(--dark);
+      color: var(--dark-fg);
+    }
+
+    .section-dark .section-label { color: var(--secondary); }
+    .section-dark .section-subtitle { color: rgba(237,230,216,0.65); }
+
+    /* ── DIVIDER ── */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .divider-dark {
+      background: rgba(237,230,216,0.08);
+    }
+
+    /* ── FEATURES ── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+    }
+
+    .feature-card {
+      background: var(--bg);
+      padding: 2.5rem 2rem;
+      transition: background 0.2s;
+    }
+
+    .feature-card:hover { background: var(--bg-card); }
+
+    .feature-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(53,90,74,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .feature-icon svg {
+      width: 20px;
+      height: 20px;
+      stroke: var(--primary);
+      stroke-width: 1.2;
+      fill: none;
+    }
+
+    .feature-card h3 {
+      font-family: var(--font-heading);
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.6rem;
+      letter-spacing: -0.01em;
+    }
+
+    .feature-card p {
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    /* ── STATS ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: rgba(237,230,216,0.08);
+      border: 1px solid rgba(237,230,216,0.08);
+      margin-top: 4rem;
+    }
+
+    .stat-card {
+      background: var(--dark);
+      padding: 2rem 1.5rem;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-family: var(--font-heading);
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--dark-fg);
+      line-height: 1;
+      margin-bottom: 0.4rem;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: rgba(237,230,216,0.4);
+      letter-spacing: 0.05em;
+    }
+
+    /* ── DEMO SECTION ── */
+    #demo-section {
+      padding: 5rem 1.5rem 0;
+      margin-bottom: 0;
+    }
+
+    #demo-app {
+      aspect-ratio: 3 / 2;
+      max-height: 80vh;
+      max-width: none;
+      margin: 0;
+      overflow: hidden;
+      border: 1px solid rgba(237,230,216,0.08);
+    }
+
+    /* ── SIDEBAR SPLIT LAYOUT ── */
+    #demo-split {
+        display: grid;
+        grid-template-columns: 1fr 320px;
+        max-width: 1920px;
+        margin: 0 auto;
+        gap: 0;
+        position: sticky;
+        top: 72px;
+        z-index: 10;
+    }
+
+    #sidebar-apartments {
+        background: var(--dark);
+        border-left: 1px solid rgba(237,230,216,0.08);
+        overflow-y: auto;
+        max-height: 80vh;
+    }
+
+    .sidebar-apt {
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid rgba(237,230,216,0.06);
+        cursor: pointer;
+        transition: background 0.15s;
+    }
+    .sidebar-apt:hover { background: rgba(237,230,216,0.04); }
+    .sidebar-apt.active { background: rgba(53,90,74,0.15); border-left: 3px solid var(--primary); }
+    .sidebar-apt-name {
+        font-family: var(--font-heading);
+        font-size: 1.1rem;
+        font-weight: 500;
+        color: var(--dark-fg);
+        margin-bottom: 0.25rem;
+    }
+    .sidebar-apt-info {
+        font-size: 0.72rem;
+        color: rgba(237,230,216,0.5);
+    }
+    .sidebar-apt-badge {
+        display: inline-block;
+        font-size: 0.58rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 2px 8px;
+        margin-top: 0.35rem;
+    }
+    .sidebar-apt-badge.available { background: rgba(46,204,113,0.1); color: #3fbf87; }
+    .sidebar-apt-badge.unavailable { background: rgba(191,59,59,0.1); color: #d9584e; }
+    .sidebar-apt-badge.reserved { background: rgba(230,163,60,0.1); color: #e6a33c; }
+
+    @media (max-width: 768px) {
+        #demo-split {
+            grid-template-columns: 1fr;
+        }
+        #sidebar-apartments {
+            max-height: 300px;
+        }
+    }
+
+    /* Demo main view */
+    #main-view {
+      position: absolute;
+      inset: 0;
+    }
+
+    #video-layer, #stream-layer {
+      position: absolute;
+      inset: 0;
+    }
+
+    #video-layer {
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #000;
+      transition: opacity 0.6s ease;
+    }
+
+    #video-layer.fade-out {
+      opacity: 0;
+      pointer-events: none;
+      visibility: hidden;
+    }
+
+    .player-wrapper { width: 100%; height: 100%; }
+    .player-wrapper video { object-fit: cover; width: 100%; height: 100%; pointer-events: none; }
+
+    #stream-layer { z-index: 1; }
+    #stream-layer iframe { width: 100%; height: 100%; border: none; }
+
+    #overlay-controls {
+      position: absolute;
+      inset: 0;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      pointer-events: none;
+    }
+
+    #connect-btn {
+      height: 44px;
+      padding: 0 2rem;
+      background: rgba(237,230,216,0.12);
+      color: var(--dark-fg);
+      border: 1px solid rgba(237,230,216,0.2);
+      font-size: 0.72rem;
+      font-family: var(--font-body);
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      pointer-events: auto;
+      backdrop-filter: blur(6px);
+      transition: all 0.3s ease;
+    }
+
+    #connect-btn:hover {
+      background: rgba(237,230,216,0.2);
+      border-color: rgba(237,230,216,0.35);
+    }
+
+    #connect-btn.loading {
+      background: rgba(28,46,38,0.7);
+      color: var(--dark-fg);
+      border: 1px solid rgba(237,230,216,0.2);
+      backdrop-filter: blur(8px);
+      cursor: default;
+      pointer-events: none;
+      transform: none;
+      box-shadow: none;
+    }
+
+    #connect-btn.ready {
+      background: var(--dark-fg);
+      color: var(--dark);
+      cursor: pointer;
+      pointer-events: auto;
+      border: none;
+    }
+
+    #connect-btn.hidden { display: none; }
+
+    #back-to-orbital {
+      display: none;
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      z-index: 20;
+      height: 40px;
+      padding: 0 1.5rem;
+      background: rgba(237,230,216,0.12);
+      color: var(--dark-fg);
+      border: 1px solid rgba(237,230,216,0.25);
+      backdrop-filter: blur(8px);
+      font-family: var(--font-body);
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    #back-to-orbital:hover {
+      background: rgba(237,230,216,0.2);
+      border-color: rgba(237,230,216,0.4);
+    }
+
+    /* ── ORBITAL VIEWER ── */
+    #orbital-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 15;
+      background: var(--dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      cursor: ew-resize;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: none;
+      transition: opacity 0.6s ease;
+    }
+    #orbital-layer.hidden {
+      opacity: 0;
+      pointer-events: none;
+      visibility: hidden;
+    }
+    #orbital-frame { position: relative; line-height: 0; width: 100%; height: 100%; }
+    #orbital-canvas { display: block; position: relative; z-index: 1; }
+    #orbital-svg {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      z-index: 2;
+    }
+    #orbital-svg polygon {
+      fill-opacity: 0;
+      stroke-opacity: 0.15;
+      stroke-width: 2;
+      vector-effect: non-scaling-stroke;
+      cursor: pointer;
+      transition: fill-opacity 0.15s ease, stroke-opacity 0.15s ease;
+    }
+    #orbital-svg polygon:hover {
+      fill-opacity: 0.45;
+      stroke-opacity: 0.9;
+    }
+    #orbital-svg polygon.dim { pointer-events: none; fill-opacity: 0; stroke-opacity: 0; }
+    #orbital-svg polygon.dim:hover { fill-opacity: 0; stroke-opacity: 0; }
+    #orbital-svg polygon.hot { fill-opacity: 0.45; stroke-opacity: 0.9; }
+
+    #orbital-click-zone { display: none; }
+    #orbital-hint {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      z-index: 10;
+      font-family: var(--font-body);
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(237,230,216,0.75);
+      background: rgba(28,46,38,0.85);
+      backdrop-filter: blur(6px);
+      padding: 8px 18px;
+      border: 1px solid rgba(237,230,216,0.1);
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    #orbital-tip {
+      position: absolute;
+      left: 50%;
+      top: 16px;
+      transform: translateX(-50%);
+      z-index: 10;
+      font-family: var(--font-body);
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--dark-fg);
+      background: rgba(28,46,38,0.9);
+      backdrop-filter: blur(8px);
+      padding: 10px 20px;
+      border: 1px solid rgba(237,230,216,0.15);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s;
+      white-space: nowrap;
+    }
+    #orbital-tip.on { opacity: 1; }
+    #orbital-legend {
+      position: absolute;
+      left: 16px;
+      bottom: 16px;
+      z-index: 10;
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      font-family: var(--font-body);
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: rgba(237,230,216,0.7);
+      background: rgba(28,46,38,0.75);
+      backdrop-filter: blur(6px);
+      padding: 8px 16px;
+      border: 1px solid rgba(237,230,216,0.08);
+    }
+    #orbital-legend i {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 5px;
+    }
+    #orbital-cta {
+      position: absolute;
+      bottom: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      height: 48px;
+      padding: 0 2.2rem;
+      background: var(--primary);
+      color: var(--primary-fg);
+      border: none;
+      font-family: var(--font-body);
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s;
+      white-space: nowrap;
+    }
+    #orbital-cta:hover {
+      background: var(--secondary);
+      transform: translateX(-50%) scale(1.03);
+    }
+
+    /* ── Apartment Card Popup ── */
+    #apt-card-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 150;
+      background: rgba(13,16,19,0.75);
+      backdrop-filter: blur(4px);
+      align-items: center;
+      justify-content: center;
+      cursor: default;
+    }
+    #apt-card-overlay.open { display: flex; }
+    #apt-card {
+      background: var(--dark);
+      border: 1px solid rgba(237,230,216,0.15);
+      max-width: 1100px;
+      width: 94%;
+      padding: 2rem 2.5rem;
+      position: relative;
+      cursor: default;
+    }
+    #apt-card-body {
+      display: grid;
+      grid-template-columns: 3fr 2fr;
+      gap: 2rem;
+      align-items: start;
+    }
+    #apt-card-image {
+      width: 100%;
+      border: 1px solid rgba(237,230,216,0.1);
+      margin-bottom: 1rem;
+      cursor: zoom-in;
+    }
+    @media (max-width: 640px) {
+      #apt-card-body { grid-template-columns: 1fr; }
+    }
+    #apt-card-close {
+      position: absolute;
+      top: 12px;
+      right: 14px;
+      background: none;
+      border: none;
+      color: rgba(237,230,216,0.4);
+      font-size: 2rem;
+      cursor: pointer;
+      line-height: 1;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #apt-card-close:hover { color: var(--dark-fg); }
+    #apt-card-title {
+      font-family: var(--font-heading);
+      font-size: 2.2rem;
+      font-weight: 600;
+      color: var(--dark-fg);
+      margin-bottom: 0.3rem;
+    }
+    #apt-card-subtitle {
+      font-family: var(--font-body);
+      font-size: 0.88rem;
+      color: rgba(237,230,216,0.6);
+      margin-bottom: 2rem;
+    }
+    .apt-card-specs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.6rem 2rem;
+      margin-bottom: 1.8rem;
+      font-size: 0.82rem;
+    }
+    .apt-card-spec {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.8rem;
+      padding: 0.4rem 0;
+      border-bottom: 1px solid rgba(237,230,216,0.06);
+      color: rgba(237,230,216,0.75);
+    }
+    .apt-card-spec span { flex: 1; }
+    .apt-card-spec strong { color: var(--dark-fg); font-weight: 500; text-align: right; white-space: nowrap; }
+    .apt-card-spec-total {
+      border-top: 1px solid rgba(237,230,216,0.2);
+      border-bottom: none;
+      padding-top: 0.8rem;
+      margin-top: 0.4rem;
+      font-size: 0.92rem;
+      color: var(--dark-fg);
+    }
+    .apt-card-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .apt-card-btn {
+      display: block;
+      width: 100%;
+      padding: 8px 14px;
+      background: transparent;
+      border: 1px solid rgba(237,230,216,0.15);
+      color: var(--dark-fg);
+      font-family: var(--font-body);
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .apt-card-btn:hover {
+      background: rgba(237,230,216,0.06);
+      border-color: rgba(237,230,216,0.3);
+    }
+    .apt-card-btn.primary {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: var(--primary-fg);
+    }
+    .apt-card-btn.primary:hover { background: var(--secondary); }
+    .apt-card-btn:disabled {
+      opacity: 0.35;
+      cursor: default;
+    }
+    .apt-card-badge {
+      display: inline-block;
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      margin-bottom: 1rem;
+    }
+    .apt-card-badge.available { background: rgba(46,204,113,0.15); color: var(--green); border: 1px solid rgba(46,204,113,0.3); }
+    .apt-card-badge.reserved { background: rgba(230,163,60,0.15); color: #e6a33c; border: 1px solid rgba(230,163,60,0.3); }
+    .apt-card-badge.unavailable { background: rgba(191,59,59,0.15); color: var(--red); border: 1px solid rgba(191,59,59,0.3); }
+
+    /* ── Image Modal ── */
+    #img-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: rgba(13,16,19,0.75);
+      backdrop-filter: blur(4px);
+      align-items: center;
+      justify-content: center;
+    }
+    #img-modal.open { display: flex; }
+    #img-modal-inner {
+      position: relative;
+      background: var(--dark);
+      border: 1px solid rgba(237,230,216,0.15);
+      padding: 2rem;
+      max-width: 1100px;
+      width: 94%;
+      max-height: 90vh;
+      overflow: auto;
+    }
+    #img-modal img {
+      width: 100%;
+      display: block;
+    }
+    #img-modal-close {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      background: rgba(28,46,38,0.9);
+      border: 1px solid rgba(237,230,216,0.2);
+      color: var(--dark-fg);
+      font-size: 1.6rem;
+      cursor: pointer;
+      line-height: 1;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1;
+    }
+    #img-modal-close:hover { background: rgba(28,46,38,1); }
+
+    #orbital-load {
+      position: absolute;
+      inset: 0;
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      background: var(--dark);
+    }
+    #orbital-load.done { display: none; }
+    #orbital-load .cap {
+      font-family: var(--font-body);
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(237,230,216,0.4);
+    }
+    #orbital-load .bar {
+      width: min(320px, 60vw);
+      height: 2px;
+      background: rgba(237,230,216,0.1);
+      overflow: hidden;
+    }
+    #orbital-load .bar i {
+      display: block;
+      height: 100%;
+      width: 0;
+      background: var(--secondary);
+      transition: width 0.15s linear;
+    }
+
+    #queue-text {
+      display: none;
+      padding: 0.6rem 1.5rem;
+      background: rgba(28,46,38,0.7);
+      color: var(--dark-fg);
+      font-size: 0.85rem;
+      backdrop-filter: blur(8px);
+      pointer-events: none;
+    }
+
+    /* ── Apartment Browser ── */
+    #apartment-browser {
+      margin-top: 3rem;
+      margin-bottom: 2rem;
+      border: 1px solid rgba(237,230,216,0.1);
+      background: rgba(237,230,216,0.03);
+      max-height: 280px;
+      overflow: hidden;
+      position: relative;
+      transition: max-height 0.4s ease;
+    }
+    #apartment-browser.expanded {
+      max-height: none;
+    }
+    #apartment-browser:not(.expanded)::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: linear-gradient(to bottom, transparent, var(--dark));
+      pointer-events: none;
+    }
+    #apt-show-more {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      background: rgba(237,230,216,0.05);
+      border: 1px solid rgba(237,230,216,0.1);
+      border-top: none;
+      color: var(--dark-fg);
+      font-family: var(--font-body);
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    #apt-show-more:hover {
+      background: rgba(237,230,216,0.1);
+    }
+    #apt-show-more.hidden { display: none; }
+
+    #apartment-count {
+      font-family: var(--font-body);
+      font-size: 0.78rem;
+      font-weight: 400;
+      color: rgba(237,230,216,0.35);
+    }
+
+    .pawn-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+
+    .pawn-btn {
+      height: 32px;
+      padding: 0 1rem;
+      background: transparent;
+      border: 1px solid rgba(237,230,216,0.15);
+      color: var(--dark-fg);
+      font-size: 0.65rem;
+      font-family: var(--font-body);
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .pawn-btn:hover {
+      border-color: var(--secondary);
+      background: rgba(87,122,101,0.1);
+    }
+
+    .pawn-btn.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: var(--primary-fg);
+    }
+
+    .apt-table-header {
+      display: grid;
+      grid-template-columns: 1fr 1fr 0.7fr 0.7fr 1fr 0.9fr auto;
+      gap: 1rem;
+      padding: 0.85rem 2rem;
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(237,230,216,0.3);
+      border-bottom: 1px solid rgba(237,230,216,0.08);
+    }
+
+    .apt-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 0.7fr 0.7fr 1fr 0.9fr auto;
+      gap: 1rem;
+      padding: 1rem 2rem;
+      align-items: center;
+      border-bottom: 1px solid rgba(237,230,216,0.05);
+      transition: background 0.15s ease;
+      font-size: 0.88rem;
+      color: var(--dark-fg);
+    }
+
+    .apt-row:last-child { border-bottom: none; }
+    .apt-row:hover { background: rgba(237,230,216,0.04); }
+
+    .apt-row-name {
+      font-family: var(--font-heading);
+      font-size: 1.05rem;
+      font-weight: 600;
+    }
+
+    .apt-row-price {
+      font-family: var(--font-heading);
+      font-weight: 600;
+    }
+
+    .apt-row-dim {
+      color: rgba(237,230,216,0.5);
+      font-size: 0.82rem;
+    }
+
+    .availability-badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .availability-badge.available {
+      background: rgba(46,204,113,0.1);
+      color: var(--green);
+    }
+
+    .availability-badge.reserved {
+      background: rgba(230,163,60,0.1);
+      color: #e6a33c;
+    }
+
+    .availability-badge.unavailable {
+      background: rgba(191,59,59,0.1);
+      color: var(--red);
+    }
+
+    .apt-row-actions {
+      display: flex;
+      gap: 0.4rem;
+    }
+
+    .apartment-select-btn {
+      height: 30px;
+      padding: 0 0.75rem;
+      background: transparent;
+      border: 1px solid rgba(237,230,216,0.15);
+      color: var(--dark-fg);
+      font-size: 0.68rem;
+      font-family: var(--font-body);
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .apartment-select-btn:hover:not(:disabled) {
+      border-color: var(--secondary);
+      color: #fff;
+      background: rgba(87,122,101,0.15);
+    }
+
+    .apartment-select-btn:disabled {
+      opacity: 0.25;
+      cursor: not-allowed;
+    }
+
+    .apt-row.active {
+      background: rgba(53,90,74,0.1);
+    }
+
+    .apt-row.active .apartment-select-btn {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: var(--primary-fg);
+    }
+
+    /* ── ZAPROSZENIE DO KONTAKTU ──
+       Pasek przy dolnej krawedzi, nie okno na srodku: pojawia sie po tym, jak ktos
+       cos obejrzal, wiec nie moze zaslonic tego, co wlasnie oglada. */
+    #contact-nudge {
+      position: fixed;
+      left: 50%;
+      bottom: 1.5rem;
+      z-index: 190;
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      max-width: calc(100vw - 2rem);
+      padding: 0.85rem 0.85rem 0.85rem 1.5rem;
+      transform: translateX(-50%);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.35);
+    }
+
+    #contact-nudge[hidden] { display: none; }
+
+    #contact-nudge-text {
+      font-size: 0.92rem;
+      line-height: 1.3;
+    }
+
+    #contact-nudge-close {
+      padding: 0 0.5rem;
+      font-size: 1.4rem;
+      line-height: 1;
+      color: rgba(237,230,216,0.45);
+      background: none;
+      border: 0;
+      cursor: pointer;
+    }
+
+    #contact-nudge-close:hover { color: rgba(237,230,216,0.9); }
+
+    @media (max-width: 640px) {
+      #contact-nudge {
+        left: 1rem;
+        right: 1rem;
+        max-width: none;
+        transform: none;
+        padding-left: 1rem;
+      }
+      #contact-nudge-text { font-size: 0.85rem; }
+    }
+
+    /* ── FORMULARZ KONTAKTOWY ── */
+    #contact-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      background: rgba(28,46,38,0.75);
+      backdrop-filter: blur(8px);
+    }
+
+    #contact-overlay.open { display: flex; }
+
+    #contact-form {
+      width: 100%;
+      max-width: 460px;
+      max-height: 100%;
+      overflow-y: auto;
+      padding: 2.5rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+    }
+
+    #contact-form h3 {
+      font-family: var(--font-heading);
+      font-size: 2rem;
+      font-weight: 500;
+      line-height: 1.15;
+      margin-bottom: 0.35rem;
+    }
+
+    #contact-apartment-info {
+      display: block;
+      margin-bottom: 1.75rem;
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    #contact-form label {
+      display: block;
+      margin-bottom: 1rem;
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    #contact-form input,
+    #contact-form textarea {
+      display: block;
+      width: 100%;
+      margin-top: 0.4rem;
+      padding: 0.7rem 0.85rem;
+      background: rgba(255,255,255,0.6);
+      border: 1px solid var(--border);
+      color: var(--fg);
+      font-size: 0.92rem;
+      font-family: var(--font-body);
+      letter-spacing: normal;
+      text-transform: none;
+    }
+
+    #contact-form textarea { min-height: 88px; resize: vertical; }
+
+    /* Zgoda marketingowa. Pole wyboru nie moze dziedziczyc stylu etykiet
+       tekstowych - te sa wersalikami na calej szerokosci, a zgoda musi byc
+       czytelnym zdaniem, bo z niej bierze sie podstawa prawna wysylki. */
+    #contact-form label.consent-field {
+      display: flex;
+      gap: 0.6rem;
+      align-items: flex-start;
+      margin-top: 1.25rem;
+      font-size: 0.72rem;
+      font-weight: 400;
+      letter-spacing: normal;
+      text-transform: none;
+      line-height: 1.5;
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    #contact-form label.consent-field input {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      margin-top: 0.15rem;
+      padding: 0;
+      accent-color: var(--primary);
+    }
+
+    #contact-form input:focus,
+    #contact-form textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    /* Honeypot: pole niewidoczne dla czlowieka, wypelniane przez boty.
+       display:none bywa przez nie pomijane, wiec chowamy je poza ekranem. */
+    .hp-field {
+      position: absolute;
+      left: -9999px;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+    }
+
+    .contact-actions {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+    }
+
+    .contact-actions .btn { flex: 1; height: 48px; justify-content: center; }
+
+    #contact-status {
+      margin-top: 1rem;
+      font-size: 0.82rem;
+      color: var(--muted);
+      min-height: 1.2em;
+    }
+
+    #contact-status.error { color: var(--red); }
+
+    /* ── LOCATION ── */
+    .location-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+    }
+
+    .location-card {
+      background: var(--bg);
+      padding: 2rem;
+    }
+
+    .location-card h3 {
+      font-family: var(--font-heading);
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      letter-spacing: -0.01em;
+    }
+
+    .location-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 0;
+      font-size: 0.82rem;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .location-item:last-child { border-bottom: none; }
+
+    .location-item span:last-child {
+      color: var(--fg);
+      font-weight: 500;
+    }
+
+    /* ── CTA ── */
+    #cta { text-align: center; }
+
+    #cta .section-subtitle {
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .cta-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    /* ── GALLERY ── */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+    }
+
+    .gallery-item {
+      position: relative;
+      overflow: hidden;
+      border-radius: 4px;
+      aspect-ratio: 16 / 10;
+    }
+
+    .gallery-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+
+    .gallery-item:hover img {
+      transform: scale(1.03);
+    }
+
+    .gallery-item figcaption {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 1.5rem 1.25rem 1rem;
+      background: linear-gradient(0deg, rgba(28,46,38,0.85) 0%, transparent 100%);
+      color: var(--dark-fg);
+      font-size: 0.82rem;
+      font-weight: 500;
+    }
+
+    .gallery-item.large {
+      grid-column: span 2;
+      aspect-ratio: 21 / 9;
+    }
+
+    /* ── ANIMATIONS ── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(32px);
+      transition: opacity 0.7s cubic-bezier(0.25,0.46,0.45,0.94),
+                  transform 0.7s cubic-bezier(0.25,0.46,0.45,0.94);
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+    .reveal-delay-4 { transition-delay: 0.4s; }
+    .reveal-delay-5 { transition-delay: 0.5s; }
+
+    .feature-card {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.5s cubic-bezier(0.25,0.46,0.45,0.94),
+                  transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94),
+                  background 0.2s;
+    }
+
+    .feature-card.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .stat-card {
+      opacity: 0;
+      transform: scale(0.95);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+
+    .stat-card.visible {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .gallery-item {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .gallery-item.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .gallery-item.visible img {
+      transition: transform 0.5s ease;
+    }
+
+    .location-card {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+
+    .location-card.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 2.5rem 2rem;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+    }
+
+    /* ── MOBILE ── */
+    @media (max-width: 768px) {
+      nav { padding: 0 1.25rem; height: 60px; }
+      .nav-links { display: none; }
+      .nav-logo { font-size: 1.2rem; }
+
+      .hero-content h1 { font-size: 2.4rem; }
+      .hero-content p { font-size: 0.9rem; }
+      .hero-label { font-size: 0.6rem; }
+
+      .section { padding: 3.5rem 1.25rem; }
+      .section-lg { padding: 4rem 1.25rem; }
+
+      .features-grid { grid-template-columns: 1fr; }
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .location-grid { grid-template-columns: 1fr; }
+      .gallery-grid { grid-template-columns: 1fr; }
+      .gallery-item.large { grid-column: span 1; aspect-ratio: 16/10; }
+
+      #demo-section { padding: 3rem 0 0; }
+
+      #demo-app {
+        aspect-ratio: 4 / 3;
+        max-height: 55vh;
+        min-height: 280px;
+        border-left: none;
+        border-right: none;
+      }
+
+      #demo-split {
+        top: 60px;
+      }
+
+      .apt-table-header { display: none; }
+
+      .apt-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        padding: 1rem 1.25rem;
+      }
+
+      .apt-row-name { width: 100%; margin-bottom: 0.25rem; }
+
+      .apt-row-dim, .apt-row-price {
+        font-size: 0.75rem;
+      }
+
+      .apt-row-actions {
+        width: 100%;
+        margin-top: 0.5rem;
+        flex-wrap: wrap;
+      }
+
+      .apt-row-actions .apartment-select-btn {
+        flex: none;
+        width: 100%;
+        font-size: 0.68rem;
+        padding: 10px 0.75rem;
+        letter-spacing: 0.06em;
+        height: auto;
+        text-align: left;
+      }
+
+
+      .pawn-actions .pawn-btn {
+        font-size: 0.6rem;
+        padding: 0 0.75rem;
+        height: 30px;
+      }
+
+      .pawn-btn-satellite { display: none; }
+
+      #connect-btn {
+        height: 48px;
+        padding: 0 1.75rem;
+        font-size: 0.75rem;
+      }
+
+      .apt-card { padding: 1rem 1.25rem; }
+      .apt-name { font-size: 1rem; }
+
+      .btn { height: 48px; padding: 0 1.5rem; font-size: 0.72rem; }
+
+      /* Orbital viewer mobile */
+      #orbital-legend {
+        left: 8px;
+        bottom: 8px;
+        padding: 5px 10px;
+        font-size: 0.58rem;
+        gap: 8px;
+      }
+      #orbital-legend i { width: 6px; height: 6px; margin-right: 3px; }
+      #orbital-hint {
+        top: 10px;
+        right: 10px;
+        padding: 6px 12px;
+        font-size: 0.6rem;
+      }
+      #orbital-tip {
+        font-size: 0.65rem;
+        padding: 7px 14px;
+        top: 10px;
+      }
+
+      /* Apartment card popup mobile - fullscreen scrollable */
+      #apt-card-overlay {
+        position: fixed;
+        inset: 0;
+        padding: 0;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+      }
+      #apt-card {
+        max-width: 100%;
+        width: 100%;
+        min-height: 100%;
+        height: auto;
+        padding: 3.5rem 1rem 6rem;
+        border: none;
+        overflow: visible;
+      }
+      #apt-card-body {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+      #apt-card-title { font-size: 1.5rem; }
+      #apt-card-subtitle { font-size: 0.75rem; margin-bottom: 1rem; }
+      #apt-card-image { width: 100%; }
+      .apt-card-specs {
+        grid-template-columns: 1fr;
+        gap: 0.3rem;
+        font-size: 0.78rem;
+      }
+      .apt-card-btn {
+        padding: 14px;
+        font-size: 0.72rem;
+        min-height: 44px;
+      }
+      #apt-card-close {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        width: 44px;
+        height: 44px;
+        font-size: 2rem;
+        background: rgba(28,46,38,0.95);
+        border: 1px solid rgba(237,230,216,0.2);
+        z-index: 9999;
+      }
+
+      /* Image modal mobile - fullscreen */
+      #img-modal { padding: 0; }
+      #img-modal-inner {
+        position: fixed;
+        inset: 0;
+        width: auto;
+        max-width: none;
+        height: auto;
+        max-height: none;
+        padding: 0;
+        margin: 0;
+        border: none;
+        background: #0d1013;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      #img-modal img {
+        width: 100%;
+        height: auto;
+        max-height: 100vh;
+        object-fit: contain;
+      }
+      #img-modal-close {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        width: 44px;
+        height: 44px;
+        font-size: 2rem;
+        background: rgba(13,16,19,0.9);
+        border: 1px solid rgba(237,230,216,0.3);
+        color: #fff;
+        z-index: 10000;
+      }
+
+      /* Back to orbital button mobile */
+      #back-to-orbital {
+        height: 40px;
+        padding: 0 1rem;
+        font-size: 0.65rem;
+        top: 10px;
+        left: 10px;
+        min-width: 44px;
+      }
+
+      /* Loading facts mobile */
+      #loading-facts {
+        max-width: 280px !important;
+        font-size: 0.75rem !important;
+        padding: 0 0.75rem !important;
+      }
+
+      /* Show more button mobile */
+      #apt-show-more {
+        font-size: 0.65rem;
+        padding: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav id="main-nav">
+    <div class="nav-logo">Mokotów <span>Prestige</span></div>
+    <ul class="nav-links">
+      <li><a href="#about">O inwestycji</a></li>
+      <li><a href="#demo-section">Podgląd 3D</a></li>
+      <li><a href="#location">Lokalizacja</a></li>
+      <li><a href="#cta">Kontakt</a></li>
+    </ul>
+    <a href="#demo-section" class="nav-cta">Podgląd 3D</a>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero">
+    <div id="hero-video-bg">
+      <video playsinline autoplay muted loop preload="auto">
+        <source src="https://ue-woodshack.s3.eu-west-1.amazonaws.com/Mokotow_Outsite_Lit_opt_1080.mp4" type="video/mp4" />
+      </video>
+    </div>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <span class="hero-label">Nowa inwestycja na Mokotowie</span>
+      <h1>Przestrzeń zaprojektowana dla Ciebie</h1>
+      <p>Poznaj inwestycję w interaktywnym podglądzie 3D. Wybierz apartament i poczuj przestrzeń, zanim zostanie wybudowana.</p>
+      <!-- Jeden przycisk, nie dwa. Drugi ("Dowiedz sie wiecej") prowadzil do
+           opisu tekstowego, czyli omijal to, po co ta strona istnieje - podglad
+           3D. Kto chce czytac, i tak zjedzie nizej. -->
+      <div class="hero-actions">
+        <a href="#demo-section" class="btn btn-primary">Podgląd 3D</a>
+      </div>
+    </div>
+    <div class="scroll-hint">Przewiń</div>
+  </section>
+
+  <!-- DEMO 3D -->
+  <section id="demo-section" class="section-dark">
+    <div class="container" style="max-width:1920px">
+      <span class="section-label">Wybierz apartament</span>
+      <h2 class="section-title">Mokot&#243;w Prestige <span id="apartment-count"></span></h2>
+      <p class="section-subtitle">Obracaj budynek i wybierz apartament, aby zobaczy&#263; szczeg&#243;&#322;y lokalu.</p>
+    </div>
+    <div id="demo-split">
+    <div id="demo-app">
+        <div id="main-view">
+          <div id="orbital-layer">
+            <div id="orbital-frame">
+              <canvas id="orbital-canvas"></canvas>
+              <svg id="orbital-svg" preserveAspectRatio="none"></svg>
+            </div>
+            <div id="orbital-tip"></div>
+            <div id="orbital-legend">
+              <span><i style="background:#3fbf87"></i>Dostepne</span>
+              <span><i style="background:#d9584e"></i>Niedostepne</span>
+            </div>
+            <div id="orbital-click-zone"></div>
+            <div id="orbital-hint">&#8596; Przeci&#261;gnij aby obr&#243;ci&#263;</div>
+            <div id="orbital-load">
+              <div class="cap">Wczytywanie modelu <span id="orbital-pct">0</span>%</div>
+              <div class="bar"><i id="orbital-bar"></i></div>
+            </div>
+          </div>
+          <div id="video-layer">
+            <div class="player-wrapper">
+              <video id="player" playsinline autoplay muted loop preload="auto">
+                <source id="videoSource" type="video/mp4" />
+              </video>
+            </div>
+          </div>
+          <div id="stream-layer">
+            <iframe id="streamIframe" allow="autoplay; camera" allowfullscreen></iframe>
+          </div>
+          <div id="overlay-controls">
+            <button id="connect-btn" style="display:none">Uruchom demo</button>
+            <span id="queue-text">Kolejka: miejsce <span id="queue-position"></span></span>
+            <div id="loading-facts" style="display:none;color:rgba(237,230,216,0.85);font-size:0.92rem;font-family:var(--font-body);text-align:center;max-width:500px;padding:0.5rem 1.5rem;pointer-events:none;transition:opacity 0.4s ease;font-style:italic"></div>
+          </div>
+          <button id="back-to-orbital" type="button" onclick="
+            document.getElementById('orbital-layer').classList.remove('hidden');
+            this.style.display='none';
+            document.getElementById('video-layer').classList.remove('fade-out');
+            document.getElementById('stream-layer').style.zIndex='1';
+            document.getElementById('main-view').classList.remove('stream-active');
+            document.body.classList.remove('stream-locked');
+          document.getElementById('main-nav').classList.remove('nav-hidden');
+          ">&#8592; Wr&#243;&#263; do wyboru</button>
+        </div>
+
+    </div>
+    <div id="sidebar-apartments">
+        <div id="sidebar-list"></div>
+    </div>
+    </div><!-- /demo-split -->
+
+  <!-- Hidden elements needed by JS (pawn-actions, apartments-list) -->
+  <div style="display:none">
+      <div class="pawn-actions">
+        <button type="button" class="pawn-btn active" data-pawn-select="orbital">Poznaj nasza inwestycje</button>
+        <button type="button" class="pawn-btn pawn-btn-satellite" data-pawn-select="satellite">Widok z lotu ptaka</button>
+      </div>
+      <div id="apartments-list"></div>
+  </div>
+  </section>
+
+  <!-- O INWESTYCJI -->
+  <section id="about" class="section">
+    <div class="container">
+      <span class="section-label reveal">O inwestycji</span>
+      <h2 class="section-title reveal reveal-delay-1">Komfort w każdym detalu</h2>
+      <p class="section-subtitle reveal reveal-delay-2">Mokotów Prestige to kameralny projekt w jednej z najbardziej pożądanych dzielnic Warszawy. Nowoczesna architektura, przemyślane układy i najwyższa jakość wykończenia.</p>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          </div>
+          <h3>Przemyślane układy</h3>
+          <p>Funkcjonalne rozkłady od 2 do 5 pokoi, zaprojektowane z dbałością o każdy metr kwadratowy.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+          </div>
+          <h3>Naturalne światło</h3>
+          <p>Duże przeszklenia i przemyślana orientacja budynku zapewniają optymalne doświetlenie wnętrz.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          </div>
+          <h3>Smart Home</h3>
+          <p>System inteligentnego zarządzania oświetleniem, ogrzewaniem i bezpieczeństwem w każdym mieszkaniu.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24"><path d="M17 8l4 4-4 4"/><path d="M3 12h18"/><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13"/></svg>
+          </div>
+          <h3>Zieleń i rekreacja</h3>
+          <p>Wewnętrzny dziedziniec z ogrodem, plac zabaw i strefa relaksu dla mieszkańców.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9L18 10l-2.7-5.4A2 2 0 0 0 13.5 3h-3a2 2 0 0 0-1.8 1.1L6 10l-2.5 1.1C2.7 11.3 2 12.1 2 13v3c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>
+          </div>
+          <h3>Parking podziemny</h3>
+          <p>Hala garażowa z miejscami postojowymi i stacjami ładowania pojazdów elektrycznych.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <h3>Bezpieczeństwo</h3>
+          <p>Monitoring, kontrola dostępu i ochrona obiektu 24/7 dla pełnego spokoju mieszkańców.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- GALERIA -->
+  <section class="section-dark section-lg">
+    <div class="container">
+      <span class="section-label reveal">Wizualizacje</span>
+      <h2 class="section-title reveal reveal-delay-1">Zajrzyj do srodka</h2>
+      <p class="section-subtitle reveal reveal-delay-2">Fotorealistyczne wizualizacje stworzone w Unreal Engine 5. Tak bedzie wygladac Twoje przyszle mieszkanie.</p>
+
+      <div class="gallery-grid">
+        <figure class="gallery-item large">
+          <img src="https://archviz.codelivery.eu/assets/viz-building-BSmCZS06.png" alt="Wizualizacja budynku Mokotow Prestige z lotu ptaka" loading="lazy" />
+          <figcaption>Elewacja budynku z zielonym dachem</figcaption>
+        </figure>
+        <figure class="gallery-item">
+          <img src="https://archviz.codelivery.eu/assets/viz-livingroom-B3U_uMGr.png" alt="Wnetrze kuchni w apartamencie" loading="lazy" />
+          <figcaption>Wnetrze apartamentu / kuchnia</figcaption>
+        </figure>
+        <figure class="gallery-item">
+          <img src="https://archviz.codelivery.eu/assets/viz-balcony-BtHA3y-J.png" alt="Strefa dzienna z biblioteka" loading="lazy" />
+          <figcaption>Strefa dzienna z antresola</figcaption>
+        </figure>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section class="section-dark section-lg">
+    <div class="container">
+      <span class="section-label reveal">Inwestycja w liczbach</span>
+      <h2 class="section-title reveal reveal-delay-1">Mokotów Prestige</h2>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-value">48</div>
+          <div class="stat-label">Mieszkań</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">2-5</div>
+          <div class="stat-label">Pokoi</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">42-93</div>
+          <div class="stat-label">m² powierzchni</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">Q3 2027</div>
+          <div class="stat-label">Planowane oddanie</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- PODGLAD Z PLATFORMY -->
+  <section class="section-dark section">
+    <div class="container">
+      <span class="section-label reveal">Rzut z gory</span>
+      <h2 class="section-title reveal reveal-delay-1">Interaktywny wybor lokalu</h2>
+      <p class="section-subtitle reveal reveal-delay-2">Widok z lotu ptaka na uklad mieszkania. Kliknij, aby wejsc do srodka i zobaczyc kazdy pokoj w pelnym 3D.</p>
+
+      <figure class="gallery-item large" style="border-radius:4px;max-width:960px">
+        <img src="https://archviz.codelivery.eu/assets/floorplan-topview-C3X0mgG7.png" alt="Rzut z gory na mieszkanie - widok z platformy" loading="lazy" />
+        <figcaption>Widok z platformy / intuicyjny wybor lokalu</figcaption>
+      </figure>
+
+    </div>
+  </section>
+
+  <div class="divider divider-dark" style="background:var(--border)"></div>
+
+  <!-- LOKALIZACJA -->
+  <section id="location" class="section">
+    <div class="container">
+      <span class="section-label reveal">Lokalizacja</span>
+      <h2 class="section-title reveal reveal-delay-1">Mokotów / życie w dobrym adresie</h2>
+      <p class="section-subtitle reveal reveal-delay-2">Blisko centrum, a jednocześnie w otoczeniu zieleni. Doskonała komunikacja i pełna infrastruktura w zasięgu ręki.</p>
+
+      <div class="location-grid">
+        <div class="location-card">
+          <h3>Komunikacja</h3>
+          <div class="location-item"><span>Metro Wilanowska</span><span>6 min</span></div>
+          <div class="location-item"><span>Centrum Warszawy</span><span>15 min</span></div>
+          <div class="location-item"><span>Lotnisko Chopina</span><span>20 min</span></div>
+          <div class="location-item"><span>Przystanek autobusowy</span><span>2 min</span></div>
+        </div>
+        <div class="location-card">
+          <h3>W okolicy</h3>
+          <div class="location-item"><span>Galeria Mokotów</span><span>8 min</span></div>
+          <div class="location-item"><span>Park Arkadia</span><span>5 min</span></div>
+          <div class="location-item"><span>Szkoła podstawowa</span><span>4 min</span></div>
+          <div class="location-item"><span>Przychodnia</span><span>3 min</span></div>
+        </div>
+        <div class="location-card">
+          <h3>Edukacja</h3>
+          <div class="location-item"><span>Przedszkole</span><span>3 min</span></div>
+          <div class="location-item"><span>Liceum</span><span>7 min</span></div>
+          <div class="location-item"><span>Uniwersytet Warszawski</span><span>18 min</span></div>
+          <div class="location-item"><span>Szkoła językowa</span><span>5 min</span></div>
+        </div>
+        <div class="location-card">
+          <h3>Sport i rozrywka</h3>
+          <div class="location-item"><span>Siłownia</span><span>4 min</span></div>
+          <div class="location-item"><span>Basen</span><span>10 min</span></div>
+          <div class="location-item"><span>Kino</span><span>8 min</span></div>
+          <div class="location-item"><span>Ścieżki rowerowe</span><span>1 min</span></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- CTA -->
+  <section id="cta" class="section-lg">
+    <div class="container">
+      <span class="section-label reveal">Zainteresowany?</span>
+      <h2 class="section-title reveal reveal-delay-1">Umów prezentację</h2>
+      <p class="section-subtitle reveal reveal-delay-2" style="margin-left:auto;margin-right:auto">Skontaktuj się z nami, aby poznać szczegółową ofertę lub umówić indywidualną prezentację inwestycji.</p>
+      <div class="cta-actions">
+        <button type="button" class="btn btn-dark" data-open-contact>Napisz do nas</button>
+        <a href="tel:+48123456789" class="btn btn-outline" style="border-color:rgba(53,90,74,0.3);color:var(--primary)">+48 123 456 789</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ZAPROSZENIE DO KONTAKTU (pokazuje je zachowanie w scenie, nie stoper) -->
+  <div id="contact-nudge" hidden>
+    <p id="contact-nudge-text">Chcesz poznać szczegóły?</p>
+    <button type="button" class="btn btn-dark" id="contact-nudge-open">Zapytaj</button>
+    <button type="button" id="contact-nudge-close" aria-label="Zamknij">&times;</button>
+  </div>
+
+  <!-- FORMULARZ KONTAKTOWY -->
+  <div id="contact-overlay">
+    <form id="contact-form" novalidate>
+      <h3>Zapytaj o apartament</h3>
+      <span id="contact-apartment-info">Mokotów Prestige</span>
+      <input type="hidden" id="contact-apartment" name="apartment" />
+      <label>
+        Imię i nazwisko
+        <input type="text" id="contact-name" name="name" autocomplete="name" required />
+      </label>
+      <label>
+        E-mail
+        <input type="email" id="contact-email" name="email" autocomplete="email" />
+      </label>
+      <label>
+        Telefon
+        <input type="tel" id="contact-phone" name="phone" autocomplete="tel" />
+      </label>
+      <label>
+        Wiadomość
+        <textarea id="contact-message" name="message"></textarea>
+      </label>
+      <label class="consent-field">
+        <input type="checkbox" id="contact-consent" name="sms_consent" />
+        <span>Zgadzam się na otrzymywanie informacji handlowych o inwestycji Mokotów Prestige SMS-em na podany numer. Zgodę mogę wycofać w każdej chwili.</span>
+      </label>
+      <div class="hp-field" aria-hidden="true">
+        <label>Strona WWW<input type="text" id="contact-website" name="website" tabindex="-1" autocomplete="off" /></label>
+      </div>
+      <div class="contact-actions">
+        <button type="submit" id="contact-submit" class="btn btn-dark">Wyślij</button>
+        <button type="button" id="contact-cancel" class="btn btn-outline" style="border-color:rgba(53,90,74,0.3);color:var(--primary)">Anuluj</button>
+      </div>
+      <p id="contact-status"></p>
+    </form>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    Mokotów Prestige &middot; Szablon podglądu inwestycji &middot; Powered by Unreal Engine 5
+  </footer>
+
+  <!-- SCRIPTS -->
+  <script src="tour.js"></script>
+  <script>
+  (function() {
+    const TOUR = window.ARCHVIS_TOUR;
+    if (!TOUR) return;
+
+    const COLOR = { free: '#3fbf87', reserved: '#e6a33c', sold: '#d9584e' };
+    const FRICTION = 0.94;
+    const DRAG_SENS = 720;
+
+    const cv = document.getElementById('orbital-canvas');
+    const ctx = cv.getContext('2d');
+    const svg = document.getElementById('orbital-svg');
+    const container = document.getElementById('orbital-layer');
+    const frameBox = document.getElementById('orbital-frame');
+    const tip = document.getElementById('orbital-tip');
+    const loadEl = document.getElementById('orbital-load');
+    const pctEl = document.getElementById('orbital-pct');
+    const barEl = document.getElementById('orbital-bar');
+
+    const orbitShot = TOUR.shots.Orbit;
+    const FRAME_COUNT = orbitShot.beautyFrames;
+    const NORM = TOUR.norm;
+
+    // Unit availability - matches apartment table
+    // A_11 = apartment13 (Rezerwacja = zielony, jedyny dostepny do spaceru)
+    // Reszta = sold (czerwony, niedostepne)
+    const fakeStatus = {};
+    Object.keys(TOUR.units).forEach(function(k) {
+      fakeStatus[k] = (k === 'A_11') ? 'free' : 'sold';
+    });
+
+    let frames = [];
+    let pos = 0, vel = 0;
+    let dragging = false, dragX = 0, dragStart = 0, dragMoved = false, lastX = 0, lastT = 0;
+    let spin = null;
+    let hotKey = null;
+    let hoveredUnit = null; // unit key currently under cursor
+
+    function loadImg(src) {
+      return new Promise(function(res) {
+        const img = new Image();
+        img.onload = function() { if (img.decode) img.decode().catch(function(){}); res(img); };
+        img.onerror = function() { res(null); };
+        img.src = src;
+      });
+    }
+
+    function frameIndex(p) {
+      return Math.floor(((p % FRAME_COUNT) + FRAME_COUNT) % FRAME_COUNT);
+    }
+
+    function draw() {
+      if (!frames.length) return;
+      const idx = frameIndex(pos);
+      const img = frames[idx];
+      if (!img) return;
+      ctx.globalAlpha = 1;
+      ctx.drawImage(img, 0, 0, cv.width, cv.height);
+      drawOverlay(idx);
+    }
+
+    function drawOverlay(frameNo) {
+      const scopes = orbitShot.scopes;
+      if (!scopes) { svg.style.display = 'none'; return; }
+
+      const units = [];
+      for (const scopeKey in scopes) {
+        const data = scopes[scopeKey];
+        if (!data.f) continue;
+        const fr = data.f.find(function(x) { return x.i === frameNo; });
+        if (fr) units.push.apply(units, fr.u);
+      }
+
+      if (!units.length) { svg.style.display = 'none'; svg.innerHTML = ''; return; }
+      svg.style.display = 'block';
+      svg.setAttribute('viewBox', '0 0 ' + NORM + ' ' + NORM);
+      svg.innerHTML = '';
+
+      units.forEach(function(u) {
+        const color = COLOR[fakeStatus[u.k]] || '#8c98a4';
+        const isHot = hotKey === u.k;
+        const isDim = u.vis < 0.2;
+
+        u.p.forEach(function(ring) {
+          const el = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+          el.setAttribute('points', ring.map(function(p) { return p.join(','); }).join(' '));
+          el.setAttribute('fill', color);
+          el.setAttribute('stroke', color);
+          el.dataset.unit = u.k;
+          if (isHot) el.classList.add('hot');
+          if (isDim) el.classList.add('dim');
+
+          el.addEventListener('pointerenter', function() {
+            hotKey = u.k;
+            hoveredUnit = u.k;
+            // Apply highlight directly - do NOT call draw() which destroys this polygon
+            el.classList.add('hot');
+            const meta = TOUR.units[u.k];
+            if (meta) {
+              // Show real apartment number if mapped
+              var UNIT_LABELS = {
+                'A_11': 'Apartament 13', 'A_12': 'Apartament 14',
+                'A_13': 'Apartament 11', 'A_14': 'Apartament 12',
+                'A_21': 'Apartament 21', 'A_22': 'Apartament 22',
+                'A_23': 'Apartament 23', 'A_24': 'Apartament 24',
+                'Lok_01 ': 'Lokal 1', 'Lok_03': 'Lokal 3'
+              };
+              var label = UNIT_LABELS[u.k] || u.k;
+              var STATUS_PL = { free: 'Dost\u0119pne', reserved: 'Rezerwacja', sold: 'Niedost\u0119pne' };
+              var STATUS_COLOR = { free: '#3fbf87', reserved: '#e6a33c', sold: '#d9584e' };
+              var statusKey = fakeStatus[u.k] || 'sold';
+              var statusLabel = STATUS_PL[statusKey] || statusKey;
+              var statusColor = STATUS_COLOR[statusKey] || '#8c98a4';
+              var bits = [label];
+              if (meta.f !== undefined) bits.push('pi\u0119tro ' + meta.f);
+              if (meta.m2) bits.push(meta.m2 + ' m\u00B2');
+              if (meta.r) bits.push(meta.r + (meta.r === 1 ? ' pok\u00F3j' : meta.r < 5 ? ' pokoje' : ' pokoi'));
+              tip.innerHTML = '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + statusColor + ';margin-right:6px;vertical-align:middle"></span><span style="color:' + statusColor + ';margin-right:8px">' + statusLabel + '</span>' + bits.join('  \u00B7  ');
+              tip.classList.add('on');
+            }
+          });
+
+          el.addEventListener('pointerleave', function() {
+            hotKey = null;
+            // Do NOT clear hoveredUnit here - polygon gets destroyed by draw()
+            // which fires pointerleave, making hoveredUnit null before click arrives
+            el.classList.remove('hot');
+            tip.classList.remove('on');
+          });
+
+          svg.appendChild(el);
+        });
+      });
+    }
+
+    // Clear hoveredUnit only when pointer truly leaves the SVG area
+    svg.addEventListener('pointerleave', function() {
+      hoveredUnit = null;
+    });
+
+    function resize() {
+      if (!frames.length) return;
+      const img = frames[0];
+      const box = container.getBoundingClientRect();
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      // Container has same aspect ratio as frames (3:2), so contain = cover = exact fit
+      const w = Math.round(box.width);
+      const h = Math.round(box.height);
+      cv.style.width = w + 'px';
+      cv.style.height = h + 'px';
+      cv.width = Math.round(w * dpr);
+      cv.height = Math.round(h * dpr);
+      cv.style.position = 'absolute';
+      cv.style.left = '0';
+      cv.style.top = '0';
+      svg.style.position = 'absolute';
+      svg.style.left = '0';
+      svg.style.top = '0';
+      svg.style.width = w + 'px';
+      svg.style.height = h + 'px';
+      draw();
+    }
+
+    // Pointer handlers
+    container.addEventListener('pointerdown', function(e) {
+      if (!frames.length) return;
+      if (spin) { cancelAnimationFrame(spin); spin = null; }
+      dragging = true;
+      dragMoved = false;
+      dragX = lastX = e.clientX;
+      dragStart = pos;
+      lastT = performance.now();
+      vel = 0;
+    });
+
+    window.addEventListener('pointermove', function(e) {
+      if (!dragging) return;
+      const dx = e.clientX - dragX;
+      if (Math.abs(dx) > 4) dragMoved = true;
+      if (!dragMoved) return;
+      pos = dragStart - (dx / DRAG_SENS) * FRAME_COUNT;
+      const now = performance.now();
+      const dt = now - lastT;
+      if (dt > 0) { vel = (e.clientX - lastX) / dt; lastX = e.clientX; lastT = now; }
+      draw();
+    });
+
+    // Apartment card data - keyed by orbital unit
+    var APT_CARD_DATA = {
+      'A_11': {
+        specs: [
+          ['Salon z aneksem kuchennym i jadalni\u0105', '69 m\u00B2'],
+          ['Komunikacja', '20 m\u00B2'],
+          ['WC', '5,5 m\u00B2'],
+          ['Sypialnia', '18,5 m\u00B2'],
+          ['Pok\u00F3j', '17,2 m\u00B2'],
+          ['Pok\u00F3j', '25,7 m\u00B2'],
+          ['\u0141azienka', '6,5 m\u00B2'],
+          ['Antresola', '47,6 m\u00B2']
+        ],
+        suma: '212 m\u00B2', taras: '36 m\u00B2'
+      }
+    };
+
+    // Orbital unit display names (orbital ID -> real apartment name)
+    var UNIT_NAMES = {
+      'A_11': 'Apartament 13', 'A_12': 'Apartament 14',
+      'A_13': 'Apartament 11', 'A_14': 'Apartament 12',
+      'A_21': 'Apartament 21', 'A_22': 'Apartament 22',
+      'A_23': 'Apartament 23', 'A_24': 'Apartament 24',
+      'Lok_01 ': 'Lokal 1', 'Lok_03': 'Lokal 3'
+    };
+
+    // Floor plan images per orbital unit
+    var UNIT_IMAGES = {
+      'A_11': 'karta-a11.png'
+    };
+
+    function showAptCard(unitKey) {
+      var aptId = ORBITAL_TO_APARTMENT[unitKey] || 'apartment13';
+      var data = APT_CARD_DATA[unitKey];
+      var overlay = document.getElementById('apt-card-overlay');
+      var title = document.getElementById('apt-card-title');
+      var subtitle = document.getElementById('apt-card-subtitle');
+      var specs = document.getElementById('apt-card-specs');
+      var actions = document.getElementById('apt-card-actions');
+      var badgeWrap = document.getElementById('apt-card-badge-wrap');
+      var img = document.getElementById('apt-card-image');
+
+      var meta = TOUR.units[unitKey];
+      var label = UNIT_NAMES[unitKey] || unitKey;
+      // Read availability from CRM/fallback data, not from card data
+      var aptEntry = (typeof apartmentsData !== 'undefined') ? apartmentsData.find(function(a) { return a.id === aptId; }) : null;
+      var rawStatus = aptEntry ? aptEntry.dostepnosc : false;
+      var avail = rawStatus === true;
+      var reserved = rawStatus === 'reserved';
+      var badgeClass = reserved ? 'reserved' : avail ? 'available' : 'unavailable';
+      var badgeText = reserved ? 'Rezerwacja' : avail ? 'Dost\u0119pny' : 'Niedost\u0119pny';
+
+      badgeWrap.innerHTML = '<span class="apt-card-badge ' + badgeClass + '">' + badgeText + '</span>';
+      title.textContent = label;
+      var priceStr = aptEntry && aptEntry.cena ? new Intl.NumberFormat('pl-PL').format(aptEntry.cena) + ' z\u0142' : '';
+      var parts = [];
+      if (meta) {
+        parts.push('Pi\u0119tro ' + meta.f);
+        if (aptEntry) parts.push(aptEntry.powierzchnia + ' m\u00B2');
+        else parts.push(meta.m2 + ' m\u00B2');
+        parts.push(meta.r + ' pokoje');
+      }
+      if (priceStr) parts.push(priceStr);
+      subtitle.textContent = parts.join(' \u00B7 ');
+
+      // Floor plan image
+      var imgSrc = UNIT_IMAGES[unitKey];
+      if (imgSrc) {
+        img.src = imgSrc;
+        img.alt = label;
+        img.style.display = 'block';
+        img.onclick = function() { showImageModal(imgSrc); };
+      } else {
+        img.style.display = 'none';
+        img.onclick = null;
+      }
+
+      // Specs table
+      if (data && data.specs) {
+        specs.style.display = '';
+        specs.innerHTML = data.specs.map(function(s) {
+          return '<div class="apt-card-spec"><span>' + s[0] + '</span><strong>' + s[1] + '</strong></div>';
+        }).join('') +
+        '<div class="apt-card-spec apt-card-spec-total"><span><strong>Suma powierzchni</strong></span><strong>' + data.suma + '</strong></div>' +
+        '<div class="apt-card-spec"><span>+ Taras</span><strong>' + data.taras + '</strong></div>';
+      } else {
+        specs.style.display = 'none';
+      }
+
+      // Action buttons - same as table row, all 5
+      var canInteract = avail || reserved;
+      var close = "document.getElementById('apt-card-overlay').classList.remove('open');";
+      var clickBtn = function(sel) { return close + "var b=document.querySelector('" + sel + "');if(b)b.click();"; };
+      var btns = '';
+      btns += '<button class="apt-card-btn" ' + (imgSrc ? 'onclick="showImageModal(\'' + imgSrc + '\')"' : 'disabled') + '>Karta lokalu</button>';
+      if (imgSrc) { btns += '<button class="apt-card-btn" style="text-align:left;font-size:0.6rem;padding:6px 14px" onclick="downloadAptCard()">&#11015; Pobierz kart\u0119 lokalu (PDF)</button>'; }
+      btns += '<button class="apt-card-btn" ' + (canInteract ? 'onclick="' + clickBtn('[data-apartment-id=&quot;' + aptId + '&quot;][data-pawn-type=&quot;apartment-showcase&quot;]') + '"' : 'disabled') + '>Prezentacja apartamentu</button>';
+      btns += '<button class="apt-card-btn" onclick="' + clickBtn('[data-apartment-id=&quot;' + aptId + '&quot;][data-pawn-type=&quot;top-view&quot;]') + '">Widok z g\u00F3ry</button>';
+      btns += '<button class="apt-card-btn primary" ' + (canInteract ? 'onclick="' + clickBtn('[data-apartment-id=&quot;' + aptId + '&quot;][data-pawn-type=&quot;first-person&quot;]') + '"' : 'disabled') + '>Spacer</button>';
+      btns += '<button class="apt-card-btn" onclick="document.querySelector(\'[data-open-contact=&quot;' + aptId + '&quot;]\').click();">Zapytaj</button>';
+      actions.innerHTML = btns;
+
+      overlay.classList.add('open');
+    }
+
+    // Click on SVG: detect which unit by point-in-polygon, show card
+    var czDown = null;
+    svg.addEventListener('pointerdown', function(e) {
+      czDown = { x: e.clientX, y: e.clientY };
+    });
+    svg.addEventListener('pointerup', function(e) {
+      if (!czDown) return;
+      var dx = e.clientX - czDown.x, dy = e.clientY - czDown.y;
+      czDown = null;
+      if (dx * dx + dy * dy > 225) return;
+
+      // Convert click position to SVG viewBox coords
+      var svgRect = svg.getBoundingClientRect();
+      if (!svgRect.width || !svgRect.height) return;
+      var nx = ((e.clientX - svgRect.left) / svgRect.width) * NORM;
+      var ny = ((e.clientY - svgRect.top) / svgRect.height) * NORM;
+
+      // Find which unit polygon contains this point
+      var idx = frameIndex(pos);
+      var scopes = orbitShot.scopes;
+      var hitUnit = null;
+      for (var sk in scopes) {
+        var sd = scopes[sk];
+        if (!sd.f) continue;
+        var fr = sd.f.find(function(x) { return x.i === idx; });
+        if (!fr) continue;
+        for (var ui = 0; ui < fr.u.length; ui++) {
+          var u = fr.u[ui];
+          if (u.vis < 0.2) continue;
+          for (var ri = 0; ri < u.p.length; ri++) {
+            if (pointInPolygon(nx, ny, u.p[ri])) { hitUnit = u.k; break; }
+          }
+          if (hitUnit) break;
+        }
+        if (hitUnit) break;
+      }
+
+      showAptCard(hitUnit || 'A_11');
+    });
+
+    // Ray-casting point-in-polygon
+    function pointInPolygon(x, y, ring) {
+      var inside = false;
+      for (var i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+        var xi = ring[i][0], yi = ring[i][1];
+        var xj = ring[j][0], yj = ring[j][1];
+        if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) {
+          inside = !inside;
+        }
+      }
+      return inside;
+    }
+
+    window.addEventListener('pointerup', function() {
+      if (!dragging) return;
+      dragging = false;
+      if (!dragMoved) return;
+      if (Math.abs(vel) > 0.05) {
+        var v = (-vel / DRAG_SENS) * FRAME_COUNT * 16;
+        (function glide() {
+          v *= FRICTION;
+          pos += v;
+          draw();
+          if (Math.abs(v) > 0.002) spin = requestAnimationFrame(glide);
+          else spin = null;
+        })();
+      }
+    });
+
+    window.addEventListener('pointercancel', function() { dragging = false; });
+    window.addEventListener('resize', resize);
+    if (window.ResizeObserver) {
+      new ResizeObserver(function() { if (frames.length) resize(); }).observe(container);
+    }
+
+    // Expose orbital animation to outside scripts
+    window.orbitalAnimateToFrame = function(targetFrame) {
+      var n = FRAME_COUNT;
+      var target = targetFrame;
+      var current = ((pos % n) + n) % n;
+      var dist = ((target - current) % n + n) % n;
+      if (dist > n / 2) dist -= n;
+      var start = pos;
+      var duration = Math.abs(dist) * 30;
+      var t0 = performance.now();
+      function step(now) {
+        var t = Math.min(1, (now - t0) / Math.max(duration, 1));
+        var ease = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+        pos = start + dist * ease;
+        draw();
+        if (t < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    };
+
+    // Load frames
+    (async function() {
+      let loaded = 0;
+      const promises = [];
+      for (let i = 0; i < FRAME_COUNT; i++) {
+        const n = String(i).padStart(4, '0');
+        promises.push(loadImg('tour/orbit.' + n + '.jpeg').then(function(img) {
+          loaded++;
+          const p = Math.round(loaded / FRAME_COUNT * 100);
+          pctEl.textContent = p;
+          barEl.style.width = p + '%';
+          return img;
+        }));
+      }
+      const imgs = await Promise.all(promises);
+      frames = imgs.filter(Boolean);
+      if (frames[0] && frames[0].decode) {
+        await Promise.race([frames[0].decode().catch(function(){}), new Promise(function(r) { setTimeout(r, 600); })]);
+      }
+      loadEl.classList.add('done');
+      resize();
+      requestAnimationFrame(draw);
+    })();
+  })();
+  </script>
+
+  <script>
+    const CONFIG = {
+      videoSrc: 'https://ue-woodshack.s3.eu-west-1.amazonaws.com/Mokotow_Outsite_Lit_opt_1080.mp4',
+      streamUrl: 'https://share.streampixel.io/69d02e1541d102927cd76c17',
+      // Codelivery CRM. Klucz nie jest sekretem - pozwala wylacznie dopisac
+      // zdarzenie lub leada do tej jednej organizacji, niczego nie odczyta.
+      crmUrl: 'https://srkdzjxnjbgwvqeqiscy.supabase.co/functions/v1',
+      // Klucz organizacji "Mokotow Prestige" w CRM. Nie jest sekretem: pozwala
+      // wylacznie dopisac zdarzenie i odczytac liste mieszkan, ktora i tak jest
+      // na tej stronie widoczna. Wczesniej stal tu klucz organizacji DEMO, wiec
+      // przywrocenie danych demo kasowalo prawdziwe leady.
+      crmKey: 'ck_9f4b21c7e05d4a6ab8137e2c5d9061fa',
+      // Slug inwestycji w CRM - po nim lead dostaje przypisanie do Mokotowa.
+      crmInvestment: 'mokotow',
+    };
+  </script>
+
+  <!-- Sledzenie Codelivery: nadaje odwiedzajacemu identyfikator i wystawia
+       window.clTrack(typ, dane). Musi byc PRZED reszta skryptow, bo ta juz z niego korzysta. -->
+  <script>
+    (function () {
+      // Kod wklejony drugi raz liczylby kazda wizyte podwojnie.
+      if (window.clTrack) return;
+
+      var q = new URLSearchParams(location.search);
+      // Przy zablokowanych ciasteczkach (Safari prywatny, polityki firmowe) samo
+      // siegniecie po localStorage rzuca wyjatkiem, a nie zwraca null. Bez try/catch
+      // wyjatek przerywa cala te funkcje i clTrack w ogole nie powstaje - a wtedy
+      // milknie nie samo page_view, tylko caly spacer 3D ponizej.
+      var store = null;
+      try { store = window.localStorage; } catch (e) {}
+
+      // cl_vid w adresie doklada link sledzacy z CRM - wtedy od razu wiadomo, kto to,
+      // wiec ma pierwszenstwo przed losowym identyfikatorem z tej przegladarki.
+      var id = q.get('cl_vid') || (store && store.getItem('cl_vid'));
+      if (!id) id = 'cv_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+      try { if (store) store.setItem('cl_vid', id); } catch (e) {}
+
+      window.clVisitorId = id;
+      window.clUtm = {
+        utm_source: q.get('utm_source'), utm_medium: q.get('utm_medium'),
+        utm_campaign: q.get('utm_campaign'), utm_term: q.get('utm_term'),
+        utm_content: q.get('utm_content'),
+      };
+
+      window.clTrack = function (type, meta) {
+        if (!navigator.sendBeacon) return;
+        var payload = Object.assign({
+          key: CONFIG.crmKey, visitor_id: id, type: type,
+          url: location.href, referrer: document.referrer,
+          gclid: q.get('gclid'), fbclid: q.get('fbclid'),
+          metadata: meta || {}, occurred_at: new Date().toISOString(),
+        }, window.clUtm);
+        // sendBeacon przezywa zamkniecie karty - zdarzenie "wyszedl" tez dojdzie.
+        //
+        // Typ MUSI byc text/plain, mimo ze w srodku jest JSON. Przy typie
+        // application/json przegladarka wysyla beacon jako zapytanie CORS
+        // z credentials, a wtedy odrzuca odpowiedz z Access-Control-Allow-Origin: *
+        // i zdarzenie ginie po cichu (Safari mowi to wprost, Chrome milczy).
+        // text/plain jest na liscie bezpiecznych typow, wiec leci bez tego calego
+        // obrzadku - funkcja `track` i tak czyta cialo jako JSON, nie patrzac na naglowek.
+        navigator.sendBeacon(
+          CONFIG.crmUrl + '/track',
+          new Blob([JSON.stringify(payload)], { type: 'text/plain' })
+        );
+      };
+
+      window.clTrack('page_view');
+    })();
+  </script>
+  <script>
+    function isTouchDevice() {
+      return ('ontouchstart' in window) ||
+        navigator.maxTouchPoints > 0 ||
+        window.matchMedia('(pointer: coarse)').matches;
+    }
+
+    const videoEl = document.getElementById('player');
+    document.getElementById('videoSource').src = CONFIG.videoSrc;
+    videoEl.load();
+    videoEl.addEventListener('canplay', () => { videoEl.play().catch(() => {}); });
+
+    const connectBtn    = document.getElementById('connect-btn');
+    const queueText     = document.getElementById('queue-text');
+    const queuePosition = document.getElementById('queue-position');
+    const videoLayer    = document.getElementById('video-layer');
+    const streamLayer   = document.getElementById('stream-layer');
+    const streamIframe  = document.getElementById('streamIframe');
+    const mainNav       = document.getElementById('main-nav');
+
+    const STATE_PROGRESS = { authenticating: 10, connecting: 20, finalising: 80, loadingComplete: 100 };
+
+    let displayedProgress = 0, targetProgress = 0;
+    let streamComplete = false, readyTriggered = false, inQueue = false;
+    let demoStarted = false, streamLoading = false, pendingApartment = null;
+
+    function animateTick() {
+      if (!streamLoading) { requestAnimationFrame(animateTick); return; }
+      const diff = targetProgress - displayedProgress;
+      if (Math.abs(diff) > 0.1) {
+        displayedProgress += diff * 0.08;
+        connectBtn.textContent = '\u0141adowanie ' + Math.round(displayedProgress) + '%';
+      }
+      if (streamComplete && Math.round(displayedProgress) >= 100 && !readyTriggered) {
+        readyTriggered = true;
+        onStreamReady();
+      }
+      requestAnimationFrame(animateTick);
+    }
+    requestAnimationFrame(animateTick);
+
+    let progressInterval = null;
+
+    var LOADING_FACTS = [
+      '7 minut pieszo do stacji Metro Wierzbno',
+      '10 minut pieszo do Parku Kr\u00f3likarni',
+      'Prywatny ogr\u00f3d na dachu dla wszystkich mieszka\u0144c\u00f3w',
+      'Du\u017cy, relaksuj\u0105cy taras przy ka\u017cdym apartamencie',
+      'Gara\u017c podziemny z \u0142adowarkami EV',
+      'System Smart Home w standardzie'
+    ];
+    var factsInterval = null;
+
+    function startStreamLoading() {
+      if (streamLoading) return;
+      streamLoading = true;
+      streamIframe.src = CONFIG.streamUrl;
+      connectBtn.classList.add('loading');
+      connectBtn.classList.remove('ready');
+      connectBtn.textContent = '\u0141adowanie 0%';
+      progressInterval = setInterval(() => {
+        if (!streamComplete && !inQueue) targetProgress = Math.min(90, targetProgress + 0.4);
+      }, 400);
+      // Start rotating facts during loading
+      var factsEl = document.getElementById('loading-facts');
+      if (factsEl) {
+        var factIdx = 0;
+        factsEl.textContent = LOADING_FACTS[0];
+        factsEl.style.display = '';
+        factsInterval = setInterval(function() {
+          factIdx = (factIdx + 1) % LOADING_FACTS.length;
+          factsEl.style.opacity = '0';
+          setTimeout(function() {
+            factsEl.textContent = LOADING_FACTS[factIdx];
+            factsEl.style.opacity = '1';
+          }, 400);
+        }, 4000);
+      }
+    }
+
+    function onStreamStateChange(state) {
+      if (state.startsWith('queue-')) { onQueueUpdate(state.split('-')[1]); return; }
+      // Zerwane polaczenie konczy ogladanie tak samo jak zamkniecie karty, tylko
+      // nie z winy odwiedzajacego - stad osobny powod. Slownika stanow StreamPixel
+      // nie znamy w calosci, wiec dopasowujemy po fragmencie nazwy.
+      if (/disconnect|closed|failed|error/i.test(state)) { endSession('stream_lost'); return; }
+      if (queueText.style.display !== 'none') { queueText.style.display = 'none'; connectBtn.style.display = ''; }
+      const progress = STATE_PROGRESS[state];
+      if (progress !== undefined) targetProgress = Math.max(targetProgress, progress);
+      if (state === 'loadingComplete') { streamComplete = true; targetProgress = 100; if (progressInterval) clearInterval(progressInterval); }
+    }
+
+    function onQueueUpdate(position) {
+      if (position === '0') { inQueue = false; displayedProgress = 20; targetProgress = 20; queueText.style.display = 'none'; connectBtn.style.display = ''; return; }
+      inQueue = true; connectBtn.style.display = 'none'; queueText.style.display = ''; queuePosition.textContent = position;
+    }
+
+    function onStreamReady() {
+      if (factsInterval) { clearInterval(factsInterval); factsInterval = null; }
+      var factsEl = document.getElementById('loading-facts');
+      if (factsEl) factsEl.style.display = 'none';
+      if (demoStarted) { switchToStream(); }
+      else { connectBtn.classList.remove('loading'); connectBtn.classList.add('ready'); connectBtn.textContent = 'DEMO \u25B6'; }
+    }
+
+    function scrollToDemo() {
+      document.getElementById('demo-app').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function switchToStream() {
+      connectBtn.classList.add('hidden');
+      queueText.style.display = 'none';
+      videoLayer.classList.add('fade-out');
+      streamLayer.style.zIndex = 3;
+      document.getElementById('main-view').classList.add('stream-active');
+      mainNav.classList.add('nav-hidden');
+      // Lock scroll so user stays on StreamPixel view
+      document.getElementById('demo-app').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      document.body.classList.add('stream-locked');
+      streamIframe.focus();
+      if (isTouchDevice()) { sendStreamPixelMessage({ type: 'ui', mode: 'touch'}); }
+      else { sendStreamPixelMessage({ type: 'ui', mode: 'mouse'}); }
+      clTrack('demo_start');
+      startSession();
+      if (pendingApartment) { selectApartment(pendingApartment.id, pendingApartment.pawnType); pendingApartment = null; }
+      streamLayer.addEventListener('click', () => streamIframe.focus());
+      document.addEventListener('keydown', (e) => {
+        if (['w','a','s','d','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) streamIframe.focus();
+      });
+    }
+
+    connectBtn.addEventListener('click', () => {
+      if (!streamLoading) { startStreamLoading(); demoStarted = true; }
+      else if (readyTriggered) { demoStarted = true; switchToStream(); }
+    });
+
+    // Mapping: orbital unit key -> real apartment ID in StreamPixel/CRM
+    const ORBITAL_TO_APARTMENT = {
+      'A_11': 'apartment13',
+      'A_12': 'apartment14',
+      'A_13': 'apartment11',
+      'A_14': 'apartment12',
+      'A_21': 'apartment21',
+      'A_22': 'apartment22',
+      'A_23': 'apartment23',
+      'A_24': 'apartment24',
+      'Lok_01 ': 'apartment1',
+      'Lok_03': 'apartment3',
+    };
+
+    window.onOrbitalUnitClick = function(unitKey) {
+      clTrack('orbital_unit_click', { unit: unitKey });
+      var aptId = ORBITAL_TO_APARTMENT[unitKey];
+      if (!aptId) { openApartment('apartment13', 'orbital'); return; }
+      // Dostepne apartamenty otwieraja sie w spacerze (first-person),
+      // niedostepne w widoku orbital
+      var apt = apartmentsData.find(function(a) { return a.id === aptId; });
+      var pawn = (apt && apt.dostepnosc) ? 'first-person' : 'orbital';
+      openApartment(aptId, pawn);
+    };
+
+
+    /* ── ZDARZENIA ZE SCENY 3D ──
+       Scena raportuje wejscie i wyjscie z pomieszczenia oraz zmiane kamery. Czas
+       pobytu podaje posrednio: kazde zdarzenie niesie `elapsedSeconds`, czyli
+       ktora to sekunda sesji. Pobyt wysylamy wiec dopiero w chwili wyjscia, bo
+       wtedy znamy obie granice.
+
+       Bez tego przetworzenia w CRM ladowal surowy zrzut sceny, z ktorego
+       handlowiec nie odczytal nic poza "cos sie stalo w 3D". */
+
+    /** Widok listy mieszkan. To nawigacja, a nie pomieszczenie do ogladania. */
+    const BROWSER_LOCATION = 'ApartmentBrowser';
+    /**
+     * Po tylu ms bez znaku zycia ze sceny uznajemy, ze odwiedzajacy odszedl.
+     * 2,5 minuty, bo tyle samo daje StreamPixel, zanim sam zerwie strumien za
+     * bezczynnosc - dluzszy prog znaczylby, ze scena juz nie zyje, a my nadal
+     * liczymy czas ogladania.
+     */
+    const IDLE_MS = 150000;
+
+    /** Ile pomieszczen trzeba obejrzec, zeby wyjscie z mieszkania liczylo sie jako zainteresowanie. */
+    const NUDGE_MIN_ROOMS = 2;
+    /**
+     * Albo tyle sekund PRZY JEDNYM MIESZKANIU - dla kogos, kto oglada spokojnie
+     * jedno i nie skacze po liscie.
+     *
+     * Liczymy od wejscia do mieszkania, a nie sume pobytow w nazwanych
+     * pomieszczeniach. Obracanie kamery, przejscia miedzy pokojami i sam widok
+     * ogolny to tez ogladanie tego mieszkania - liczone po pokojach wychodzilo
+     * z tego kilkanascie sekund przy dwoch minutach realnego siedzenia w scenie.
+     */
+    const NUDGE_MIN_SECONDS = 90;
+
+    /** Ile obejrzano w kazdym mieszkaniu: apartment -> { rooms, seconds }. */
+    const apartmentEngagement = new Map();
+
+    /** Otwarty pobyt w pomieszczeniu: { apartment, room, at, wall }. */
+    let sceneStay = null;
+    /** Ostatnie mieszkanie i kamera - zeby nie dublowac zdarzen przy kazdym raporcie. */
+    let sceneApartment = null;
+    let scenePawn = null;
+
+    let sessionStartedAt = null;
+    let sessionLastActivityAt = null;
+    let idleTimer = null;
+    // ---------------------------------------------------------------------
+    // Zegar zaczepki
+    //
+    // Odlicza czas przy jednym mieszkaniu i pyta o kontakt, gdy przekroczy prog.
+    // Bez zegara prog sprawdzal sie tylko w chwili wyjscia z pomieszczenia, wiec
+    // kto ogladal spokojnie i sie nie przeklikiwal, nie zobaczyl zaczepki nigdy -
+    // a to najbardziej zainteresowana osoba na stronie.
+    //
+    // Odliczanie STAJE, gdy karta przestaje byc widoczna, i rusza dalej po
+    // powrocie. Czas przy przelaczonej karcie nie jest ogladaniem, a kasowanie
+    // odliczania przy kazdym zerknieciu w inne okno znaczyloby, ze prog osiaga
+    // wylacznie ktos, kto przez poltorej minuty nie tknal komputera.
+    // ---------------------------------------------------------------------
+
+    let nudgeTimer = null;
+    /** Poczatek biezacego odcinka odliczania. null = odliczanie stoi. */
+    let apartmentEnteredAt = null;
+    /** Sekundy uzbierane przy TYM mieszkaniu w poprzednich odcinkach. */
+    let apartmentSeconds = 0;
+
+    function startNudgeTimer(apartment) {
+      stopNudgeTimer();
+      if (!apartment) return;
+      apartmentSeconds = 0;
+      resumeNudgeTimer();
+    }
+
+    function resumeNudgeTimer() {
+      if (!sceneApartment || apartmentEnteredAt !== null) return;
+      apartmentEnteredAt = Date.now();
+      const left = Math.max(NUDGE_MIN_SECONDS - apartmentSeconds, 0);
+      nudgeTimer = setTimeout(() => maybeNudge(sceneApartment, 'long_view'), left * 1000);
+    }
+
+    function pauseNudgeTimer() {
+      clearTimeout(nudgeTimer);
+      nudgeTimer = null;
+      if (apartmentEnteredAt === null) return;
+      apartmentSeconds += (Date.now() - apartmentEnteredAt) / 1000;
+      apartmentEnteredAt = null;
+    }
+
+    function stopNudgeTimer() {
+      clearTimeout(nudgeTimer);
+      nudgeTimer = null;
+      apartmentEnteredAt = null;
+      apartmentSeconds = 0;
+    }
+
+    /**
+     * Zamyka otwarty pobyt i wysyla go z czasem trwania. `elapsed` to sekunda
+     * sesji ze zdarzenia, ktore ten pobyt konczy; przy wyjsciu ze strony jej nie
+     * mamy, wiec liczymy z zegara przegladarki.
+     */
+    function flushRoomStay(elapsed) {
+      if (!sceneStay) return;
+      const stay = sceneStay;
+      sceneStay = null;
+      const seconds = Math.round(
+        Number.isFinite(elapsed) && Number.isFinite(stay.at)
+          ? elapsed - stay.at
+          : (Date.now() - stay.wall) / 1000
+      );
+      // Ponizej sekundy to przejscie przez pomieszczenie, nie ogladanie go.
+      if (seconds < 1) return;
+      clTrack('room_view', { apartment: stay.apartment, room: stay.room, seconds });
+
+      if (!stay.apartment) return;
+      const seen = apartmentEngagement.get(stay.apartment) ?? { rooms: 0, seconds: 0 };
+      seen.rooms += 1;
+      seen.seconds += seconds;
+      apartmentEngagement.set(stay.apartment, seen);
+      // Prog czasu pilnuje zegar, nie ta suma - liczy od wejscia do mieszkania,
+      // wiec zawsze wyprzedzi sume pobytow w pokojach.
+    }
+
+    function startSession() {
+      sessionStartedAt = Date.now();
+      touchSession();
+    }
+
+    /**
+     * Kazdy dowod, ze odwiedzajacy nadal tam jest, przesuwa licznik bezczynnosci.
+     * Ruchu myszy nie da sie tu uzyc: scena siedzi w iframe i to ona zjada zdarzenia
+     * wejscia, wiec jedynym sygnalem zycia sa jej wlasne raporty.
+     */
+    function touchSession() {
+      if (!sessionStartedAt) return;
+      sessionLastActivityAt = Date.now();
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(() => endSession('idle'), IDLE_MS);
+    }
+
+    /**
+     * Koniec ogladania. `seconds` to caly czas w scenie, `active_seconds` - czas do
+     * ostatniego znaku zycia. Roznica miedzy nimi mowi, ile scena stala nietknieta,
+     * a to zupelnie co innego niz ogladanie.
+     */
+    function endSession(reason) {
+      if (!sessionStartedAt) return;
+      clearTimeout(idleTimer);
+      flushRoomStay(null);
+      const seconds = Math.round((Date.now() - sessionStartedAt) / 1000);
+      const active = Math.round((sessionLastActivityAt - sessionStartedAt) / 1000);
+      sessionStartedAt = null;
+      clTrack('demo_end', { seconds, active_seconds: active, reason });
+      // Zerwany strumien i tak przerwal seans - to najtanszy moment na pytanie.
+      // Przy wyjsciu ze strony nie ma kogo pytac.
+      if (reason === 'stream_lost') maybeNudge(sceneApartment, 'stream_lost');
+    }
+
+    function onSceneAnalytics(data) {
+      const elapsed = parseFloat(data.elapsedSeconds);
+      // Scena mowi "13", CRM trzyma mieszkania pod "apartment13".
+      const apartment = data.apartmentNumber ? 'apartment' + data.apartmentNumber : null;
+
+      // Powrot po przerwie liczy sie jako nowe wejscie, nie jako ciag dalszy.
+      if (!sessionStartedAt) {
+        startSession();
+        clTrack('demo_start', { resumed: true });
+      }
+
+      // Licznik bezczynnosci przesuwaja TYLKO znane akcje odwiedzajacego. Scena
+      // zglasza tez wlasne komunikaty - m.in. ten o zerwaniu strumienia po 2,5
+      // minuty bez ruchu - a potraktowanie takiego komunikatu jak dowodu zycia
+      // resetowaloby licznik i sesja nie skonczylaby sie nigdy.
+      if (data.actionType === 'ApartmentBrowserFocus') {
+        touchSession();
+        // Powrot do listy mieszkan. `apartmentNumber` jest tu tylko podswietleniem
+        // na liscie - potraktowanie go jak wejscia zawyzaloby zainteresowanie.
+        const left = sceneApartment;
+        flushRoomStay(elapsed);
+        sceneApartment = null;
+        stopNudgeTimer();
+        // Wyjscie na liste to naturalna pauza: wlasnie skonczyl oglada i ma
+        // wyrobione zdanie. Zaczepka w trakcie spaceru przerwalaby to, co go
+        // przekonuje.
+        const seen = left ? apartmentEngagement.get(left) : null;
+        if (seen && seen.rooms >= NUDGE_MIN_ROOMS) maybeNudge(left, 'left_apartment');
+        return;
+      }
+
+      const known =
+        data.actionType === 'PawnChange' ||
+        data.actionType === 'LocationEnter' ||
+        data.actionType === 'LocationLeave';
+
+      if (!known) {
+        // Typ, ktorego jeszcze nie znamy - zapisujemy surowo, zeby go nie zgubic,
+        // ale bez przesuwania licznika bezczynnosci i bez wnioskow o mieszkaniu.
+        clTrack('streampixel_analytics', data);
+        return;
+      }
+
+      touchSession();
+
+      // Mieszkanie wybrane wewnatrz sceny, a nie przyciskiem na stronie. Ten sam
+      // typ zdarzenia, bo dla handlowca to ta sama informacja.
+      if (apartment && apartment !== sceneApartment) {
+        sceneApartment = apartment;
+        clTrack('apartment_select', { apartment, pawn: data.pawnType || null, source: 'scene' });
+        // Od tej chwili liczy sie czas przy tym mieszkaniu. Kazde nastepne
+        // zaczyna odliczanie od zera - przeskakiwanie po liscie to szukanie,
+        // a nie ogladanie.
+        startNudgeTimer(apartment);
+      }
+
+      if (data.actionType === 'PawnChange') {
+        // Zmiana kamery nie wyprowadza z pomieszczenia, wiec pobytu nie zamykamy.
+        if (data.pawnType && data.pawnType !== scenePawn) {
+          scenePawn = data.pawnType;
+          clTrack('pawn_select', { apartment, pawn: data.pawnType, source: 'scene' });
+        }
+      } else if (data.actionType === 'LocationEnter') {
+        // Wejscie bez wczesniejszego wyjscia zamyka poprzedni pobyt - zabezpieczenie
+        // na wypadek zgubionego LocationLeave.
+        flushRoomStay(elapsed);
+        if (data.locationName && data.locationName !== BROWSER_LOCATION) {
+          sceneStay = { apartment, room: data.locationName, at: elapsed, wall: Date.now() };
+        }
+      } else {
+        // LocationLeave: scena sama mowi, kiedy ktos wychodzi - to najdokladniejszy
+        // koniec pobytu, dokladniejszy niz liczenie z roznicy miedzy zdarzeniami.
+        flushRoomStay(elapsed);
+      }
+    }
+
+    // Wyjscie ze strony albo przelaczenie karty konczy sesje - inaczej ostatni
+    // pobyt i caly czas ogladania przepadlyby bez sladu.
+    window.addEventListener('pagehide', () => endSession('left_page'));
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') {
+        endSession('left_page');
+        pauseNudgeTimer();
+      } else {
+        // Sesja wznawia sie dopiero przy nastepnym zdarzeniu ze sceny, ale
+        // odliczanie ruszamy od razu: wrocil do tego samego mieszkania i patrzy
+        // na nie dalej, nawet jesli akurat nic nie klika.
+        resumeNudgeTimer();
+      }
+    });
+
+    // StreamPixel raz wysyla obiekt, raz string z JSON-em - normalizujemy oba.
+    function parseMessageData(raw) {
+      if (typeof raw !== 'string') return raw;
+      try { return JSON.parse(raw); } catch { return raw; }
+    }
+
+    window.addEventListener('message', (event) => {
+      if (event.origin !== 'https://share.streampixel.io') return;
+      const data = parseMessageData(event.data);
+      if (data?.type === 'stream-state') {
+        onStreamStateChange(data.value);
+      } else if (data?.type === 'analytics') {
+        onSceneAnalytics(data);
+      } else if (data?.type === 'contact-form') {
+        openContactForm(data?.apartmentNumber);
+      }
+    });
+
+    /* ── LISTA MIESZKAN ──
+       Zrodlem prawdy jest CRM: ceny i dostepnosc zmienia sie w panelu, a strona
+       czyta je funkcja `catalog` przy kazdym wejsciu. Ponizsza lista to wylacznie
+       kopia awaryjna na wypadek, gdyby CRM nie odpowiedzial - lepiej pokazac
+       odwiedzajacemu stan sprzed zmiany niz pusta sekcje z samym naglowkiem.
+       Po kazdej zmianie w panelu warto ja odswiezyc, ale nic sie nie psuje,
+       gdy sie o tym zapomni. */
+    const FALLBACK_APARTMENTS = [
+      { "id": "apartment13", "numer": "13", "kierunek": "NE", "powierzchnia": 212.0, "pokoje": 4, "cena": 3500000, "dostepnosc": true },
+      { "id": "apartment14", "numer": "14", "kierunek": "NW", "powierzchnia": 198.0, "pokoje": 5, "cena": 3200000, "dostepnosc": false },
+      { "id": "apartment11", "numer": "11", "kierunek": "SE", "powierzchnia": 185.0, "pokoje": 4, "cena": 2950000, "dostepnosc": false },
+      { "id": "apartment12", "numer": "12", "kierunek": "NW", "powierzchnia": 185.0, "pokoje": 4, "cena": 2900000, "dostepnosc": false },
+      { "id": "apartment21", "numer": "21", "kierunek": "SE", "powierzchnia": 220.0, "pokoje": 5, "cena": 3800000, "dostepnosc": false },
+      { "id": "apartment22", "numer": "22", "kierunek": "NW", "powierzchnia": 220.0, "pokoje": 5, "cena": 3750000, "dostepnosc": false },
+      { "id": "apartment23", "numer": "23", "kierunek": "NE", "powierzchnia": 220.0, "pokoje": 5, "cena": 3900000, "dostepnosc": false },
+      { "id": "apartment24", "numer": "24", "kierunek": "SW", "powierzchnia": 220.0, "pokoje": 5, "cena": 3700000, "dostepnosc": false },
+      { "id": "apartment1",  "numer": "1",  "kierunek": "S",  "powierzchnia": 113.0, "pokoje": 3, "cena": 1950000, "dostepnosc": false },
+      { "id": "apartment3",  "numer": "3",  "kierunek": "N",  "powierzchnia": 113.0, "pokoje": 3, "cena": 1900000, "dostepnosc": false },
+    ];
+
+    // Local overrides - CRM only has 2 apartments with old data
+    var LOCAL_OVERRIDES = {
+      'apartment13': { dostepnosc: true, powierzchnia: 212.0, cena: 3500000 }
+    };
+    function applyLocalOverrides() {
+      apartmentsData.forEach(function(a) {
+        var ov = LOCAL_OVERRIDES[a.id];
+        if (ov) Object.assign(a, ov);
+      });
+    }
+
+    let apartmentsData = FALLBACK_APARTMENTS;
+    applyLocalOverrides();
+
+    const apartmentsList = document.getElementById('apartments-list');
+    const priceFormatter = new Intl.NumberFormat('pl-PL');
+
+    function renderApartments(apartments) {
+      if (!apartments.length) { apartmentsList.innerHTML = '<div style="padding:1.5rem 2rem;color:rgba(237,230,216,0.3);font-style:italic">Brak apartament\u00f3w.</div>'; return; }
+      document.getElementById('apartment-count').textContent = apartments.length + ' ' + (apartments.length === 1 ? 'lokal' : apartments.length < 5 ? 'lokale' : 'lokali');
+      apartmentsList.innerHTML = apartments.map((apt) => `
+        <div class="apt-row" data-id="${apt.id}">
+          <span class="apt-row-name">Apartament ${apt.numer}</span>
+          <span class="apt-row-dim">${apt.powierzchnia} m\u00b2</span>
+          <span class="apt-row-dim">${apt.pokoje} ${apt.pokoje === 1 ? 'pok\u00f3j' : apt.pokoje < 5 ? 'pokoje' : 'pokoi'}</span>
+          <span class="apt-row-dim">${apt.kierunek}</span>
+          <span class="apt-row-price">${priceFormatter.format(apt.cena)} z\u0142</span>
+          <span><span class="availability-badge ${apt.dostepnosc === 'reserved' ? 'reserved' : apt.dostepnosc ? 'available' : 'unavailable'}">${apt.dostepnosc === 'reserved' ? 'Rezerwacja' : apt.dostepnosc ? 'Dost\u0119pny' : 'Niedost\u0119pny'}</span></span>
+          <span class="apt-row-actions">
+            <button type="button" class="apartment-select-btn" ${apt.id === 'apartment13' ? 'onclick="showImageModal(\'karta-a11.png\')"' : 'disabled'}>Karta lokalu</button>
+            <button type="button" class="apartment-select-btn" data-apartment-id="${apt.id}" data-pawn-type="apartment-showcase" ${apt.dostepnosc ? '' : 'disabled'}>Prezentacja apartamentu</button>
+            <button type="button" class="apartment-select-btn apt-btn-topview" data-apartment-id="${apt.id}" data-pawn-type="top-view">Widok z gory</button>
+            <button type="button" class="apartment-select-btn" data-apartment-id="${apt.id}" data-pawn-type="first-person" ${apt.dostepnosc ? '' : 'disabled'}>Spacer</button>
+            <button type="button" class="apartment-select-btn" data-open-contact="${apt.id}">Zapytaj</button>
+          </span>
+        </div>
+      `).join('');
+    }
+
+    function renderSidebarApartments(apartments) {
+        var sidebar = document.getElementById('sidebar-list');
+        if (!sidebar) return;
+        var priceFormatter2 = new Intl.NumberFormat('pl-PL');
+        sidebar.innerHTML = apartments.map(function(apt) {
+            var status = apt.dostepnosc === 'reserved' ? 'Rezerwacja' : apt.dostepnosc ? 'Dost\u0119pny' : 'Niedost\u0119pny';
+            var badgeClass = apt.dostepnosc === 'reserved' ? 'reserved' : apt.dostepnosc ? 'available' : 'unavailable';
+            return '<div class="sidebar-apt" data-apt-id="' + apt.id + '">' +
+                '<div class="sidebar-apt-name">Apartament ' + apt.numer + '</div>' +
+                '<div class="sidebar-apt-info">' + apt.powierzchnia + ' m\u00b2 \u00b7 ' + apt.pokoje + ' pok. \u00b7 ' + priceFormatter2.format(apt.cena) + ' z\u0142</div>' +
+                '<span class="sidebar-apt-badge ' + badgeClass + '">' + status + '</span>' +
+                '</div>';
+        }).join('');
+    }
+
+    function sendStreamPixelMessage(message, targetOrigin = 'https://share.streampixel.io') {
+      console.log('[StreamPixel] postMessage ->', message, '(targetOrigin:', targetOrigin + ')');
+      streamIframe.contentWindow.postMessage(message, targetOrigin);
+    }
+
+    function selectApartment(apartmentRowName, pawnType) {
+      clTrack('apartment_select', { apartment: apartmentRowName, pawn: pawnType || 'orbital' });
+      // Scena zaraz potwierdzi ten sam wybor wlasnym zdarzeniem - zapamietujemy go,
+      // zeby jedno klikniecie nie zapisalo sie w CRM jako dwie wizyty w mieszkaniu.
+      sceneApartment = apartmentRowName;
+      touchSession();
+      document.querySelectorAll('.apt-row').forEach(c => c.classList.remove('active'));
+      const row = document.querySelector(`.apt-row[data-id="${apartmentRowName}"]`);
+      if (row) row.classList.add('active');
+      if (pawnType === 'apartment-showcase') {
+        sendStreamPixelMessage({ type: 'apartment-selection', apartmentRowName, pawnType: 'orbital' });
+        sendStreamPixelMessage({ type: 'pawn-selection', pawnType: 'apartment-showcase' });
+      } else {
+        sendStreamPixelMessage({ type: 'apartment-selection', apartmentRowName, pawnType: pawnType || 'orbital' });
+      }
+    }
+
+    /**
+     * Pokazuje mieszkanie w scenie 3D. Gdy spacer jeszcze nie wystartowal, wybor
+     * czeka w `pendingApartment` i zostanie wyslany, kiedy silnik zglosi gotowosc.
+     * Wolane z dwoch miejsc: przyciskow w liscie i linku z adresu (patrz nizej).
+     */
+    function openApartment(aptId, pawnType) {
+      // Hide orbital viewer when entering StreamPixel
+      var orbLayer = document.getElementById('orbital-layer');
+      if (orbLayer) { orbLayer.classList.add('hidden'); var bb = document.getElementById('back-to-orbital'); if (bb) bb.style.display = 'block'; }
+      connectBtn.style.display = '';
+      scrollToDemo();
+      if (demoStarted && readyTriggered) { switchToStream(); selectApartment(aptId, pawnType); }
+      else {
+        pendingApartment = { id: aptId, pawnType: pawnType || 'orbital' };
+        demoStarted = true;
+        if (!streamLoading) startStreamLoading();
+        if (readyTriggered) switchToStream();
+      }
+    }
+
+    // Mapping from apartment ID to best orbital viewing frame
+    var APT_VIEW_FRAMES = {
+      'apartment13': 3,
+      'apartment14': 61,
+      'apartment11': 26,
+      'apartment12': 38,
+      'apartment21': 7,
+      'apartment22': 59,
+      'apartment23': 23,
+      'apartment24': 42,
+      'apartment1': 3,
+      'apartment3': 22,
+    };
+
+    apartmentsList.addEventListener('click', (event) => {
+      const button = event.target.closest('[data-apartment-id]');
+      if (button && !button.disabled) {
+        openApartment(button.dataset.apartmentId, button.dataset.pawnType || 'orbital');
+        return;
+      }
+      // Clicking on row name or row itself rotates the orbital
+      const row = event.target.closest('.apt-row');
+      if (row && !event.target.closest('button')) {
+        var aptId = row.dataset.id;
+        var frame = APT_VIEW_FRAMES[aptId];
+        if (frame !== undefined && window.orbitalAnimateToFrame) {
+          window.orbitalAnimateToFrame(frame);
+          // Scroll to orbital if not visible
+          var demoApp = document.getElementById('demo-app');
+          if (demoApp) demoApp.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+    });
+
+    // Global pawn selection
+    document.querySelector('.pawn-actions').addEventListener('click', (event) => {
+      const btn = event.target.closest('[data-pawn-select]');
+      if (!btn) return;
+      document.querySelectorAll('.pawn-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      clTrack('pawn_select', { pawn: btn.dataset.pawnSelect });
+      // Hide orbital
+      var orbLayer = document.getElementById('orbital-layer');
+      if (orbLayer) { orbLayer.classList.add('hidden'); var bb = document.getElementById('back-to-orbital'); if (bb) bb.style.display = 'block'; }
+      connectBtn.style.display = '';
+      scrollToDemo();
+      if (demoStarted && readyTriggered) {
+        sendStreamPixelMessage({ type: 'pawn-selection', pawnType: btn.dataset.pawnSelect });
+      } else {
+        demoStarted = true;
+        if (!streamLoading) startStreamLoading();
+        if (readyTriggered) switchToStream();
+      }
+    });
+
+    /**
+     * Link z oferty PDF albo z maila: ?apartment=apartment13&pawn=apartment-showcase
+     * otwiera od razu prezentacje tego mieszkania, bez szukania go w liscie.
+     * Numer ("13") tez zadziala - apartmentIdFrom() go przetlumaczy.
+     */
+    function applyDeepLink() {
+      const params = new URLSearchParams(location.search);
+      const wanted = apartmentIdFrom(params.get('apartment'));
+      if (!wanted) return;
+      const apt = apartmentsData.find((a) => a.id === wanted);
+      // Sprzedanego mieszkania scena nie pokaze (przyciski w liscie sa wtedy
+      // wylaczone), wiec link tez ma go nie otwierac - tylko podswietlic wiersz.
+      const row = document.querySelector(`.apt-row[data-id="${wanted}"]`);
+      if (row) row.classList.add('active');
+      if (!apt || !apt.dostepnosc) return;
+      openApartment(wanted, params.get('pawn') || 'apartment-showcase');
+    }
+
+    /**
+     * Pobiera liste z CRM. Gdy sie nie uda - zostaje kopia awaryjna, bo pusta
+     * sekcja mieszkan jest gorsza niz nieaktualna cena.
+     */
+    async function loadApartments() {
+      try {
+        const url = CONFIG.crmUrl + '/catalog?key=' + encodeURIComponent(CONFIG.crmKey) +
+          '&investment=' + encodeURIComponent(CONFIG.crmInvestment);
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        const data = await response.json();
+        if (Array.isArray(data.apartments) && data.apartments.length) {
+          // Merge: CRM updates existing entries, fallback-only entries stay
+          var crmById = {};
+          data.apartments.forEach(function(a) { crmById[a.id] = a; });
+          apartmentsData = FALLBACK_APARTMENTS.map(function(fb) {
+            return crmById[fb.id] || fb;
+          });
+          // Add any CRM-only apartments not in fallback
+          data.apartments.forEach(function(a) {
+            if (!FALLBACK_APARTMENTS.find(function(fb) { return fb.id === a.id; })) {
+              apartmentsData.push(a);
+            }
+          });
+        }
+      } catch (error) {
+        console.warn('[CRM] nie udalo sie pobrac listy mieszkan, uzywam kopii lokalnej', error);
+      }
+      applyLocalOverrides();
+      renderApartments(apartmentsData);
+      renderSidebarApartments(apartmentsData);
+      applyDeepLink();
+    }
+
+    // Kopia awaryjna rysuje sie od razu, zeby lista nie migala pustka przy wolnym
+    // laczu; odpowiedz z CRM ja podmienia.
+    renderApartments(apartmentsData);
+    renderSidebarApartments(apartmentsData);
+    loadApartments();
+
+    // ── SIDEBAR CLICK HANDLER ──
+    var sidebarList = document.getElementById('sidebar-list');
+    if (sidebarList) {
+        sidebarList.addEventListener('click', function(e) {
+            var row = e.target.closest('.sidebar-apt');
+            if (!row) return;
+            var aptId = row.dataset.aptId;
+            // Highlight active
+            document.querySelectorAll('.sidebar-apt').forEach(function(el) { el.classList.remove('active'); });
+            row.classList.add('active');
+            // Rotate orbital
+            if (window.orbitalAnimateToFrame && APT_VIEW_FRAMES[aptId] !== undefined) {
+                window.orbitalAnimateToFrame(APT_VIEW_FRAMES[aptId]);
+            }
+            // Show apartment card
+            var REVERSE_MAP = {};
+            for (var k in ORBITAL_TO_APARTMENT) { REVERSE_MAP[ORBITAL_TO_APARTMENT[k]] = k; }
+            var unitKey = REVERSE_MAP[aptId];
+            if (unitKey) showAptCard(unitKey);
+        });
+    }
+
+    /* ── FORMULARZ KONTAKTOWY ──
+       Otwiera go przycisk w sekcji kontaktu albo sama scena 3D (message
+       'contact-form' z numerem apartamentu). Zapis idzie do funkcji `lead`
+       w CRM razem z identyfikatorem odwiedzajacego - dzieki temu cala jego
+       wczesniejsza sciezka po stronie przykleja sie do powstalego leada. */
+    const contactOverlay   = document.getElementById('contact-overlay');
+    const contactForm      = document.getElementById('contact-form');
+    const contactApartment = document.getElementById('contact-apartment');
+    const contactAptInfo   = document.getElementById('contact-apartment-info');
+    const contactStatus    = document.getElementById('contact-status');
+    const contactSubmit    = document.getElementById('contact-submit');
+    const contactConsent   = document.getElementById('contact-consent');
+    const contactName      = document.getElementById('contact-name');
+    const contactEmail     = document.getElementById('contact-email');
+    const contactPhone     = document.getElementById('contact-phone');
+    const contactMessage   = document.getElementById('contact-message');
+
+    /**
+     * Kontakt z poprzedniego zgloszenia z TEGO urzadzenia.
+     *
+     * Trzymamy go u odwiedzajacego, a nie pytamy o niego CRM. Adres i telefon
+     * oddawane po samym identyfikatorze z ciasteczka byly danymi osobowymi
+     * wydawanymi kazdemu, kto to ciasteczko podejrzy - klucz strony jest jawny
+     * w zrodle. Tutaj dane nie opuszczaja przegladarki, w ktorej je wpisano.
+     */
+    const CONTACT_MEMORY_KEY = 'cl_contact';
+
+    function rememberContact(data) {
+      try {
+        localStorage.setItem(CONTACT_MEMORY_KEY, JSON.stringify(data));
+      } catch (e) {
+        // Prywatne okno albo pelny dysk. Podpowiedz to wygoda, nie warunek dzialania.
+      }
+    }
+
+    function recallContact() {
+      try {
+        return JSON.parse(localStorage.getItem(CONTACT_MEMORY_KEY)) || null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    /**
+     * Scena 3D podaje numer mieszkania ("13"), a CRM zna je pod nazwa wiersza
+     * ("apartment13"). Tlumaczymy przez liste na stronie, zeby nie zaszywac
+     * drugiej mapy tych samych identyfikatorow.
+     */
+    function apartmentIdFrom(value) {
+      if (value == null || value === '') return null;
+      const text = String(value);
+      const match = apartmentsData.find(
+        (apt) => apt.id === text || apt.numer === text
+      );
+      return match ? match.id : null;
+    }
+
+    function openContactForm(apartmentNumber) {
+      const id = apartmentIdFrom(apartmentNumber);
+      const apt = apartmentsData.find((a) => a.id === id);
+      contactApartment.value = id || '';
+      contactAptInfo.textContent = apt
+        ? 'Apartament ' + apt.numer + ' \u00b7 ' + apt.powierzchnia + ' m\u00b2'
+        : 'Mokot\u00f3w Prestige';
+      contactStatus.textContent = '';
+      contactStatus.classList.remove('error');
+      contactSubmit.disabled = false;
+      contactOverlay.classList.add('open');
+
+      // Kto raz zostawil kontakt, nie przepisuje go drugi raz. Pytanie o to samo
+      // imie przy kazdym mieszkaniu jest najczestszym powodem, dla ktorego
+      // powracajacy zamyka formularz zamiast wyslac drugie zapytanie.
+      const known = recallContact();
+      if (known) {
+        contactName.value = known.name || '';
+        contactEmail.value = known.email || '';
+        contactPhone.value = known.phone || '';
+        contactConsent.checked = Boolean(known.sms_consent);
+        // Kursor na tresc: tylko ona jest przy tym mieszkaniu inna. Reszta juz
+        // wypelniona, wiec stawianie kursora w imieniu kazaloby go przeklikac.
+        contactMessage.focus();
+      } else {
+        contactName.focus();
+      }
+
+      clTrack('contact_form_open', { apartment: id, known: Boolean(known) });
+    }
+
+    function closeContactForm() {
+      contactOverlay.classList.remove('open');
+      contactForm.reset();
+    }
+
+    const contactNudge     = document.getElementById('contact-nudge');
+    const contactNudgeText = document.getElementById('contact-nudge-text');
+
+    let nudgeApartment = null;
+    let nudgeShown = false;
+    let contactSent = false;
+
+    /**
+     * Zaproszenie do kontaktu. Raz na wizyte i nigdy, gdy formularz jest juz na
+     * ekranie albo wyslany - druga zaczepka po odmowie to nie zaproszenie, tylko
+     * naprzykrzanie sie.
+     */
+    function maybeNudge(apartment, reason) {
+      if (nudgeShown || contactSent) return;
+      if (contactOverlay.classList.contains('open')) return;
+      nudgeShown = true;
+      nudgeApartment = apartment;
+      const apt = apartmentsData.find((a) => a.id === apartment);
+      contactNudgeText.textContent = apt
+        ? 'Apartament ' + apt.numer + ' \u2013 chcesz pozna\u0107 szczeg\u00f3\u0142y?'
+        : 'Chcesz pozna\u0107 szczeg\u00f3\u0142y?';
+      contactNudge.hidden = false;
+      clTrack('contact_nudge', { apartment, reason });
+    }
+
+    document.getElementById('contact-nudge-open').addEventListener('click', () => {
+      contactNudge.hidden = true;
+      openContactForm(nudgeApartment);
+    });
+
+    document.getElementById('contact-nudge-close').addEventListener('click', () => {
+      contactNudge.hidden = true;
+    });
+
+    // Delegacja, nie nasluch na kazdym przycisku: te w liscie apartamentow
+    // powstaja przy renderowaniu i przezywaja kazde przerysowanie listy.
+    document.addEventListener('click', (event) => {
+      const btn = event.target.closest('[data-open-contact]');
+      if (btn) openContactForm(btn.dataset.openContact);
+
+      // Klikniecie w numer telefonu. Najmocniejszy sygnal na calej stronie i
+      // jedyny, ktorego nie widac inaczej - polaczenie omija CRM. Na telefonie
+      // karta natychmiast oddaje sterowanie dialerowi, wiec zwykly fetch by nie
+      // zdazyl; clTrack idzie sendBeaconem, ktory przezywa opuszczenie strony.
+      const phone = event.target.closest('a[href^="tel:"]');
+      if (phone) clTrack('phone_click', { phone: phone.getAttribute('href').slice(4) });
+    });
+
+    document.getElementById('contact-cancel').addEventListener('click', closeContactForm);
+
+    contactOverlay.addEventListener('click', (event) => {
+      if (event.target === contactOverlay) closeContactForm();
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && contactOverlay.classList.contains('open')) closeContactForm();
+    });
+
+    contactForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const form = Object.fromEntries(new FormData(contactForm).entries());
+
+      if (!form.name.trim()) { showContactError('Podaj imi\u0119 i nazwisko.'); return; }
+      if (!form.email.trim() && !form.phone.trim()) {
+        showContactError('Zostaw e-mail albo telefon, \u017Ceby\u015Bmy mogli odpowiedzie\u0107.');
+        return;
+      }
+
+      contactSubmit.disabled = true;
+      contactStatus.classList.remove('error');
+      contactStatus.textContent = 'Wysy\u0142anie\u2026';
+
+      try {
+        const response = await fetch(CONFIG.crmUrl + '/lead', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(Object.assign({
+            key: CONFIG.crmKey,
+            visitor_id: window.clVisitorId,
+            investment: CONFIG.crmInvestment,
+          }, form, window.clUtm, {
+            // Odznaczone pole wyboru w ogole nie trafia do FormData, a zaznaczone
+            // daje napis "on". CRM przyjmuje wylacznie `true`, bo zgoda ma byc
+            // wyrazna, a nie domyslana - stad jawny boolean zamiast tego, co
+            // przyszlo z formularza.
+            sms_consent: contactConsent.checked,
+          })),
+        });
+        if (!response.ok) throw new Error(String(response.status));
+
+        contactSent = true;
+        contactNudge.hidden = true;
+        // Zapamietujemy dopiero po udanym wyslaniu - dane, ktorych CRM nie
+        // przyjal, nie maja wracac przy nastepnym otwarciu jako "juz podane".
+        // Tresci wiadomosci nie trzymamy: przy kazdym mieszkaniu jest inna.
+        rememberContact({
+          name: form.name,
+          email: form.email,
+          phone: form.phone,
+          sms_consent: contactConsent.checked,
+        });
+        clTrack('form_submit', { apartment: form.apartment || null });
+        contactStatus.textContent = 'Dzi\u0119kujemy, odezwiemy si\u0119 wkr\u00f3tce.';
+        setTimeout(closeContactForm, 2000);
+      } catch {
+        showContactError('Nie uda\u0142o si\u0119 wys\u0142a\u0107. Spr\u00f3buj ponownie za chwil\u0119.');
+        contactSubmit.disabled = false;
+      }
+    });
+
+    function showContactError(text) {
+      contactStatus.textContent = text;
+      contactStatus.classList.add('error');
+    }
+
+    // Smooth scroll
+    document.querySelectorAll('a[href^="#"]').forEach(link => {
+      link.addEventListener('click', (e) => {
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth' }); }
+      });
+    });
+
+    // Hero video autoplay fix
+    const heroVideo = document.querySelector('#hero-video-bg video');
+    if (heroVideo) {
+      heroVideo.load();
+      heroVideo.addEventListener('canplay', () => { heroVideo.play().catch(() => {}); });
+      heroVideo.play().catch(() => {});
+    }
+
+    // Scroll reveal animations
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.15, rootMargin: '-40px' });
+
+    document.querySelectorAll('.reveal, .feature-card, .stat-card, .gallery-item, .location-card').forEach((el, i) => {
+      if (el.classList.contains('feature-card') || el.classList.contains('stat-card') || el.classList.contains('location-card')) {
+        el.style.transitionDelay = (i % 6) * 0.08 + 's';
+      }
+      if (el.classList.contains('gallery-item')) {
+        el.style.transitionDelay = (i % 3) * 0.15 + 's';
+      }
+      revealObserver.observe(el);
+    });
+
+    // Nav style on scroll (light hero -> dark sections)
+    const heroEl = document.getElementById('hero');
+    const observer = new IntersectionObserver((entries) => {
+      mainNav.classList.toggle('dark-nav', entries[0].isIntersecting);
+    }, { threshold: 0.1 });
+    observer.observe(heroEl);
+  </script>
+<div id="apt-card-overlay" onclick="if(event.target===this)this.classList.remove('open')">
+  <div id="apt-card">
+    <button id="apt-card-close" type="button" onclick="document.getElementById('apt-card-overlay').classList.remove('open')">&times;</button>
+    <div id="apt-card-badge-wrap"></div>
+    <div id="apt-card-title"></div>
+    <div id="apt-card-subtitle"></div>
+    <div id="apt-card-body">
+      <div>
+        <img id="apt-card-image" src="" alt="" style="display:none" />
+        <div id="apt-card-specs" class="apt-card-specs"></div>
+      </div>
+      <div id="apt-card-actions" class="apt-card-actions"></div>
+    </div>
+  </div>
+</div>
+
+<div id="img-modal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div id="img-modal-inner">
+    <button id="img-modal-close" type="button" onclick="document.getElementById('img-modal').classList.remove('open')">&times;</button>
+    <img id="img-modal-img" src="" alt="" />
+  </div>
+</div>
+<script>
+window.showImageModal = function(src) {
+  var m = document.getElementById('img-modal');
+  document.getElementById('img-modal-img').src = src;
+  m.classList.add('open');
+};
+
+window.downloadAptCard = function() {
+  var card = document.getElementById('apt-card');
+  if (!card) return;
+  var title = (document.getElementById('apt-card-title') || {}).textContent || 'Karta Lokalu';
+  var subtitle = (document.getElementById('apt-card-subtitle') || {}).textContent || '';
+  var badge = (document.getElementById('apt-card-badge-wrap') || {}).textContent || '';
+  var img = document.getElementById('apt-card-image');
+  var imgSrc = img && img.style.display !== 'none' ? img.src : '';
+  var specs = document.getElementById('apt-card-specs');
+  var specsHTML = specs ? specs.innerHTML : '';
+
+  var w = window.open('', '_blank');
+  if (!w) { alert('Odblokuj wyskakujące okna aby pobrać PDF'); return; }
+  w.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>' + title + ' - Karta Lokalu</title>');
+  w.document.write('<style>');
+  w.document.write('*{box-sizing:border-box;margin:0;padding:0}');
+  w.document.write('body{font-family:"DM Sans",system-ui,sans-serif;color:#1C2E26;padding:3rem;max-width:900px;margin:0 auto}');
+  w.document.write('.badge{display:inline-block;padding:4px 14px;font-size:0.75rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;border-radius:2px;margin-bottom:1.5rem}');
+  w.document.write('.badge-ok{background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7}');
+  w.document.write('.badge-na{background:#fce4ec;color:#c62828;border:1px solid #ef9a9a}');
+  w.document.write('h1{font-family:"Cormorant Garamond",serif;font-size:2.5rem;font-weight:600;margin-bottom:0.5rem}');
+  w.document.write('.sub{font-size:0.95rem;color:#5C6E64;margin-bottom:2rem}');
+  w.document.write('.layout{display:grid;grid-template-columns:3fr 2fr;gap:2rem;align-items:start}');
+  w.document.write('img{width:100%;border:1px solid #D8CFBE;margin-bottom:1.5rem}');
+  w.document.write('.specs{display:grid;grid-template-columns:1fr 1fr;gap:0 2.5rem}');
+  w.document.write('.spec{display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid #eee;font-size:0.85rem;gap:1rem}');
+  w.document.write('.spec span{flex:1}');
+  w.document.write('.spec strong{font-weight:600;text-align:right;white-space:nowrap}');
+  w.document.write('.total{border-top:2px solid #1C2E26;border-bottom:none;padding-top:0.8rem;margin-top:0.3rem;font-size:1rem;font-weight:600}');
+  w.document.write('.contact{margin-top:2.5rem;padding-top:1.5rem;border-top:1px solid #D8CFBE;font-size:0.85rem;color:#5C6E64}');
+  w.document.write('.contact strong{color:#1C2E26}');
+  w.document.write('@media print{body{padding:1.5rem}@page{margin:1.5cm}}');
+  w.document.write('</style></head><body>');
+
+  var isAvail = badge.indexOf('Dost') >= 0;
+  w.document.write('<div class="badge ' + (isAvail ? 'badge-ok' : 'badge-na') + '">' + badge.trim() + '</div>');
+  w.document.write('<h1>' + title + '</h1>');
+  w.document.write('<div class="sub">' + subtitle + '</div>');
+
+  w.document.write('<div class="layout"><div>');
+  if (imgSrc) { w.document.write('<img src="' + imgSrc + '" alt="' + title + '">'); }
+  // Convert specs to print-friendly
+  var printSpecs = specsHTML
+    .replace(/apt-card-spec-total/g, 'spec total')
+    .replace(/apt-card-spec/g, 'spec');
+  w.document.write('<div class="specs">' + printSpecs + '</div>');
+  w.document.write('</div><div>');
+
+  // Contact info
+  w.document.write('<div class="contact">');
+  w.document.write('<strong>Mokot\u00F3w Prestige</strong><br>');
+  w.document.write('Kontakt: <strong>kontakt@codelivery.tech</strong><br>');
+  w.document.write('Tel: <strong>+48 501 773 665</strong><br><br>');
+  w.document.write('<em>Wygenerowano z mokotow.vercel.app</em>');
+  w.document.write('</div>');
+
+  w.document.write('</div></div>');
+  w.document.write('</body></html>');
+  w.document.close();
+
+  // Wait for image to load then trigger print
+  if (imgSrc) {
+    var checkImg = w.document.querySelector('img');
+    if (checkImg && !checkImg.complete) {
+      checkImg.onload = function() { w.print(); };
+    } else {
+      setTimeout(function() { w.print(); }, 300);
+    }
+  } else {
+    setTimeout(function() { w.print(); }, 200);
+  }
+};
+</script>
+</body>
+</html>
