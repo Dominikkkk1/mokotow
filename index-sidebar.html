@@ -454,6 +454,21 @@
         border-left: 1px solid rgba(237,230,216,0.08);
         overflow-y: auto;
         max-height: 80vh;
+        min-height: 400px;
+    }
+    #sidebar-apartments:empty, #sidebar-list:empty {
+        min-height: 200px;
+    }
+    #sidebar-apartments::before {
+        content: 'Lokale';
+        display: block;
+        padding: 1rem 1.25rem 0.5rem;
+        font-family: var(--font-body);
+        font-size: 0.65rem;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: rgba(237,230,216,0.35);
     }
 
     .sidebar-apt {
