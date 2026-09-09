@@ -468,27 +468,22 @@
     #sidebar-wrap.collapsed { width: 0; overflow: hidden; }
 
     #sidebar-toggle {
-        position: absolute;
-        left: 0;
-        top: 50%;
-        transform: translateX(-100%) translateY(-50%);
-        z-index: 15;
-        width: 36px;
-        height: 72px;
-        background: var(--bg);
-        border: 1px solid var(--border);
-        border-right: none;
-        color: var(--fg);
-        font-size: 1.1rem;
+        flex-shrink: 0;
+        width: 28px;
+        background: var(--bg-card);
+        border: none;
+        border-left: 1px solid var(--border);
+        border-right: 1px solid var(--border);
+        color: var(--muted);
+        font-size: 0.9rem;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        border-radius: 8px 0 0 8px;
-        box-shadow: -2px 0 8px rgba(0,0,0,0.08);
-        transition: background 0.15s;
+        transition: background 0.15s, color 0.15s;
+        z-index: 15;
     }
-    #sidebar-toggle:hover { background: var(--bg-card); }
+    #sidebar-toggle:hover { background: var(--bg); color: var(--fg); }
 
     #sidebar-apartments {
         background: var(--bg);
@@ -605,6 +600,100 @@
     }
     .sb-spacer-btn:hover { background: var(--secondary); }
     .sb-spacer-btn:disabled { opacity: 0.2; cursor: not-allowed; background: var(--muted); }
+
+    /* Sidebar detail view */
+    #sb-detail {
+        display: none;
+        padding: 0;
+    }
+    #sb-detail.open { display: block; }
+    .sb-back {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.7rem 1rem;
+        border-bottom: 1px solid var(--border);
+        cursor: pointer;
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: var(--primary);
+        background: none;
+        border-top: none;
+        border-left: none;
+        border-right: none;
+        width: 100%;
+        font-family: var(--font-body);
+        text-align: left;
+    }
+    .sb-back:hover { background: rgba(53,90,74,0.06); }
+    .sbd-head {
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid var(--border);
+    }
+    .sbd-name {
+        font-family: var(--font-heading);
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--fg);
+    }
+    .sbd-badge {
+        display: inline-block;
+        font-size: 0.55rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 2px 8px;
+        margin-left: 0.4rem;
+        vertical-align: middle;
+    }
+    .sbd-badge.ok { background: rgba(46,204,113,0.15); color: #2e7d32; }
+    .sbd-badge.na { background: rgba(191,59,59,0.15); color: #c62828; }
+    .sbd-stats {
+        display: flex;
+        border-bottom: 1px solid var(--border);
+    }
+    .sbd-stat {
+        flex: 1;
+        text-align: center;
+        padding: 0.6rem 0.25rem;
+        border-right: 1px solid var(--border);
+        font-size: 0.6rem;
+        color: var(--muted);
+    }
+    .sbd-stat:last-child { border-right: none; }
+    .sbd-stat strong { display: block; font-size: 0.85rem; color: var(--fg); font-weight: 600; }
+    .sbd-img {
+        width: 100%;
+        display: block;
+        cursor: zoom-in;
+        border-bottom: 1px solid var(--border);
+    }
+    .sbd-actions {
+        padding: 0.75rem 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+    }
+    .sbd-btn {
+        display: block;
+        width: 100%;
+        padding: 0.6rem;
+        background: none;
+        border: 1px solid var(--border);
+        color: var(--fg);
+        font-family: var(--font-body);
+        font-size: 0.65rem;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        cursor: pointer;
+        text-align: center;
+        transition: background 0.12s;
+    }
+    .sbd-btn:hover { background: rgba(53,90,74,0.06); }
+    .sbd-btn.primary { background: var(--primary); color: var(--primary-fg); border-color: var(--primary); }
+    .sbd-btn.primary:hover { background: var(--secondary); }
+    .sbd-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
     @media (max-width: 900px) {
         #demo-split { flex-direction: column; top: 60px; }
@@ -2057,8 +2146,8 @@
         </div>
 
     </div>
+    <button id="sidebar-toggle" onclick="var w=document.getElementById('sidebar-wrap');w.classList.toggle('collapsed');this.innerHTML=w.classList.contains('collapsed')?'&#9654;':'&#9664;'">&#9664;</button>
     <div id="sidebar-wrap">
-        <button id="sidebar-toggle" onclick="var w=document.getElementById('sidebar-wrap');w.classList.toggle('collapsed');this.innerHTML=w.classList.contains('collapsed')?'&#9654;':'&#9664;'">&#9664;</button>
         <div id="sidebar-apartments">
             <div id="sidebar-header">
                 <span id="sidebar-count"></span>
@@ -2083,6 +2172,7 @@
             </div>
             <div class="sb-head"><span>Lokal</span><span>Pow.</span><span>Pi&#281;t.</span><span>Pok.</span><span></span></div>
             <div id="sidebar-list"></div>
+            <div id="sb-detail"></div>
         </div>
     </div>
     </div><!-- /demo-split -->
@@ -3009,6 +3099,53 @@
       mc.classList.add('open');
     }
 
+    // Show apartment detail in sidebar (replaces list view)
+    function showSidebarDetail(aptId) {
+      var apt = apartmentsData.find(function(a) { return a.id === aptId; });
+      if (!apt) return;
+      var unitKey = APT_TO_UNIT_MAP[aptId];
+      var avail = apt.dostepnosc === true || apt.dostepnosc === 'reserved';
+      var badgeCls = apt.dostepnosc ? 'ok' : 'na';
+      var statusText = apt.dostepnosc === 'reserved' ? 'Rezerwacja' : apt.dostepnosc ? 'Dost\u0119pne' : 'Niedost\u0119pne';
+      var floor = apt.pietro !== undefined ? apt.pietro : '-';
+      var imgSrc = unitKey && UNIT_IMAGES[unitKey] ? UNIT_IMAGES[unitKey] : null;
+
+      var html = '<button class="sb-back" onclick="closeSidebarDetail()">&#8592; Wszystkie lokale</button>';
+      html += '<div class="sbd-head"><span class="sbd-name">Apartament ' + apt.numer + '</span><span class="sbd-badge ' + badgeCls + '">' + statusText + '</span></div>';
+      html += '<div class="sbd-stats">';
+      html += '<div class="sbd-stat">Pow.<strong>' + apt.powierzchnia + ' m\u00B2</strong></div>';
+      html += '<div class="sbd-stat">Pokoje<strong>' + apt.pokoje + '</strong></div>';
+      html += '<div class="sbd-stat">Pi\u0119tro<strong>' + floor + '</strong></div>';
+      html += '</div>';
+      if (imgSrc) { html += '<img class="sbd-img" src="' + imgSrc + '" alt="Karta lokalu" onclick="showImageModal(\'' + imgSrc + '\')">'; }
+      html += '<div class="sbd-actions">';
+      if (imgSrc) { html += '<button class="sbd-btn" onclick="showImageModal(\'' + imgSrc + '\')">Karta lokalu</button>'; }
+      html += '<button class="sbd-btn primary" onclick="var b=document.querySelector(\'[data-apartment-id=&quot;' + aptId + '&quot;][data-pawn-type=&quot;first-person&quot;]\');if(b)b.click();"' + (avail ? '' : ' disabled') + '>Spacer</button>';
+      html += '<button class="sbd-btn" onclick="var b=document.querySelector(\'[data-open-contact=&quot;' + aptId + '&quot;]\');if(b)b.click();">Zapytaj</button>';
+      html += '</div>';
+
+      var detail = document.getElementById('sb-detail');
+      detail.innerHTML = html;
+      detail.classList.add('open');
+      // Hide list, show detail
+      document.getElementById('sidebar-list').style.display = 'none';
+      document.querySelector('.sb-head').style.display = 'none';
+      var hdr = document.getElementById('sidebar-header');
+      if (hdr) hdr.style.display = 'none';
+      var filters = document.getElementById('sb-filters');
+      if (filters) filters.style.display = 'none';
+    }
+
+    function closeSidebarDetail() {
+      var detail = document.getElementById('sb-detail');
+      detail.classList.remove('open');
+      detail.innerHTML = '';
+      document.getElementById('sidebar-list').style.display = '';
+      document.querySelector('.sb-head').style.display = '';
+      var hdr = document.getElementById('sidebar-header');
+      if (hdr) hdr.style.display = '';
+    }
+
     window.onOrbitalUnitClick = function(unitKey) {
       clTrack('orbital_unit_click', { unit: unitKey });
       var aptId = ORBITAL_TO_APARTMENT[unitKey];
@@ -3546,9 +3683,10 @@
             }
         });
 
-        // Click: rotate orbital + show mini card
+        // Click: rotate orbital + show detail view in sidebar
         sidebarList.addEventListener('click', function(e) {
             if (e.target.closest('[data-walk]')) return;
+            if (e.target.closest('.sb-back')) return;
             var row = e.target.closest('.sb-row');
             if (!row) return;
             var aptId = row.dataset.aptId;
@@ -3557,7 +3695,7 @@
             if (window.orbitalAnimateToFrame && APT_VIEW_FRAMES[aptId] !== undefined) {
                 window.orbitalAnimateToFrame(APT_VIEW_FRAMES[aptId]);
             }
-            showMiniCard(aptId);
+            showSidebarDetail(aptId);
         });
 
         // Hover: highlight polygon on orbital
