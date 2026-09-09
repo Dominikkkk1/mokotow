@@ -424,7 +424,7 @@
 
     /* ── DEMO SECTION ── */
     #demo-section {
-      padding: 5rem 1.5rem 0;
+      padding: 3rem 0 0;
       margin-bottom: 0;
     }
 
@@ -435,12 +435,14 @@
       margin: 0;
       overflow: hidden;
       border: 1px solid rgba(237,230,216,0.08);
+      border-right: none;
     }
 
     /* ── SIDEBAR SPLIT LAYOUT ── */
     #demo-split {
         display: grid;
         grid-template-columns: 1fr 320px;
+        align-items: stretch;
         max-width: 1920px;
         width: 100%;
         margin: 0 auto;
@@ -448,7 +450,6 @@
         position: sticky;
         top: 72px;
         z-index: 10;
-        min-height: 500px;
     }
 
     #demo-split #demo-app {
@@ -461,54 +462,102 @@
         background: var(--dark);
         border-left: 1px solid rgba(237,230,216,0.08);
         overflow-y: auto;
-        max-height: 80vh;
-        min-height: 400px;
-    }
-    #sidebar-apartments:empty, #sidebar-list:empty {
-        min-height: 200px;
+        display: flex;
+        flex-direction: column;
     }
     #sidebar-apartments::before {
         content: 'Lokale';
         display: block;
-        padding: 1rem 1.25rem 0.5rem;
+        padding: 0.8rem 1rem 0.5rem;
         font-family: var(--font-body);
-        font-size: 0.65rem;
+        font-size: 0.6rem;
         font-weight: 600;
         letter-spacing: 0.12em;
         text-transform: uppercase;
-        color: rgba(237,230,216,0.35);
+        color: rgba(237,230,216,0.4);
+        border-bottom: 1px solid rgba(237,230,216,0.06);
+    }
+    #sidebar-list {
+        flex: 1;
+        overflow-y: auto;
     }
 
+    /* Table header */
+    .sidebar-header {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1fr;
+        padding: 0.5rem 1rem;
+        font-size: 0.55rem;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: rgba(237,230,216,0.35);
+        border-bottom: 1px solid rgba(237,230,216,0.08);
+        position: sticky;
+        top: 0;
+        background: var(--dark);
+        z-index: 1;
+    }
+
+    /* Each row */
     .sidebar-apt {
-        padding: 1rem 1.25rem;
-        border-bottom: 1px solid rgba(237,230,216,0.06);
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1fr;
+        align-items: center;
+        padding: 0.65rem 1rem;
+        border-bottom: 1px solid rgba(237,230,216,0.04);
         cursor: pointer;
-        transition: background 0.15s;
+        transition: background 0.12s;
+        font-size: 0.75rem;
+        color: rgba(237,230,216,0.7);
     }
     .sidebar-apt:hover { background: rgba(237,230,216,0.04); }
-    .sidebar-apt.active { background: rgba(53,90,74,0.15); border-left: 3px solid var(--primary); }
+    .sidebar-apt.active { background: rgba(53,90,74,0.2); }
+
     .sidebar-apt-name {
-        font-family: var(--font-heading);
-        font-size: 1.1rem;
-        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-family: var(--font-body);
+        font-weight: 600;
+        font-size: 0.78rem;
         color: var(--dark-fg);
-        margin-bottom: 0.25rem;
     }
-    .sidebar-apt-info {
+    .sidebar-apt-name .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+    .sidebar-apt-dim {
+        color: rgba(237,230,216,0.65);
         font-size: 0.72rem;
-        color: rgba(237,230,216,0.5);
     }
-    .sidebar-apt-badge {
-        display: inline-block;
-        font-size: 0.58rem;
-        letter-spacing: 0.08em;
+    .sidebar-apt-action {
+        text-align: right;
+    }
+    .sidebar-apt-action button {
+        background: none;
+        border: 1px solid rgba(237,230,216,0.15);
+        color: var(--dark-fg);
+        font-size: 0.55rem;
+        font-family: var(--font-body);
+        font-weight: 500;
+        letter-spacing: 0.06em;
         text-transform: uppercase;
-        padding: 2px 8px;
-        margin-top: 0.35rem;
+        padding: 4px 10px;
+        cursor: pointer;
+        transition: all 0.15s;
     }
-    .sidebar-apt-badge.available { background: rgba(46,204,113,0.1); color: #3fbf87; }
-    .sidebar-apt-badge.unavailable { background: rgba(191,59,59,0.1); color: #d9584e; }
-    .sidebar-apt-badge.reserved { background: rgba(230,163,60,0.1); color: #e6a33c; }
+    .sidebar-apt-action button:hover {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: var(--primary-fg);
+    }
+    .sidebar-apt-action button:disabled {
+        opacity: 0.25;
+        cursor: not-allowed;
+    }
 
     @media (max-width: 768px) {
         #demo-split {
@@ -1791,7 +1840,7 @@
 
   <!-- DEMO 3D -->
   <section id="demo-section" class="section-dark">
-    <div class="container" style="max-width:1920px">
+    <div class="container" style="max-width:1920px;padding-left:1.5rem;padding-right:1.5rem">
       <span class="section-label">Wybierz apartament</span>
       <h2 class="section-title">Mokot&#243;w Prestige <span id="apartment-count"></span></h2>
       <p class="section-subtitle">Obracaj budynek i wybierz apartament, aby zobaczy&#263; szczeg&#243;&#322;y lokalu.</p>
@@ -1843,10 +1892,8 @@
         </div>
 
     </div>
-    <div id="sidebar-apartments" style="background:var(--dark);min-width:320px">
-        <div id="sidebar-list">
-          <div style="padding:1.5rem 1.25rem;color:rgba(237,230,216,0.3);font-size:0.8rem">Ładowanie lokali...</div>
-        </div>
+    <div id="sidebar-apartments">
+        <div id="sidebar-list"></div>
     </div>
     </div><!-- /demo-split -->
 
@@ -3064,15 +3111,21 @@
         var sidebar = document.getElementById('sidebar-list');
         if (!sidebar) return;
         var priceFormatter2 = new Intl.NumberFormat('pl-PL');
-        sidebar.innerHTML = apartments.map(function(apt) {
-            var status = apt.dostepnosc === 'reserved' ? 'Rezerwacja' : apt.dostepnosc ? 'Dost\u0119pny' : 'Niedost\u0119pny';
-            var badgeClass = apt.dostepnosc === 'reserved' ? 'reserved' : apt.dostepnosc ? 'available' : 'unavailable';
+
+        var html = '<div class="sidebar-header"><span>Lokal</span><span>Pow.</span><span>Pok.</span><span></span></div>';
+
+        html += apartments.map(function(apt) {
+            var dotColor = apt.dostepnosc === 'reserved' ? '#e6a33c' : apt.dostepnosc ? '#3fbf87' : '#d9584e';
+            var canWalk = apt.dostepnosc === true || apt.dostepnosc === 'reserved';
             return '<div class="sidebar-apt" data-apt-id="' + apt.id + '">' +
-                '<div class="sidebar-apt-name">Apartament ' + apt.numer + '</div>' +
-                '<div class="sidebar-apt-info">' + apt.powierzchnia + ' m\u00b2 \u00b7 ' + apt.pokoje + ' pok. \u00b7 ' + priceFormatter2.format(apt.cena) + ' z\u0142</div>' +
-                '<span class="sidebar-apt-badge ' + badgeClass + '">' + status + '</span>' +
+                '<div class="sidebar-apt-name"><span class="dot" style="background:' + dotColor + '"></span>' + apt.numer + '</div>' +
+                '<span class="sidebar-apt-dim">' + apt.powierzchnia + ' m\u00B2</span>' +
+                '<span class="sidebar-apt-dim">' + apt.pokoje + '</span>' +
+                '<span class="sidebar-apt-action"><button data-walk="' + apt.id + '"' + (canWalk ? '' : ' disabled') + '>Spacer</button></span>' +
                 '</div>';
         }).join('');
+
+        sidebar.innerHTML = html;
     }
 
     function sendStreamPixelMessage(message, targetOrigin = 'https://share.streampixel.io') {
@@ -3234,17 +3287,23 @@
     var sidebarList = document.getElementById('sidebar-list');
     if (sidebarList) {
         sidebarList.addEventListener('click', function(e) {
+            // Spacer button click
+            var walkBtn = e.target.closest('[data-walk]');
+            if (walkBtn && !walkBtn.disabled) {
+                var aptId = walkBtn.dataset.walk;
+                var realBtn = document.querySelector('[data-apartment-id="' + aptId + '"][data-pawn-type="first-person"]');
+                if (realBtn) realBtn.click();
+                return;
+            }
+            // Row click - rotate orbital
             var row = e.target.closest('.sidebar-apt');
             if (!row) return;
             var aptId = row.dataset.aptId;
-            // Highlight active
             document.querySelectorAll('.sidebar-apt').forEach(function(el) { el.classList.remove('active'); });
             row.classList.add('active');
-            // Rotate orbital
             if (window.orbitalAnimateToFrame && APT_VIEW_FRAMES[aptId] !== undefined) {
                 window.orbitalAnimateToFrame(APT_VIEW_FRAMES[aptId]);
             }
-            // Show apartment card
             var REVERSE_MAP = {};
             for (var k in ORBITAL_TO_APARTMENT) { REVERSE_MAP[ORBITAL_TO_APARTMENT[k]] = k; }
             var unitKey = REVERSE_MAP[aptId];
