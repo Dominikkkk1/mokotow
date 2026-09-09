@@ -29,6 +29,7 @@
     }
 
     html { scroll-behavior: smooth; overflow-x: hidden; }
+    body.stream-locked { overflow: hidden; }
 
     body {
       background: var(--bg);
@@ -424,7 +425,7 @@
     #demo-app {
       aspect-ratio: 3 / 2;
       max-height: 80vh;
-      max-width: 1200px;
+      max-width: 1600px;
       margin-left: auto;
       margin-right: auto;
       overflow: hidden;
@@ -1742,6 +1743,7 @@
             document.getElementById('video-layer').classList.remove('fade-out');
             document.getElementById('stream-layer').style.zIndex='1';
             document.getElementById('main-view').classList.remove('stream-active');
+            document.body.classList.remove('stream-locked');
           ">&#8592; Widok budynku</button>
         </div>
 
@@ -2554,7 +2556,9 @@
       videoLayer.classList.add('fade-out');
       streamLayer.style.zIndex = 3;
       document.getElementById('main-view').classList.add('stream-active');
-      scrollToDemo();
+      // Lock scroll so user stays on StreamPixel view
+      document.getElementById('demo-app').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      document.body.classList.add('stream-locked');
       streamIframe.focus();
       if (isTouchDevice()) { sendStreamPixelMessage({ type: 'ui', mode: 'touch'}); }
       else { sendStreamPixelMessage({ type: 'ui', mode: 'mouse'}); }
