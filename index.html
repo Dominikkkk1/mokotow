@@ -2302,7 +2302,7 @@
       var clickBtn = function(sel) { return close + "var b=document.querySelector('" + sel + "');if(b)b.click();"; };
       var btns = '';
       btns += '<button class="apt-card-btn" ' + (imgSrc ? 'onclick="showImageModal(\'' + imgSrc + '\')"' : 'disabled') + '>Karta lokalu</button>';
-      if (imgSrc) { btns += '<a class="apt-card-btn" href="' + imgSrc + '" download="' + label.replace(/ /g, '-') + '-Karta-Lokalu.png" style="text-align:left;font-size:0.6rem;padding:6px 14px;text-decoration:none">\u2B07 Pobierz kart\u0119 lokalu (PDF)</a>'; }
+      if (imgSrc) { btns += '<button class="apt-card-btn" style="text-align:left;font-size:0.6rem;padding:6px 14px" onclick="downloadAptCard()">&#11015; Pobierz kart\u0119 lokalu (PDF)</button>'; }
       btns += '<button class="apt-card-btn" ' + (canInteract ? 'onclick="' + clickBtn('[data-apartment-id=&quot;' + aptId + '&quot;][data-pawn-type=&quot;apartment-showcase&quot;]') + '"' : 'disabled') + '>Prezentacja apartamentu</button>';
       btns += '<button class="apt-card-btn" onclick="' + clickBtn('[data-apartment-id=&quot;' + aptId + '&quot;][data-pawn-type=&quot;top-view&quot;]') + '">Widok z g\u00F3ry</button>';
       btns += '<button class="apt-card-btn primary" ' + (canInteract ? 'onclick="' + clickBtn('[data-apartment-id=&quot;' + aptId + '&quot;][data-pawn-type=&quot;first-person&quot;]') + '"' : 'disabled') + '>Spacer</button>';
@@ -3418,6 +3418,78 @@ window.showImageModal = function(src) {
   var m = document.getElementById('img-modal');
   document.getElementById('img-modal-img').src = src;
   m.classList.add('open');
+};
+
+window.downloadAptCard = function() {
+  var card = document.getElementById('apt-card');
+  if (!card) return;
+  var title = (document.getElementById('apt-card-title') || {}).textContent || 'Karta Lokalu';
+  var subtitle = (document.getElementById('apt-card-subtitle') || {}).textContent || '';
+  var badge = (document.getElementById('apt-card-badge-wrap') || {}).textContent || '';
+  var img = document.getElementById('apt-card-image');
+  var imgSrc = img && img.style.display !== 'none' ? img.src : '';
+  var specs = document.getElementById('apt-card-specs');
+  var specsHTML = specs ? specs.innerHTML : '';
+
+  var w = window.open('', '_blank');
+  if (!w) { alert('Odblokuj wyskakujące okna aby pobrać PDF'); return; }
+  w.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>' + title + ' - Karta Lokalu</title>');
+  w.document.write('<style>');
+  w.document.write('*{box-sizing:border-box;margin:0;padding:0}');
+  w.document.write('body{font-family:"DM Sans",system-ui,sans-serif;color:#1C2E26;padding:3rem;max-width:900px;margin:0 auto}');
+  w.document.write('.badge{display:inline-block;padding:4px 14px;font-size:0.75rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;border-radius:2px;margin-bottom:1.5rem}');
+  w.document.write('.badge-ok{background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7}');
+  w.document.write('.badge-na{background:#fce4ec;color:#c62828;border:1px solid #ef9a9a}');
+  w.document.write('h1{font-family:"Cormorant Garamond",serif;font-size:2.5rem;font-weight:600;margin-bottom:0.5rem}');
+  w.document.write('.sub{font-size:0.95rem;color:#5C6E64;margin-bottom:2rem}');
+  w.document.write('.layout{display:grid;grid-template-columns:3fr 2fr;gap:2rem;align-items:start}');
+  w.document.write('img{width:100%;border:1px solid #D8CFBE;margin-bottom:1.5rem}');
+  w.document.write('.specs{display:grid;grid-template-columns:1fr 1fr;gap:0}');
+  w.document.write('.spec{display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid #eee;font-size:0.85rem}');
+  w.document.write('.spec strong{font-weight:600}');
+  w.document.write('.total{border-top:2px solid #1C2E26;border-bottom:none;padding-top:0.8rem;margin-top:0.3rem;font-size:1rem;font-weight:600}');
+  w.document.write('.contact{margin-top:2.5rem;padding-top:1.5rem;border-top:1px solid #D8CFBE;font-size:0.85rem;color:#5C6E64}');
+  w.document.write('.contact strong{color:#1C2E26}');
+  w.document.write('@media print{body{padding:1.5rem}@page{margin:1.5cm}}');
+  w.document.write('</style></head><body>');
+
+  var isAvail = badge.indexOf('Dost') >= 0;
+  w.document.write('<div class="badge ' + (isAvail ? 'badge-ok' : 'badge-na') + '">' + badge.trim() + '</div>');
+  w.document.write('<h1>' + title + '</h1>');
+  w.document.write('<div class="sub">' + subtitle + '</div>');
+
+  w.document.write('<div class="layout"><div>');
+  if (imgSrc) { w.document.write('<img src="' + imgSrc + '" alt="' + title + '">'); }
+  // Convert specs to print-friendly
+  var printSpecs = specsHTML
+    .replace(/apt-card-spec-total/g, 'spec total')
+    .replace(/apt-card-spec/g, 'spec');
+  w.document.write('<div class="specs">' + printSpecs + '</div>');
+  w.document.write('</div><div>');
+
+  // Contact info
+  w.document.write('<div class="contact">');
+  w.document.write('<strong>Mokot\u00F3w Prestige</strong><br>');
+  w.document.write('Kontakt: <strong>kontakt@codelivery.tech</strong><br>');
+  w.document.write('Tel: <strong>+48 501 773 665</strong><br><br>');
+  w.document.write('<em>Wygenerowano z mokotow.vercel.app</em>');
+  w.document.write('</div>');
+
+  w.document.write('</div></div>');
+  w.document.write('</body></html>');
+  w.document.close();
+
+  // Wait for image to load then trigger print
+  if (imgSrc) {
+    var checkImg = w.document.querySelector('img');
+    if (checkImg && !checkImg.complete) {
+      checkImg.onload = function() { w.print(); };
+    } else {
+      setTimeout(function() { w.print(); }, 300);
+    }
+  } else {
+    setTimeout(function() { w.print(); }, 200);
+  }
 };
 </script>
 </body>
