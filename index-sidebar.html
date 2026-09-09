@@ -446,7 +446,6 @@
         position: sticky;
         top: 72px;
         z-index: 10;
-        background: var(--dark);
     }
     #demo-split #demo-app {
         flex: 1;
@@ -454,91 +453,113 @@
         position: relative;
         max-width: none;
         margin: 0;
-        transition: flex 0.3s ease;
     }
-    #sidebar-apartments {
-        width: 280px;
-        flex-shrink: 0;
-        background: var(--dark);
-        border-left: 1px solid rgba(237,230,216,0.08);
-        overflow-y: auto;
-        max-height: 80vh;
+
+    /* Sidebar - light background like 3D Estate */
+    #sidebar-wrap {
         position: relative;
-        transition: width 0.3s ease, opacity 0.2s ease;
+        flex-shrink: 0;
+        width: 320px;
+        transition: width 0.3s ease;
     }
-    #sidebar-apartments.collapsed {
-        width: 0;
-        opacity: 0;
-        overflow: hidden;
-        border-left: none;
-    }
+    #sidebar-wrap.collapsed { width: 0; }
+
     #sidebar-toggle {
         position: absolute;
-        left: -32px;
+        left: 0;
         top: 50%;
-        transform: translateY(-50%);
+        transform: translateX(-100%) translateY(-50%);
         z-index: 15;
-        width: 32px;
-        height: 56px;
-        background: var(--dark);
-        border: 1px solid rgba(237,230,216,0.1);
+        width: 36px;
+        height: 72px;
+        background: var(--bg);
+        border: 1px solid var(--border);
         border-right: none;
-        color: rgba(237,230,216,0.6);
-        font-size: 0.9rem;
+        color: var(--fg);
+        font-size: 1.1rem;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        border-radius: 6px 0 0 6px;
+        border-radius: 8px 0 0 8px;
+        box-shadow: -2px 0 8px rgba(0,0,0,0.08);
+        transition: background 0.15s;
     }
-    #sidebar-toggle:hover { background: rgba(237,230,216,0.06); color: var(--dark-fg); }
+    #sidebar-toggle:hover { background: var(--bg-card); }
+
+    #sidebar-apartments {
+        background: var(--bg);
+        overflow-y: auto;
+        height: 100%;
+        max-height: 80vh;
+        border-left: 1px solid var(--border);
+        transition: opacity 0.2s ease;
+    }
+    #sidebar-wrap.collapsed #sidebar-apartments { opacity: 0; overflow: hidden; }
+
     #sidebar-header {
-        padding: 0.8rem 1rem;
-        font-family: var(--font-body);
-        font-size: 0.6rem;
-        font-weight: 600;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        color: rgba(237,230,216,0.35);
-        border-bottom: 1px solid rgba(237,230,216,0.06);
+        padding: 1rem 1.25rem 0.75rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }
-    .sidebar-apt {
-        padding: 0.7rem 1rem;
-        border-bottom: 1px solid rgba(237,230,216,0.04);
-        cursor: pointer;
-        transition: background 0.12s;
+    #sidebar-count {
+        font-family: var(--font-body);
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--fg);
+    }
+
+    /* Column headers */
+    .sb-head {
         display: flex;
         align-items: center;
-        gap: 0.6rem;
+        padding: 0.5rem 1.25rem;
+        border-bottom: 1px solid var(--border);
+        font-family: var(--font-body);
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: var(--fg);
+        gap: 1rem;
     }
-    .sidebar-apt:hover { background: rgba(237,230,216,0.04); }
-    .sidebar-apt.active { background: rgba(53,90,74,0.2); }
-    .sidebar-dot {
-        width: 8px;
-        height: 8px;
+    .sb-head span { flex: 1; }
+    .sb-head span:first-child { flex: 1.5; }
+
+    /* Rows */
+    .sb-row {
+        display: flex;
+        align-items: center;
+        padding: 0.85rem 1.25rem;
+        border-bottom: 1px solid rgba(0,0,0,0.06);
+        cursor: pointer;
+        transition: background 0.12s;
+        gap: 1rem;
+        font-size: 0.82rem;
+        color: var(--fg);
+    }
+    .sb-row:hover { background: rgba(53,90,74,0.06); }
+    .sb-row.active { background: rgba(53,90,74,0.12); }
+    .sb-row span { flex: 1; }
+    .sb-row span:first-child { flex: 1.5; display: flex; align-items: center; gap: 0.5rem; }
+    .sb-dot {
+        width: 10px;
+        height: 10px;
         border-radius: 50%;
         flex-shrink: 0;
     }
-    .sidebar-dot.ok { background: #3fbf87; }
-    .sidebar-dot.na { background: #d9584e; }
-    .sidebar-name {
-        font-family: var(--font-body);
-        font-weight: 600;
-        font-size: 0.8rem;
-        color: var(--dark-fg);
-    }
-    .sidebar-area {
-        margin-left: auto;
-        font-size: 0.75rem;
-        color: rgba(237,230,216,0.5);
-        white-space: nowrap;
+    .sb-dot.ok { background: #3fbf87; }
+    .sb-dot.na { background: #d9584e; }
+    .sb-dot.rs { background: #e6a33c; }
+    .sb-name {
+        font-weight: 700;
+        color: var(--fg);
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: 900px) {
         #demo-split { flex-direction: column; top: 60px; }
-        #demo-split #demo-app { aspect-ratio: 4/3; max-height: 55vh; }
-        #sidebar-apartments { width: 100%; max-height: 200px; border-left: none; border-top: 1px solid rgba(237,230,216,0.08); }
-        #sidebar-apartments.collapsed { height: 0; max-height: 0; width: 100%; }
+        #sidebar-wrap { width: 100%; }
+        #sidebar-wrap.collapsed { width: 100%; height: 0; }
+        #sidebar-apartments { max-height: 250px; border-left: none; border-top: 1px solid var(--border); }
         #sidebar-toggle { display: none; }
     }
 
@@ -1866,10 +1887,15 @@
         </div>
 
     </div>
-    <div id="sidebar-apartments">
-        <button id="sidebar-toggle" onclick="var s=this.parentElement;s.classList.toggle('collapsed');this.innerHTML=s.classList.contains('collapsed')?'&#9654;':'&#9664;'">&#9664;</button>
-        <div id="sidebar-header">Lokale</div>
-        <div id="sidebar-list"></div>
+    <div id="sidebar-wrap">
+        <button id="sidebar-toggle" onclick="var w=document.getElementById('sidebar-wrap');w.classList.toggle('collapsed');this.innerHTML=w.classList.contains('collapsed')?'&#9654;':'&#9664;'">&#9664;</button>
+        <div id="sidebar-apartments">
+            <div id="sidebar-header">
+                <span id="sidebar-count"></span>
+            </div>
+            <div class="sb-head"><span>Lokal</span><span>Pow.</span><span>Pi&#281;t.</span><span>Pok.</span></div>
+            <div id="sidebar-list"></div>
+        </div>
     </div>
     </div><!-- /demo-split -->
 
@@ -3032,16 +3058,16 @@
        Po kazdej zmianie w panelu warto ja odswiezyc, ale nic sie nie psuje,
        gdy sie o tym zapomni. */
     const FALLBACK_APARTMENTS = [
-      { "id": "apartment13", "numer": "13", "kierunek": "NE", "powierzchnia": 212.0, "pokoje": 4, "cena": 3500000, "dostepnosc": true },
-      { "id": "apartment14", "numer": "14", "kierunek": "NW", "powierzchnia": 198.0, "pokoje": 5, "cena": 3200000, "dostepnosc": false },
-      { "id": "apartment11", "numer": "11", "kierunek": "SE", "powierzchnia": 185.0, "pokoje": 4, "cena": 2950000, "dostepnosc": false },
-      { "id": "apartment12", "numer": "12", "kierunek": "NW", "powierzchnia": 185.0, "pokoje": 4, "cena": 2900000, "dostepnosc": false },
-      { "id": "apartment21", "numer": "21", "kierunek": "SE", "powierzchnia": 220.0, "pokoje": 5, "cena": 3800000, "dostepnosc": false },
-      { "id": "apartment22", "numer": "22", "kierunek": "NW", "powierzchnia": 220.0, "pokoje": 5, "cena": 3750000, "dostepnosc": false },
-      { "id": "apartment23", "numer": "23", "kierunek": "NE", "powierzchnia": 220.0, "pokoje": 5, "cena": 3900000, "dostepnosc": false },
-      { "id": "apartment24", "numer": "24", "kierunek": "SW", "powierzchnia": 220.0, "pokoje": 5, "cena": 3700000, "dostepnosc": false },
-      { "id": "apartment1",  "numer": "1",  "kierunek": "S",  "powierzchnia": 113.0, "pokoje": 3, "cena": 1950000, "dostepnosc": false },
-      { "id": "apartment3",  "numer": "3",  "kierunek": "N",  "powierzchnia": 113.0, "pokoje": 3, "cena": 1900000, "dostepnosc": false },
+      { "id": "apartment13", "numer": "13", "pietro": 1, "kierunek": "NE", "powierzchnia": 212.0, "pokoje": 4, "cena": 3500000, "dostepnosc": true },
+      { "id": "apartment14", "numer": "14", "pietro": 1, "kierunek": "NW", "powierzchnia": 198.0, "pokoje": 5, "cena": 3200000, "dostepnosc": false },
+      { "id": "apartment11", "numer": "11", "pietro": 1, "kierunek": "SE", "powierzchnia": 185.0, "pokoje": 4, "cena": 2950000, "dostepnosc": false },
+      { "id": "apartment12", "numer": "12", "pietro": 1, "kierunek": "NW", "powierzchnia": 185.0, "pokoje": 4, "cena": 2900000, "dostepnosc": false },
+      { "id": "apartment21", "numer": "21", "pietro": 2, "kierunek": "SE", "powierzchnia": 220.0, "pokoje": 5, "cena": 3800000, "dostepnosc": false },
+      { "id": "apartment22", "numer": "22", "pietro": 2, "kierunek": "NW", "powierzchnia": 220.0, "pokoje": 5, "cena": 3750000, "dostepnosc": false },
+      { "id": "apartment23", "numer": "23", "pietro": 2, "kierunek": "NE", "powierzchnia": 220.0, "pokoje": 5, "cena": 3900000, "dostepnosc": false },
+      { "id": "apartment24", "numer": "24", "pietro": 2, "kierunek": "SW", "powierzchnia": 220.0, "pokoje": 5, "cena": 3700000, "dostepnosc": false },
+      { "id": "apartment1",  "numer": "1",  "pietro": 0, "kierunek": "S",  "powierzchnia": 113.0, "pokoje": 3, "cena": 1950000, "dostepnosc": false },
+      { "id": "apartment3",  "numer": "3",  "pietro": 0, "kierunek": "N",  "powierzchnia": 113.0, "pokoje": 3, "cena": 1900000, "dostepnosc": false },
     ];
 
     // Local overrides - CRM only has 2 apartments with old data
@@ -3086,12 +3112,16 @@
     function renderSidebarApartments(apartments) {
         var sidebar = document.getElementById('sidebar-list');
         if (!sidebar) return;
+        var countEl = document.getElementById('sidebar-count');
+        if (countEl) countEl.textContent = apartments.length + ' lokali';
         sidebar.innerHTML = apartments.map(function(apt) {
-            var dotCls = apt.dostepnosc ? 'ok' : 'na';
-            return '<div class="sidebar-apt" data-apt-id="' + apt.id + '">' +
-                '<span class="sidebar-dot ' + dotCls + '"></span>' +
-                '<span class="sidebar-name">' + apt.numer + '</span>' +
-                '<span class="sidebar-area">' + apt.powierzchnia + ' m\u00B2</span>' +
+            var dotCls = apt.dostepnosc === 'reserved' ? 'rs' : apt.dostepnosc ? 'ok' : 'na';
+            var floor = apt.pietro || '-';
+            return '<div class="sb-row" data-apt-id="' + apt.id + '">' +
+                '<span><span class="sb-dot ' + dotCls + '"></span><span class="sb-name">' + apt.numer + '</span></span>' +
+                '<span>' + apt.powierzchnia + ' m\u00B2</span>' +
+                '<span>' + floor + '</span>' +
+                '<span>' + apt.pokoje + '</span>' +
                 '</div>';
         }).join('');
     }
@@ -3255,23 +3285,17 @@
     var sidebarList = document.getElementById('sidebar-list');
     if (sidebarList) {
         sidebarList.addEventListener('click', function(e) {
-            // Spacer button click
-            var walkBtn = e.target.closest('[data-walk]');
-            if (walkBtn && !walkBtn.disabled) {
-                var aptId = walkBtn.dataset.walk;
-                var realBtn = document.querySelector('[data-apartment-id="' + aptId + '"][data-pawn-type="first-person"]');
-                if (realBtn) realBtn.click();
-                return;
-            }
-            // Row click - rotate orbital
-            var row = e.target.closest('.sidebar-apt');
+            var row = e.target.closest('.sb-row');
             if (!row) return;
             var aptId = row.dataset.aptId;
-            document.querySelectorAll('.sidebar-apt').forEach(function(el) { el.classList.remove('active'); });
+            // Highlight active row
+            document.querySelectorAll('.sb-row').forEach(function(el) { el.classList.remove('active'); });
             row.classList.add('active');
+            // Rotate orbital to this apartment
             if (window.orbitalAnimateToFrame && APT_VIEW_FRAMES[aptId] !== undefined) {
                 window.orbitalAnimateToFrame(APT_VIEW_FRAMES[aptId]);
             }
+            // Show apartment card popup
             var REVERSE_MAP = {};
             for (var k in ORBITAL_TO_APARTMENT) { REVERSE_MAP[ORBITAL_TO_APARTMENT[k]] = k; }
             var unitKey = REVERSE_MAP[aptId];
