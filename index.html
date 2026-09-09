@@ -1697,9 +1697,8 @@
             </div>
             <div id="orbital-tip"></div>
             <div id="orbital-legend">
-              <span><i style="background:#3fbf87"></i>Wolne</span>
-              <span><i style="background:#e6a33c"></i>Rezerwacja</span>
-              <span><i style="background:#d9584e"></i>Sprzedane</span>
+              <span><i style="background:#3fbf87"></i>Dostepne</span>
+              <span><i style="background:#d9584e"></i>Niedostepne</span>
             </div>
             <div id="orbital-click-zone"></div>
             <div id="orbital-hint">Przeciagnij, zeby obrocic · kliknij mieszkanie</div>
@@ -2034,13 +2033,12 @@
     const FRAME_COUNT = orbitShot.beautyFrames;
     const NORM = TOUR.norm;
 
-    // Fake CRM status
+    // Unit availability - matches apartment table
+    // A_11 = apartment13 (Rezerwacja = zielony, jedyny dostepny do spaceru)
+    // Reszta = sold (czerwony, niedostepne)
     const fakeStatus = {};
-    const states = ['free', 'free', 'reserved', 'sold'];
-    Object.keys(TOUR.units).forEach(function(k, i) {
-      let h = 0;
-      for (let c = 0; c < k.length; c++) h = (h * 31 + k.charCodeAt(c)) & 0xffff;
-      fakeStatus[k] = states[(h + i) % states.length];
+    Object.keys(TOUR.units).forEach(function(k) {
+      fakeStatus[k] = (k === 'A_11') ? 'free' : 'sold';
     });
 
     let frames = [];
