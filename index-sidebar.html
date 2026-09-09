@@ -440,166 +440,106 @@
 
     /* ── SIDEBAR SPLIT LAYOUT ── */
     #demo-split {
-        display: grid;
-        grid-template-columns: 1fr 320px;
-        align-items: stretch;
+        display: flex;
         max-width: 1920px;
-        width: 100%;
         margin: 0 auto;
-        gap: 0;
         position: sticky;
         top: 72px;
         z-index: 10;
+        background: var(--dark);
     }
-
     #demo-split #demo-app {
+        flex: 1;
+        min-width: 0;
         position: relative;
         max-width: none;
         margin: 0;
+        transition: flex 0.3s ease;
     }
-
     #sidebar-apartments {
+        width: 280px;
+        flex-shrink: 0;
         background: var(--dark);
         border-left: 1px solid rgba(237,230,216,0.08);
         overflow-y: auto;
-        display: flex;
-        flex-direction: column;
+        max-height: 80vh;
+        position: relative;
+        transition: width 0.3s ease, opacity 0.2s ease;
     }
-    #sidebar-apartments::before {
-        content: 'Lokale';
-        display: block;
-        padding: 0.8rem 1rem 0.5rem;
+    #sidebar-apartments.collapsed {
+        width: 0;
+        opacity: 0;
+        overflow: hidden;
+        border-left: none;
+    }
+    #sidebar-toggle {
+        position: absolute;
+        left: -32px;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 15;
+        width: 32px;
+        height: 56px;
+        background: var(--dark);
+        border: 1px solid rgba(237,230,216,0.1);
+        border-right: none;
+        color: rgba(237,230,216,0.6);
+        font-size: 0.9rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px 0 0 6px;
+    }
+    #sidebar-toggle:hover { background: rgba(237,230,216,0.06); color: var(--dark-fg); }
+    #sidebar-header {
+        padding: 0.8rem 1rem;
         font-family: var(--font-body);
         font-size: 0.6rem;
         font-weight: 600;
         letter-spacing: 0.12em;
         text-transform: uppercase;
-        color: rgba(237,230,216,0.4);
+        color: rgba(237,230,216,0.35);
         border-bottom: 1px solid rgba(237,230,216,0.06);
     }
-    #sidebar-list {
-        flex: 1;
-        overflow-y: auto;
-    }
-
-    /* Table header */
-    .sidebar-header {
-        display: grid;
-        grid-template-columns: 2fr 1fr 1fr 1fr;
-        padding: 0.5rem 1rem;
-        font-size: 0.55rem;
-        font-weight: 600;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        color: rgba(237,230,216,0.35);
-        border-bottom: 1px solid rgba(237,230,216,0.08);
-        position: sticky;
-        top: 0;
-        background: var(--dark);
-        z-index: 1;
-    }
-
-    /* Each row */
     .sidebar-apt {
-        display: grid;
-        grid-template-columns: 2fr 1fr 1fr 1fr;
-        align-items: center;
-        padding: 0.65rem 1rem;
+        padding: 0.7rem 1rem;
         border-bottom: 1px solid rgba(237,230,216,0.04);
         cursor: pointer;
         transition: background 0.12s;
-        font-size: 0.75rem;
-        color: rgba(237,230,216,0.7);
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
     }
     .sidebar-apt:hover { background: rgba(237,230,216,0.04); }
     .sidebar-apt.active { background: rgba(53,90,74,0.2); }
-
-    .sidebar-apt-name {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-family: var(--font-body);
-        font-weight: 600;
-        font-size: 0.78rem;
-        color: var(--dark-fg);
-    }
-    .sidebar-apt-name .dot {
+    .sidebar-dot {
         width: 8px;
         height: 8px;
         border-radius: 50%;
         flex-shrink: 0;
     }
-    .sidebar-apt-dim {
-        color: rgba(237,230,216,0.65);
-        font-size: 0.72rem;
-    }
-    .sidebar-apt-action {
-        text-align: right;
-    }
-    .sidebar-apt-action button {
-        background: none;
-        border: 1px solid rgba(237,230,216,0.15);
-        color: var(--dark-fg);
-        font-size: 0.55rem;
+    .sidebar-dot.ok { background: #3fbf87; }
+    .sidebar-dot.na { background: #d9584e; }
+    .sidebar-name {
         font-family: var(--font-body);
-        font-weight: 500;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
-        padding: 4px 10px;
-        cursor: pointer;
-        transition: all 0.15s;
+        font-weight: 600;
+        font-size: 0.8rem;
+        color: var(--dark-fg);
     }
-    .sidebar-apt-action button:hover {
-        background: var(--primary);
-        border-color: var(--primary);
-        color: var(--primary-fg);
-    }
-    .sidebar-apt-action button:disabled {
-        opacity: 0.25;
-        cursor: not-allowed;
+    .sidebar-area {
+        margin-left: auto;
+        font-size: 0.75rem;
+        color: rgba(237,230,216,0.5);
+        white-space: nowrap;
     }
 
     @media (max-width: 768px) {
-        #demo-split {
-            grid-template-columns: 1fr;
-            position: relative;
-            top: 0;
-        }
-        #demo-split #demo-app {
-            aspect-ratio: 4 / 3;
-            max-height: 55vh;
-        }
-        #sidebar-apartments {
-            max-height: none;
-            border-left: none;
-            border-top: 1px solid rgba(237,230,216,0.08);
-            position: relative;
-        }
-        #sidebar-apartments::before {
-            content: '';
-            display: block;
-            width: 40px;
-            height: 4px;
-            background: rgba(237,230,216,0.25);
-            border-radius: 2px;
-            margin: 8px auto 4px;
-        }
-        #sidebar-list {
-            max-height: 40vh;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-        .sidebar-header {
-            font-size: 0.5rem;
-            padding: 0.4rem 0.75rem;
-        }
-        .sidebar-apt {
-            padding: 0.55rem 0.75rem;
-            font-size: 0.7rem;
-        }
-        .sidebar-apt-name { font-size: 0.72rem; }
-        .sidebar-apt-dim { font-size: 0.65rem; }
-        .sidebar-apt-action button { font-size: 0.5rem; padding: 3px 8px; }
+        #demo-split { flex-direction: column; top: 60px; }
+        #demo-split #demo-app { aspect-ratio: 4/3; max-height: 55vh; }
+        #sidebar-apartments { width: 100%; max-height: 200px; border-left: none; border-top: 1px solid rgba(237,230,216,0.08); }
+        #sidebar-apartments.collapsed { height: 0; max-height: 0; width: 100%; }
+        #sidebar-toggle { display: none; }
     }
 
     /* Demo main view */
@@ -1927,6 +1867,8 @@
 
     </div>
     <div id="sidebar-apartments">
+        <button id="sidebar-toggle" onclick="var s=this.parentElement;s.classList.toggle('collapsed');this.innerHTML=s.classList.contains('collapsed')?'&#9654;':'&#9664;'">&#9664;</button>
+        <div id="sidebar-header">Lokale</div>
         <div id="sidebar-list"></div>
     </div>
     </div><!-- /demo-split -->
@@ -3144,22 +3086,14 @@
     function renderSidebarApartments(apartments) {
         var sidebar = document.getElementById('sidebar-list');
         if (!sidebar) return;
-        var priceFormatter2 = new Intl.NumberFormat('pl-PL');
-
-        var html = '<div class="sidebar-header"><span>Lokal</span><span>Pow.</span><span>Pok.</span><span></span></div>';
-
-        html += apartments.map(function(apt) {
-            var dotColor = apt.dostepnosc === 'reserved' ? '#e6a33c' : apt.dostepnosc ? '#3fbf87' : '#d9584e';
-            var canWalk = apt.dostepnosc === true || apt.dostepnosc === 'reserved';
+        sidebar.innerHTML = apartments.map(function(apt) {
+            var dotCls = apt.dostepnosc ? 'ok' : 'na';
             return '<div class="sidebar-apt" data-apt-id="' + apt.id + '">' +
-                '<div class="sidebar-apt-name"><span class="dot" style="background:' + dotColor + '"></span>' + apt.numer + '</div>' +
-                '<span class="sidebar-apt-dim">' + apt.powierzchnia + ' m\u00B2</span>' +
-                '<span class="sidebar-apt-dim">' + apt.pokoje + '</span>' +
-                '<span class="sidebar-apt-action"><button data-walk="' + apt.id + '"' + (canWalk ? '' : ' disabled') + '>Spacer</button></span>' +
+                '<span class="sidebar-dot ' + dotCls + '"></span>' +
+                '<span class="sidebar-name">' + apt.numer + '</span>' +
+                '<span class="sidebar-area">' + apt.powierzchnia + ' m\u00B2</span>' +
                 '</div>';
         }).join('');
-
-        sidebar.innerHTML = html;
     }
 
     function sendStreamPixelMessage(message, targetOrigin = 'https://share.streampixel.io') {
