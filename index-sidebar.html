@@ -429,13 +429,15 @@
     }
 
     #demo-app {
-      aspect-ratio: 3 / 2;
-      max-height: 80vh;
+      height: 75vh;
+      max-height: 800px;
+      min-height: 400px;
       max-width: none;
       margin: 0;
       overflow: hidden;
       border: 1px solid rgba(237,230,216,0.08);
       border-right: none;
+      position: relative;
     }
 
     /* ── SIDEBAR SPLIT LAYOUT ── */
@@ -490,8 +492,9 @@
     #sidebar-apartments {
         background: var(--bg);
         overflow-y: auto;
-        height: 100%;
-        max-height: 80vh;
+        height: 75vh;
+        max-height: 800px;
+        min-height: 400px;
         border-left: 1px solid var(--border);
         transition: opacity 0.2s ease;
     }
@@ -508,6 +511,35 @@
         font-size: 0.85rem;
         font-weight: 600;
         color: var(--fg);
+    }
+
+    /* Filters */
+    #sb-filters {
+        display: none;
+        padding: 0.75rem 1.25rem;
+        border-bottom: 1px solid var(--border);
+        gap: 0.75rem;
+    }
+    #sb-filters.open { display: flex; }
+    #sb-filters label {
+        flex: 1;
+        font-size: 0.65rem;
+        font-weight: 600;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+    #sb-filters select {
+        display: block;
+        width: 100%;
+        margin-top: 0.3rem;
+        padding: 0.4rem 0.5rem;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        color: var(--fg);
+        font-family: var(--font-body);
+        font-size: 0.78rem;
+        border-radius: 4px;
     }
 
     /* Column headers */
@@ -1892,6 +1924,24 @@
         <div id="sidebar-apartments">
             <div id="sidebar-header">
                 <span id="sidebar-count"></span>
+                <button id="sb-filter-toggle" onclick="document.getElementById('sb-filters').classList.toggle('open');this.textContent=document.getElementById('sb-filters').classList.contains('open')?'Ukryj filtry':'Filtry'" style="background:none;border:1px solid var(--border);color:var(--muted);font-family:var(--font-body);font-size:0.65rem;font-weight:500;letter-spacing:0.06em;padding:4px 12px;cursor:pointer">Filtry</button>
+            </div>
+            <div id="sb-filters">
+                <label>Status
+                    <select id="sb-f-status" onchange="window.sbFilter()">
+                        <option value="all">Wszystkie</option>
+                        <option value="ok">Dost&#281;pne</option>
+                        <option value="na">Niedost&#281;pne</option>
+                    </select>
+                </label>
+                <label>Pi&#281;tro
+                    <select id="sb-f-floor" onchange="window.sbFilter()">
+                        <option value="all">Wszystkie</option>
+                        <option value="0">Parter</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                    </select>
+                </label>
             </div>
             <div class="sb-head"><span>Lokal</span><span>Pow.</span><span>Pi&#281;t.</span><span>Pok.</span></div>
             <div id="sidebar-list"></div>
@@ -2509,6 +2559,12 @@
     }
 
     // Expose orbital animation to outside scripts
+    // Expose highlight control for sidebar hover
+    window.orbitalSetHighlight = function(unitKey) {
+      hotKey = unitKey;
+      draw();
+    };
+
     window.orbitalAnimateToFrame = function(targetFrame) {
       var n = FRAME_COUNT;
       var target = targetFrame;
@@ -3126,6 +3182,19 @@
         }).join('');
     }
 
+    // Filter sidebar apartments
+    window.sbFilter = function() {
+        var status = document.getElementById('sb-f-status').value;
+        var floor = document.getElementById('sb-f-floor').value;
+        var filtered = apartmentsData.filter(function(apt) {
+            if (status === 'ok' && !apt.dostepnosc) return false;
+            if (status === 'na' && apt.dostepnosc) return false;
+            if (floor !== 'all' && String(apt.pietro) !== floor) return false;
+            return true;
+        });
+        renderSidebarApartments(filtered);
+    };
+
     function sendStreamPixelMessage(message, targetOrigin = 'https://share.streampixel.io') {
       console.log('[StreamPixel] postMessage ->', message, '(targetOrigin:', targetOrigin + ')');
       streamIframe.contentWindow.postMessage(message, targetOrigin);
@@ -3281,26 +3350,39 @@
     renderSidebarApartments(apartmentsData);
     loadApartments();
 
-    // ── SIDEBAR CLICK HANDLER ──
+    // ── SIDEBAR INTERACTIONS ──
     var sidebarList = document.getElementById('sidebar-list');
+    // Reverse mapping: apartment ID -> orbital unit key
+    var APT_TO_UNIT = {};
+    for (var k in ORBITAL_TO_APARTMENT) { APT_TO_UNIT[ORBITAL_TO_APARTMENT[k]] = k; }
+
     if (sidebarList) {
+        // Click: rotate orbital + show card
         sidebarList.addEventListener('click', function(e) {
             var row = e.target.closest('.sb-row');
             if (!row) return;
             var aptId = row.dataset.aptId;
-            // Highlight active row
             document.querySelectorAll('.sb-row').forEach(function(el) { el.classList.remove('active'); });
             row.classList.add('active');
-            // Rotate orbital to this apartment
             if (window.orbitalAnimateToFrame && APT_VIEW_FRAMES[aptId] !== undefined) {
                 window.orbitalAnimateToFrame(APT_VIEW_FRAMES[aptId]);
             }
-            // Show apartment card popup
-            var REVERSE_MAP = {};
-            for (var k in ORBITAL_TO_APARTMENT) { REVERSE_MAP[ORBITAL_TO_APARTMENT[k]] = k; }
-            var unitKey = REVERSE_MAP[aptId];
+            var unitKey = APT_TO_UNIT[aptId];
             if (unitKey) showAptCard(unitKey);
         });
+
+        // Hover: highlight polygon on orbital
+        sidebarList.addEventListener('mouseenter', function(e) {
+            var row = e.target.closest('.sb-row');
+            if (!row) return;
+            var unitKey = APT_TO_UNIT[row.dataset.aptId];
+            if (unitKey && window.orbitalSetHighlight) window.orbitalSetHighlight(unitKey);
+        }, true);
+        sidebarList.addEventListener('mouseleave', function(e) {
+            var row = e.target.closest('.sb-row');
+            if (!row) return;
+            if (window.orbitalSetHighlight) window.orbitalSetHighlight(null);
+        }, true);
     }
 
     /* ── FORMULARZ KONTAKTOWY ──
