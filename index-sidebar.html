@@ -468,22 +468,26 @@
     #sidebar-wrap.collapsed { width: 0; overflow: hidden; }
 
     #sidebar-toggle {
-        flex-shrink: 0;
+        position: absolute;
+        right: 320px;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 16;
         width: 28px;
-        background: var(--bg-card);
+        height: 56px;
+        background: rgba(240,235,227,0.95);
         border: none;
-        border-left: 1px solid var(--border);
-        border-right: 1px solid var(--border);
         color: var(--muted);
         font-size: 0.9rem;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
+        border-radius: 6px 0 0 6px;
+        box-shadow: -2px 0 6px rgba(0,0,0,0.15);
         transition: background 0.15s, color 0.15s;
-        z-index: 15;
     }
-    #sidebar-toggle:hover { background: var(--bg); color: var(--fg); }
+    #sidebar-toggle:hover { color: var(--fg); }
 
     #sidebar-apartments {
         background: var(--bg);
@@ -2088,6 +2092,7 @@
       <p class="section-subtitle">Obracaj budynek i wybierz apartament, aby zobaczy&#263; szczeg&#243;&#322;y lokalu.</p>
     </div>
     <div id="demo-split">
+    <button id="sidebar-toggle" onclick="var w=document.getElementById('sidebar-wrap');w.classList.toggle('collapsed');var t=this;t.innerHTML=w.classList.contains('collapsed')?'&#9654;':'&#9664;';t.style.right=w.classList.contains('collapsed')?'0':'320px'">&#9664;</button>
     <div id="demo-app">
         <div id="main-view">
           <div id="orbital-layer">
@@ -2146,7 +2151,6 @@
         </div>
 
     </div>
-    <button id="sidebar-toggle" onclick="var w=document.getElementById('sidebar-wrap');w.classList.toggle('collapsed');this.innerHTML=w.classList.contains('collapsed')?'&#9654;':'&#9664;'">&#9664;</button>
     <div id="sidebar-wrap">
         <div id="sidebar-apartments">
             <div id="sidebar-header">
@@ -3101,8 +3105,9 @@
 
     // Show apartment detail in sidebar (replaces list view)
     function showSidebarDetail(aptId) {
+      console.log('[sidebar] showSidebarDetail called with', aptId);
       var apt = apartmentsData.find(function(a) { return a.id === aptId; });
-      if (!apt) return;
+      if (!apt) { console.log('[sidebar] apartment not found!'); return; }
       var unitKey = APT_TO_UNIT_MAP[aptId];
       var avail = apt.dostepnosc === true || apt.dostepnosc === 'reserved';
       var badgeCls = apt.dostepnosc ? 'ok' : 'na';
