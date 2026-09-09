@@ -3128,7 +3128,6 @@
       html += '<div class="sbd-actions">';
       // All actions matching the full card
       if (imgSrc) {
-        html += '<button class="sbd-btn" onclick="showImageModal(\'' + imgSrc + '\')">Karta lokalu</button>';
         html += '<button class="sbd-btn" onclick="downloadAptCard()" style="font-size:0.58rem">\u2B07 Pobierz kart\u0119 lokalu (PDF)</button>';
       }
       html += '<button class="sbd-btn" onclick="var b=document.querySelector(\'[data-apartment-id=&quot;' + aptId + '&quot;][data-pawn-type=&quot;apartment-showcase&quot;]\');if(b)b.click();"' + (avail ? '' : ' disabled') + '>Prezentacja apartamentu</button>';
@@ -3140,20 +3139,21 @@
       var detail = document.getElementById('sb-detail');
       detail.innerHTML = html;
       detail.classList.add('open');
+      // Hide list elements, show detail
       document.getElementById('sidebar-list').style.display = 'none';
       document.querySelector('.sb-head').style.display = 'none';
       var hdr = document.getElementById('sidebar-header');
       if (hdr) hdr.style.display = 'none';
       var filters = document.getElementById('sb-filters');
-      if (filters) filters.style.display = 'none';
+      if (filters) filters.classList.remove('open');
     }
 
     function closeSidebarDetail() {
-      // Clear highlight
       if (window.orbitalSetHighlight) window.orbitalSetHighlight(null);
       var detail = document.getElementById('sb-detail');
       detail.classList.remove('open');
       detail.innerHTML = '';
+      // Restore list elements
       document.getElementById('sidebar-list').style.display = '';
       document.querySelector('.sb-head').style.display = '';
       var hdr = document.getElementById('sidebar-header');
