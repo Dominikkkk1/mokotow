@@ -562,10 +562,44 @@
     @media (max-width: 768px) {
         #demo-split {
             grid-template-columns: 1fr;
+            position: relative;
+            top: 0;
+        }
+        #demo-split #demo-app {
+            aspect-ratio: 4 / 3;
+            max-height: 55vh;
         }
         #sidebar-apartments {
-            max-height: 300px;
+            max-height: none;
+            border-left: none;
+            border-top: 1px solid rgba(237,230,216,0.08);
+            position: relative;
         }
+        #sidebar-apartments::before {
+            content: '';
+            display: block;
+            width: 40px;
+            height: 4px;
+            background: rgba(237,230,216,0.25);
+            border-radius: 2px;
+            margin: 8px auto 4px;
+        }
+        #sidebar-list {
+            max-height: 40vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .sidebar-header {
+            font-size: 0.5rem;
+            padding: 0.4rem 0.75rem;
+        }
+        .sidebar-apt {
+            padding: 0.55rem 0.75rem;
+            font-size: 0.7rem;
+        }
+        .sidebar-apt-name { font-size: 0.72rem; }
+        .sidebar-apt-dim { font-size: 0.65rem; }
+        .sidebar-apt-action button { font-size: 0.5rem; padding: 3px 8px; }
     }
 
     /* Demo main view */
