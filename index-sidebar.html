@@ -2486,6 +2486,7 @@
     let dragging = false, dragX = 0, dragStart = 0, dragMoved = false, lastX = 0, lastT = 0;
     let spin = null;
     let hotKey = null;
+    let hotKeyLocked = false; // true when set programmatically (sidebar), don't clear on pointerleave
     let hoveredUnit = null; // unit key currently under cursor
 
     function loadImg(src) {
@@ -2573,7 +2574,7 @@
           });
 
           el.addEventListener('pointerleave', function() {
-            hotKey = null;
+            if (!hotKeyLocked) hotKey = null;
             // Do NOT clear hoveredUnit here - polygon gets destroyed by draw()
             // which fires pointerleave, making hoveredUnit null before click arrives
             el.classList.remove('hot');
@@ -2820,6 +2821,7 @@
     // Expose highlight control for sidebar hover
     window.orbitalSetHighlight = function(unitKey) {
       hotKey = unitKey;
+      hotKeyLocked = !!unitKey; // lock when setting, unlock when clearing
       draw();
     };
 
