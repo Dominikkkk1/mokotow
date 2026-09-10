@@ -1854,16 +1854,21 @@
       #demo-section { padding: 3rem 0 0; }
 
       #demo-app {
-        aspect-ratio: 4 / 3;
-        max-height: 55vh;
-        min-height: 280px;
+        height: 45vh;
+        max-height: none;
+        min-height: 250px;
         border-left: none;
         border-right: none;
       }
 
       #demo-split {
         top: 60px;
+        flex-direction: column;
       }
+
+      #sidebar-wrap { width: 100%; }
+      #sidebar-apartments { height: auto; max-height: 300px; min-height: 0; border-left: none; border-top: 1px solid var(--border); }
+      #sidebar-toggle { display: none; }
 
       .apt-table-header { display: none; }
 
@@ -1915,6 +1920,14 @@
       .apt-name { font-size: 1rem; }
 
       .btn { height: 48px; padding: 0 1.5rem; font-size: 0.72rem; }
+
+      /* Sidebar mobile */
+      .sb-head, .sb-row { grid-template-columns: 2fr 1.2fr 1fr; font-size: 0.72rem; padding: 0.6rem 0.75rem; }
+      .sb-head span:nth-child(3), .sb-head span:nth-child(4),
+      .sb-row span:nth-child(3), .sb-row span:nth-child(4) { display: none; }
+      .sbd-actions { padding: 0.5rem 0.75rem; }
+      .sbd-btn { padding: 0.7rem; font-size: 0.65rem; min-height: 44px; }
+      #mini-card { width: 260px; bottom: 8px; right: 8px; }
 
       /* Orbital viewer mobile */
       #orbital-legend {
