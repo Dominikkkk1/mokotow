@@ -968,7 +968,7 @@
     }
     #orbital-svg polygon.dim { pointer-events: none; fill-opacity: 0; stroke-opacity: 0; }
     #orbital-svg polygon.dim:hover { fill-opacity: 0; stroke-opacity: 0; }
-    #orbital-svg polygon.hot { fill-opacity: 0.45; stroke-opacity: 0.9; }
+    #orbital-svg polygon.hot { fill-opacity: 0.5; stroke-opacity: 1; stroke-width: 3; }
 
     #orbital-click-zone { display: none; }
     #orbital-hint {
@@ -3127,8 +3127,12 @@
       var imgSrc = unitKey && window.UNIT_IMAGES && window.UNIT_IMAGES[unitKey] ? window.UNIT_IMAGES[unitKey] : null;
       var label = 'Apartament ' + apt.numer;
 
-      // Highlight on orbital
+      // Highlight on orbital + scroll to it on mobile
       if (window.orbitalSetHighlight && unitKey) window.orbitalSetHighlight(unitKey);
+      var demoEl = document.getElementById('demo-app');
+      if (demoEl && window.innerWidth <= 900) {
+        demoEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
 
       var html = '<button class="sb-back" onclick="closeSidebarDetail()">&#8592; Mokot&#243;w Prestige</button>';
       html += '<div class="sbd-head"><span class="sbd-name">' + label + '</span><span class="sbd-badge ' + badgeCls + '">' + statusText + '</span></div>';
