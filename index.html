@@ -3413,12 +3413,15 @@
   <div id="img-modal-inner">
     <button id="img-modal-close" type="button" onclick="document.getElementById('img-modal').classList.remove('open')">&times;</button>
     <img id="img-modal-img" src="" alt="" />
+    <button id="img-modal-pdf" onclick="downloadAptCard()" style="display:none;margin:1rem auto 0;padding:10px 24px;background:var(--primary,#355A4A);color:#F0EBE3;border:none;font-family:inherit;font-size:0.72rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">&#11015; Pobierz PDF</button>
   </div>
 </div>
 <script>
 window.showImageModal = function(src) {
   var m = document.getElementById('img-modal');
   document.getElementById('img-modal-img').src = src;
+  var pdfBtn = document.getElementById('img-modal-pdf');
+  if (pdfBtn) pdfBtn.style.display = src ? 'block' : 'none';
   m.classList.add('open');
 };
 
