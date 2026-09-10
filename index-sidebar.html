@@ -515,16 +515,19 @@
 
     /* Filters */
     #sb-filters {
-        display: none;
-        padding: 0.75rem 1.25rem;
+        display: flex;
+        flex-wrap: wrap;
+        padding: 0.8rem 1rem;
         border-bottom: 1px solid var(--border);
-        gap: 0.75rem;
+        gap: 0.6rem;
+        background: rgba(0,0,0,0.02);
     }
-    #sb-filters.open { display: flex; }
+    #sb-filters.hidden { display: none; }
     #sb-filters label {
         flex: 1;
-        font-size: 0.65rem;
-        font-weight: 600;
+        min-width: 120px;
+        font-size: 0.62rem;
+        font-weight: 700;
         color: var(--muted);
         text-transform: uppercase;
         letter-spacing: 0.06em;
@@ -532,25 +535,27 @@
     #sb-filters select {
         display: block;
         width: 100%;
-        margin-top: 0.3rem;
-        padding: 0.4rem 0.5rem;
-        background: var(--bg-card);
+        margin-top: 0.25rem;
+        padding: 0.45rem 0.5rem;
+        background: #fff;
         border: 1px solid var(--border);
         color: var(--fg);
         font-family: var(--font-body);
         font-size: 0.78rem;
         border-radius: 4px;
+        cursor: pointer;
     }
+    #sb-filters select:focus { border-color: var(--primary); outline: none; }
 
     /* Column headers */
     .sb-head {
         display: grid;
-        grid-template-columns: 2fr 1.2fr 0.8fr 0.8fr 1fr;
+        grid-template-columns: 1.5fr 1fr 1.2fr 0.7fr 0.7fr 0.8fr;
         align-items: center;
         padding: 0.5rem 1rem;
         border-bottom: 1px solid var(--border);
         font-family: var(--font-body);
-        font-size: 0.65rem;
+        font-size: 0.6rem;
         font-weight: 700;
         color: var(--fg);
         text-transform: uppercase;
@@ -560,15 +565,16 @@
     /* Rows */
     .sb-row {
         display: grid;
-        grid-template-columns: 2fr 1.2fr 0.8fr 0.8fr 1fr;
+        grid-template-columns: 1.5fr 1fr 1.2fr 0.7fr 0.7fr 0.8fr;
         align-items: center;
-        padding: 0.75rem 1rem;
+        padding: 0.7rem 1rem;
         border-bottom: 1px solid rgba(0,0,0,0.06);
         cursor: pointer;
         transition: background 0.12s;
-        font-size: 0.78rem;
+        font-size: 0.75rem;
         color: var(--fg);
     }
+    .sb-price { font-weight: 600; font-size: 0.7rem; }
     .sb-row:hover { background: rgba(53,90,74,0.06); }
     .sb-row.active { background: rgba(53,90,74,0.12); }
     .sb-cell-name {
@@ -706,9 +712,9 @@
         #sidebar-wrap.collapsed { width: 100%; height: 0; overflow: hidden; }
         #sidebar-apartments { max-height: 300px; border-left: none; border-top: 1px solid var(--border); height: auto; min-height: 0; }
         #sidebar-toggle { display: none; }
-        .sb-head, .sb-row { grid-template-columns: 2fr 1fr 1fr; font-size: 0.72rem; padding: 0.6rem 0.75rem; }
-        .sb-head span:nth-child(3), .sb-head span:nth-child(4),
-        .sb-row span:nth-child(3), .sb-row span:nth-child(4) { display: none; }
+        .sb-head, .sb-row { grid-template-columns: 1.5fr 1fr 1fr 0.8fr; font-size: 0.7rem; padding: 0.55rem 0.75rem; }
+        .sb-head span:nth-child(4), .sb-head span:nth-child(5),
+        .sb-row span:nth-child(4), .sb-row span:nth-child(5) { display: none; }
     }
 
     /* ── Mini apartment card (bottom-right overlay on orbital) ── */
@@ -1922,9 +1928,9 @@
       .btn { height: 48px; padding: 0 1.5rem; font-size: 0.72rem; }
 
       /* Sidebar mobile */
-      .sb-head, .sb-row { grid-template-columns: 2fr 1.2fr 1fr; font-size: 0.72rem; padding: 0.6rem 0.75rem; }
-      .sb-head span:nth-child(3), .sb-head span:nth-child(4),
-      .sb-row span:nth-child(3), .sb-row span:nth-child(4) { display: none; }
+      .sb-head, .sb-row { grid-template-columns: 1.5fr 1fr 1fr 0.8fr; font-size: 0.7rem; padding: 0.55rem 0.75rem; }
+      .sb-head span:nth-child(4), .sb-head span:nth-child(5),
+      .sb-row span:nth-child(4), .sb-row span:nth-child(5) { display: none; }
       .sbd-actions { padding: 0.5rem 0.75rem; }
       .sbd-btn { padding: 0.7rem; font-size: 0.65rem; min-height: 44px; }
       #mini-card { width: 260px; bottom: 8px; right: 8px; }
@@ -2168,7 +2174,7 @@
         <div id="sidebar-apartments">
             <div id="sidebar-header">
                 <span id="sidebar-count"></span>
-                <button id="sb-filter-toggle" onclick="document.getElementById('sb-filters').classList.toggle('open');this.textContent=document.getElementById('sb-filters').classList.contains('open')?'Ukryj filtry':'Filtry'" style="background:none;border:1px solid var(--border);color:var(--muted);font-family:var(--font-body);font-size:0.65rem;font-weight:500;letter-spacing:0.06em;padding:4px 12px;cursor:pointer">Filtry</button>
+                <button id="sb-filter-toggle" onclick="document.getElementById('sb-filters').classList.toggle('hidden');this.textContent=document.getElementById('sb-filters').classList.contains('hidden')?'Poka\u017C filtry':'Ukryj filtry'" style="background:none;border:1px solid var(--border);color:var(--primary);font-family:var(--font-body);font-size:0.68rem;font-weight:600;letter-spacing:0.06em;padding:5px 14px;cursor:pointer;border-radius:4px">Ukryj filtry</button>
             </div>
             <div id="sb-filters">
                 <label>Status
@@ -2186,8 +2192,16 @@
                         <option value="2">2</option>
                     </select>
                 </label>
+                <label>Pokoje
+                    <select id="sb-f-rooms" onchange="window.sbFilter()">
+                        <option value="all">Wszystkie</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                    </select>
+                </label>
             </div>
-            <div class="sb-head"><span>Lokal</span><span>Pow.</span><span>Pi&#281;t.</span><span>Pok.</span><span></span></div>
+            <div class="sb-head"><span>Lokal</span><span>Pow.</span><span>Cena</span><span>Pi&#281;t.</span><span>Pok.</span><span></span></div>
             <div id="sidebar-list"></div>
             <div id="sb-detail"></div>
         </div>
@@ -3517,13 +3531,16 @@
         if (!sidebar) return;
         var countEl = document.getElementById('sidebar-count');
         if (countEl) countEl.textContent = apartments.length + ' lokali';
+        var pf = new Intl.NumberFormat('pl-PL');
         sidebar.innerHTML = apartments.map(function(apt) {
             var dotCls = apt.dostepnosc === 'reserved' ? 'rs' : apt.dostepnosc ? 'ok' : 'na';
             var floor = apt.pietro !== undefined ? apt.pietro : '-';
             var canWalk = apt.dostepnosc === true || apt.dostepnosc === 'reserved';
+            var price = apt.cena ? pf.format(apt.cena / 1000) + 'k' : '-';
             return '<div class="sb-row" data-apt-id="' + apt.id + '">' +
                 '<span class="sb-cell-name"><span class="sb-dot ' + dotCls + '"></span><span class="sb-name">' + apt.numer + '</span></span>' +
                 '<span>' + apt.powierzchnia + ' m\u00B2</span>' +
+                '<span class="sb-price">' + price + '</span>' +
                 '<span>' + floor + '</span>' +
                 '<span>' + apt.pokoje + '</span>' +
                 '<span><button class="sb-spacer-btn" data-walk="' + apt.id + '"' + (canWalk ? '' : ' disabled') + '>Spacer</button></span>' +
@@ -3535,10 +3552,12 @@
     window.sbFilter = function() {
         var status = document.getElementById('sb-f-status').value;
         var floor = document.getElementById('sb-f-floor').value;
+        var rooms = document.getElementById('sb-f-rooms').value;
         var filtered = apartmentsData.filter(function(apt) {
             if (status === 'ok' && !apt.dostepnosc) return false;
             if (status === 'na' && apt.dostepnosc) return false;
             if (floor !== 'all' && String(apt.pietro) !== floor) return false;
+            if (rooms !== 'all' && String(apt.pokoje) !== rooms) return false;
             return true;
         });
         renderSidebarApartments(filtered);
