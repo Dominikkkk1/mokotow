@@ -2083,6 +2083,9 @@
     html.embed #demo-section { padding:0 !important; margin:0 !important; background:#0E1114; }
     html.embed #demo-section > .container { display:none !important; }
     html.embed #demo-split { margin:0 !important; }
+    /* Bez tego podglad bierze 75vh okna nadrzednego i w ramce zostaje czarny pas. */
+    html.embed #demo-app,
+    html.embed #demo-split { height:100vh !important; min-height:0 !important; }
   </style>
   <script>
     if (new URLSearchParams(location.search).has('embed')) {
