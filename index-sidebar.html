@@ -2068,6 +2068,27 @@
   </style>
 </head>
 <body>
+  <!--
+    Tryb osadzenia: /sidebar?embed=1
+    Zostawia sam podglad (orbital + sidebar), chowa nawigacje, hero, pozostale
+    sekcje i stopke. Uzywa go landing archvis, zeby pokazac DOKLADNIE to samo
+    demo, bez kopiowania kodu i klatek do drugiego repo.
+  -->
+  <style>
+    html.embed, html.embed body { margin:0; padding:0; background:#0E1114; }
+    html.embed #main-nav,
+    html.embed #hero,
+    html.embed footer,
+    html.embed section:not(#demo-section) { display:none !important; }
+    html.embed #demo-section { padding:0 !important; margin:0 !important; background:#0E1114; }
+    html.embed #demo-section > .container { display:none !important; }
+    html.embed #demo-split { margin:0 !important; }
+  </style>
+  <script>
+    if (new URLSearchParams(location.search).has('embed')) {
+      document.documentElement.classList.add('embed');
+    }
+  </script>
 
   <!-- NAV -->
   <nav id="main-nav">
