@@ -2086,6 +2086,11 @@
     /* Bez tego podglad bierze 75vh okna nadrzednego i w ramce zostaje czarny pas. */
     html.embed #demo-app,
     html.embed #demo-split { height:100vh !important; min-height:0 !important; }
+    /* Sidebar i podglad maja wypelnic ramke, inaczej pod spodem zostaje czarny pas. */
+    html.embed #main-view,
+    html.embed #orbital-layer,
+    html.embed #orbital-frame { height:100% !important; }
+    html.embed #sidebar-wrap { height:100% !important; }
   </style>
   <script>
     if (new URLSearchParams(location.search).has('embed')) {
