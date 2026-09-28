@@ -952,7 +952,7 @@
       pointer-events: none;
       visibility: hidden;
     }
-    #orbital-frame { position: relative; line-height: 0; width: 100%; height: 100%; }
+    #orbital-frame { position: relative; line-height: 0; width: 100%; height: 100%; overflow: hidden; }
     #orbital-canvas { display: block; position: relative; z-index: 1; }
     #orbital-svg {
       position: absolute;
@@ -2539,7 +2539,10 @@
       const img = frames[idx];
       if (!img) return;
       ctx.globalAlpha = 1;
-      ctx.drawImage(img, 0, 0, cv.width, cv.height);
+      // Klatka wpisana z zachowaniem proporcji (jak na archvis.pl), nadmiar przyciety.
+      // Wczesniej byla rozciagana do ramki - po schowaniu listy budynek sie rozjezdzal.
+      ctx.clearRect(0, 0, cv.width, cv.height);
+      ctx.drawImage(img, fit.x, fit.y, fit.w, fit.h);
       drawOverlay(idx);
     }
 
@@ -2622,6 +2625,9 @@
       hoveredUnit = null;
     });
 
+    // Prostokat klatki w pikselach kanwy (cover: wypelnia ramke, nie zmienia proporcji).
+    let fit = { x: 0, y: 0, w: 0, h: 0 };
+
     function resize() {
       if (!frames.length) return;
       const img = frames[0];
@@ -2637,11 +2643,17 @@
       cv.style.position = 'absolute';
       cv.style.left = '0';
       cv.style.top = '0';
+      const iw = img.naturalWidth || img.width, ih = img.naturalHeight || img.height;
+      const scale = Math.max(w / iw, h / ih);
+      const fw = iw * scale, fh = ih * scale;
+      const fx = (w - fw) / 2, fy = (h - fh) / 2;
+      fit = { x: fx * dpr, y: fy * dpr, w: fw * dpr, h: fh * dpr };
+      // Obrysy lokali ida za obrazem: ta sama pozycja i skala co klatka.
       svg.style.position = 'absolute';
-      svg.style.left = '0';
-      svg.style.top = '0';
-      svg.style.width = w + 'px';
-      svg.style.height = h + 'px';
+      svg.style.left = fx + 'px';
+      svg.style.top = fy + 'px';
+      svg.style.width = fw + 'px';
+      svg.style.height = fh + 'px';
       draw();
     }
 
